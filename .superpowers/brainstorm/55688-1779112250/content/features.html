@@ -1,0 +1,55 @@
+<h2>Fitur Utama & Halaman</h2>
+<p class="subtitle">Apa saja yang harus ada di dalam aplikasi?</p>
+
+<div class="options" data-multiselect>
+  <div class="option selected" data-choice="main-invitation" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Landing Page Undangan</h3>
+      <p>Hero section, Nama Mempelai, Detail Acara (Waktu & Lokasi), Galeri Foto.</p>
+    </div>
+  </div>
+  <div class="option selected" data-choice="rsvp" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>RSVP & Ucapan</h3>
+      <p>Form tamu konfirmasi kehadiran dan tulis doa restu.</p>
+    </div>
+  </div>
+  <div class="option selected" data-choice="cms-scan" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>CMS Scan Barcode</h3>
+      <p>Halaman khusus admin untuk scan QR Code tamu dan verifikasi souvenir.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="music" onclick="toggleSelect(this)">
+    <div class="letter">+</div>
+    <div class="content">
+      <h3>Background Music</h3>
+      <p>Musik otomatis (atau tombol play) saat undangan dibuka.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="countdown" onclick="toggleSelect(this)">
+    <div class="letter">+</div>
+    <div class="content">
+      <h3>Countdown Timer</h3>
+      <p>Hitung mundur menuju hari H.</p>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Struktur Data (Supabase)</div>
+  <div class="mockup-body">
+    <pre style="background: #eee; padding: 10px; border-radius: 4px;">
+Table: guests
+- id (UUID)
+- name (String)
+- qr_code (String/Unique)
+- rsvp_status (Boolean)
+- souvenir_taken (Boolean)
+- message (Text)
+    </pre>
+  </div>
+</div>

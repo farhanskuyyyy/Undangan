@@ -2,39 +2,18 @@ import { motion } from 'framer-motion';
 
 interface StoryPoint {
   title: string;
-  date: string;
+  event_date: string;
   description: string;
-  image: string;
+  image_url: string;
 }
 
-const storyPoints: StoryPoint[] = [
-  {
-    title: "First Meet",
-    date: "August 2021",
-    description: "It all started at a small coffee shop in Jakarta. A chance encounter that changed everything.",
-    image: "/contoh1.JPG",
-  },
-  {
-    title: "First Date",
-    date: "October 2021",
-    description: "A sunset dinner by the beach. We talked for hours and realized we didn't want the night to end.",
-    image: "/contoh1.JPG",
-  },
-  {
-    title: "The Proposal",
-    date: "December 2024",
-    description: "Under the starlit sky, he asked the big question. A moment of pure magic and joy.",
-    image: "/contoh1.JPG",
-  },
-  {
-    title: "Wedding Day",
-    date: "May 19, 2026",
-    description: "The beginning of our forever. We can't wait to celebrate this special day with you.",
-    image: "/contoh1.JPG",
-  },
-];
+interface LoveStoryProps {
+  stories: StoryPoint[];
+}
 
-export const LoveStory = () => {
+export const LoveStory = ({ stories }: LoveStoryProps) => {
+  if (!stories || stories.length === 0) return null;
+
   return (
     <section className="py-24 bg-cream relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 relative">
@@ -69,7 +48,7 @@ export const LoveStory = () => {
           </div>
 
           <div className="space-y-12 md:space-y-24">
-            {storyPoints.map((point, index) => (
+            {stories.map((point, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
@@ -86,7 +65,7 @@ export const LoveStory = () => {
                     <div className="absolute -inset-2 bg-sage/20 rounded-2xl blur-lg group-hover:bg-sage/30 transition duration-500"></div>
                     <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border-4 border-white shadow-xl">
                       <img
-                        src={point.image}
+                        src={point.image_url}
                         alt={point.title}
                         className="w-full h-full object-cover transform transition duration-700 group-hover:scale-110"
                       />
@@ -98,7 +77,7 @@ export const LoveStory = () => {
                 <div className="flex-1 text-center md:text-left">
                   <div className={`flex flex-col ${index % 2 === 0 ? 'md:items-start' : 'md:items-end'} gap-2`}>
                     <span className="text-terracotta font-medium tracking-widest uppercase text-sm">
-                      {point.date}
+                      {point.event_date}
                     </span>
                     <h3 className="text-2xl md:text-3xl font-serif text-sage italic">
                       {point.title}

@@ -1,17 +1,17 @@
 import { motion } from 'framer-motion';
 
-const images = [
-  { src: '/contoh1.JPG', alt: 'Moment 1', aspect: 'aspect-square' },
-  { src: '/contoh1.JPG', alt: 'Moment 2', aspect: 'aspect-video' },
-  { src: '/contoh1.JPG', alt: 'Moment 3', aspect: 'aspect-[3/4]' },
-  { src: '/contoh1.JPG', alt: 'Moment 4', aspect: 'aspect-[4/3]' },
-  { src: '/contoh1.JPG', alt: 'Moment 5', aspect: 'aspect-square' },
-  { src: '/contoh1.JPG', alt: 'Moment 6', aspect: 'aspect-video' },
-  { src: '/contoh1.JPG', alt: 'Moment 7', aspect: 'aspect-[3/4]' },
-  { src: '/contoh1.JPG', alt: 'Moment 8', aspect: 'aspect-[4/3]' },
-];
+interface GalleryImage {
+  image_url: string;
+  aspect_ratio: string;
+}
 
-const Gallery = () => {
+interface GalleryProps {
+  images: GalleryImage[];
+}
+
+const Gallery = ({ images }: GalleryProps) => {
+  if (!images || images.length === 0) return null;
+
   return (
     <section className="py-16 px-4 bg-cream/30" id="gallery">
       <div className="max-w-6xl mx-auto">
@@ -36,9 +36,9 @@ const Gallery = () => {
               className={`break-inside-avoid mb-4 overflow-hidden rounded-lg border-4 border-white shadow-md hover:shadow-xl transition-shadow duration-300`}
             >
               <img
-                src={image.src}
-                alt={image.alt}
-                className={`w-full h-auto object-cover ${image.aspect} hover:scale-105 transition-transform duration-500`}
+                src={image.image_url}
+                alt={`Moment ${index + 1}`}
+                className={`w-full h-auto object-cover ${image.aspect_ratio || 'aspect-square'} hover:scale-105 transition-transform duration-500`}
               />
             </motion.div>
           ))}

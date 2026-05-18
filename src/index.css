@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-sage: #829460;
+    --color-cream: #F3EFE0;
+    --color-terracotta: #BC8F8F;
+  }
   html {
     font-family: 'Inter', sans-serif;
   }

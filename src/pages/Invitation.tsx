@@ -1,6 +1,7 @@
 import { Hero } from '../components/Hero'
 import { Countdown } from '../components/Countdown'
 import { LoveStory } from '../components/LoveStory'
+import { Gallery } from '../components/Gallery'
 import { RSVPForm } from '../components/RSVPForm'
 import { MusicPlayer } from '../components/MusicPlayer'
 import { useSearchParams } from 'react-router-dom'
@@ -19,6 +20,8 @@ export const Invitation = () => {
         </section>
 
         <LoveStory />
+
+        <Gallery />
 
         <section className="py-20 border-y border-gray-100 text-center">
           <h2 className="text-3xl font-serif italic mb-6">Location</h2>

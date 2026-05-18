@@ -1,6 +1,7 @@
-import { Hero } from './components/Hero'
-import { Countdown } from './components/Countdown'
-import { RSVPForm } from './components/RSVPForm'
+import { Hero } from '../components/Hero'
+import { Countdown } from '../components/Countdown'
+import { RSVPForm } from '../components/RSVPForm'
+import { MusicPlayer } from '../components/MusicPlayer'
 import { useSearchParams } from 'react-router-dom'
 
 export const Invitation = () => {
@@ -36,6 +37,7 @@ export const Invitation = () => {
           &copy; 2026 John & Jane. All rights reserved.
         </footer>
       </div>
+      <MusicPlayer />
     </div>
   )
 }

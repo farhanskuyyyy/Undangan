@@ -65,7 +65,7 @@ export const AdminCMS = () => {
         { fps: 10, qrbox: { width: 250, height: 250 } },
         false
       )
-      scanner.render(onScanSuccess, (err) => {})
+      scanner.render(onScanSuccess, () => {})
 
       return () => {
         scanner.clear().catch(error => console.error("Failed to clear scanner", error))

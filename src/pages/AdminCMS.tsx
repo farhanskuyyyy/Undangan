@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
-import { Html5QrcodeScanner } from 'html5-qrcode'
+import { useState, useEffect, useRef } from 'react'
+import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera } from 'lucide-react'
 
 export const AdminCMS = () => {
   const [password, setPassword] = useState('')
@@ -11,6 +11,8 @@ export const AdminCMS = () => {
   const [arrivedGuests, setArrivedGuests] = useState<any[]>([])
   const [pendingGuests, setPendingGuests] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [isScanning, setIsScanning] = useState(false)
+  const scannerRef = useRef<Html5Qrcode | null>(null)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,8 +48,48 @@ export const AdminCMS = () => {
     }
   }
 
+  const stopScanner = async () => {
+    if (scannerRef.current && scannerRef.current.isScanning) {
+      try {
+        await scannerRef.current.stop()
+        setIsScanning(false)
+      } catch (err) {
+        console.error('Failed to stop scanner:', err)
+      }
+    }
+  }
+
+  const startScanner = async () => {
+    if (!scannerRef.current) {
+      scannerRef.current = new Html5Qrcode("reader")
+    }
+
+    if (isScanning) return
+
+    setIsScanning(true)
+    setGuest(null) // Clear previous guest info when starting new scan
+
+    try {
+      await scannerRef.current.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        onScanSuccess,
+        () => {}
+      )
+    } catch (err) {
+      console.error('Failed to start scanner:', err)
+      setIsScanning(false)
+      alert('Gagal mengakses kamera. Pastikan izin kamera telah diberikan.')
+    }
+  }
+
   const onScanSuccess = async (decodedText: string) => {
     setLoading(true)
+    await stopScanner() // Auto-close on success
+    
     const trimmedCode = decodedText.trim()
     try {
       const { data, error } = await supabase
@@ -102,16 +144,9 @@ export const AdminCMS = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchGuests()
-      const scanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        false
-      )
-      scanner.render(onScanSuccess, () => {})
-
-      return () => {
-        scanner.clear().catch(error => console.error("Failed to clear scanner", error))
-      }
+    }
+    return () => {
+      stopScanner()
     }
   }, [isAuthenticated])
 
@@ -161,12 +196,41 @@ export const AdminCMS = () => {
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
           {/* Scanner Section */}
-          <div className="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-[#E5E1DA]">
-            <div className="flex items-center gap-2 mb-4 text-[#4A5D4E]">
-              <ScanLine size={20} />
-              <h2 className="text-lg font-medium">Scan QR Code</h2>
+          <div className="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-[#E5E1DA] flex flex-col">
+            <div className="flex items-center justify-between mb-4 text-[#4A5D4E]">
+              <div className="flex items-center gap-2">
+                <ScanLine size={20} />
+                <h2 className="text-lg font-medium">Scan QR Code</h2>
+              </div>
+              {isScanning && (
+                <button 
+                  onClick={stopScanner}
+                  className="text-xs text-red-500 hover:text-red-600 font-medium"
+                >
+                  Batal
+                </button>
+              )}
             </div>
-            <div id="reader" className="overflow-hidden rounded-xl border border-[#F3F1ED]"></div>
+            
+            <div className="relative flex-1 min-h-[300px] flex items-center justify-center bg-[#FDFBF7] rounded-xl border border-[#F3F1ED] overflow-hidden">
+              <div id="reader" className={`w-full h-full ${!isScanning ? 'hidden' : ''}`}></div>
+              
+              {!isScanning && (
+                <div className="text-center p-6">
+                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-[#E5E1DA] flex items-center justify-center mx-auto mb-4 text-[#4A5D4E]">
+                    <Camera size={32} />
+                  </div>
+                  <button
+                    onClick={startScanner}
+                    className="bg-[#4A5D4E] text-white px-6 py-3 rounded-xl hover:bg-[#3d4d41] transition-all font-medium shadow-sm flex items-center gap-2 mx-auto"
+                  >
+                    <Camera size={20} />
+                    Mulai Scanner
+                  </button>
+                  <p className="text-xs text-[#8C9A8E] mt-4">Klik tombol untuk mengaktifkan kamera</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Guest Info Section */}
@@ -242,9 +306,10 @@ export const AdminCMS = () => {
                   </div>
                   
                   <button 
-                    onClick={() => setGuest(null)}
-                    className="w-full text-[#8C9A8E] text-sm hover:text-[#4A5D4E] transition-colors py-2 font-medium"
+                    onClick={startScanner}
+                    className="w-full text-[#4A5D4E] bg-[#F0F4F1] hover:bg-[#E2EAE4] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm"
                   >
+                    <Camera size={18} />
                     Scan Tamu Lain
                   </button>
                 </div>
@@ -357,6 +422,12 @@ export const AdminCMS = () => {
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #8C9A8E;
+        }
+        #reader {
+          background: black !important;
+        }
+        #reader video {
+          object-fit: cover !important;
         }
       `}</style>
     </div>

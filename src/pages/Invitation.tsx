@@ -1,5 +1,6 @@
 import { Hero } from '../components/Hero'
 import { Countdown } from '../components/Countdown'
+import { LoveStory } from '../components/LoveStory'
 import { RSVPForm } from '../components/RSVPForm'
 import { MusicPlayer } from '../components/MusicPlayer'
 import { useSearchParams } from 'react-router-dom'
@@ -14,8 +15,10 @@ export const Invitation = () => {
         <Hero />
         
         <section className="mb-20">
-          <Countdown targetDate="2026-05-18T10:00:00" />
+          <Countdown targetDate="2026-05-19T10:00:00" />
         </section>
+
+        <LoveStory />
 
         <section className="py-20 border-y border-gray-100 text-center">
           <h2 className="text-3xl font-serif italic mb-6">Location</h2>

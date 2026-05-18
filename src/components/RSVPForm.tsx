@@ -14,6 +14,7 @@ interface GuestMessage {
   id: string
   name: string
   message: string
+  created_at: string
 }
 
 export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?: string }) => {
@@ -32,7 +33,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
   const fetchMessages = async () => {
     const { data, error } = await supabase
       .from('guests')
-      .select('id, name, message')
+      .select('id, name, message, created_at')
       .eq('rsvp_status', true)
       .not('message', 'is', null)
       .order('created_at', { ascending: false })
@@ -47,6 +48,16 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
   useEffect(() => {
     fetchMessages()
   }, [])
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
 
   const onSubmit = async (data: RSVPData) => {
     setLoading(true)
@@ -99,38 +110,41 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
             ref={containerRef}
             className="h-[400px] overflow-hidden relative bg-cream/30 rounded-lg border border-terracotta/10 p-4"
           >
-            <motion.div
-              animate={{
-                y: [0, -1000],
-              }}
-              transition={{
-                duration: 30,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="space-y-4"
-            >
-              {/* Double the messages for seamless loop if enough messages, 
-                  or just show what we have */}
-              {[...messages, ...messages].map((msg, index) => (
-                <div 
-                  key={`${msg.id}-${index}`} 
-                  className="bg-cream p-4 rounded-md border-l-4 border-terracotta shadow-sm"
-                >
-                  <p className="text-sage font-serif italic mb-1">"{msg.message}"</p>
-                  <p className="text-terracotta text-sm font-light uppercase tracking-wider">— {msg.name}</p>
-                </div>
-              ))}
-              {messages.length === 0 && (
-                <div className="text-center text-sage/60 py-10 font-serif">
-                  Belum ada pesan.
-                </div>
-              )}
-            </motion.div>
+            {messages.length > 0 ? (
+              <motion.div
+                animate={{
+                  y: [0, '-50%'],
+                }}
+                transition={{
+                  duration: messages.length * 5, // Dynamic duration based on count
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                className="space-y-4"
+              >
+                {/* Double the messages for seamless loop */}
+                {[...messages, ...messages].map((msg, index) => (
+                  <div 
+                    key={`${msg.id}-${index}`} 
+                    className="bg-cream p-4 rounded-md border-l-4 border-terracotta shadow-sm"
+                  >
+                    <p className="text-sage font-serif italic mb-1">"{msg.message}"</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-terracotta text-sm font-light uppercase tracking-wider">— {msg.name}</p>
+                      <p className="text-[10px] text-sage/40 font-sans">{formatDate(msg.created_at)}</p>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            ) : (
+              <div className="text-center text-sage/60 py-20 font-serif">
+                Belum ada pesan.
+              </div>
+            )}
             
             {/* Gradient Overlays for smooth fade */}
-            <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white/10 to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-cream/80 to-transparent pointer-events-none z-10" />
+            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-cream/80 to-transparent pointer-events-none z-10" />
           </div>
         </div>
 

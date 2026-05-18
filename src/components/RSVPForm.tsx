@@ -16,12 +16,18 @@ interface GuestMessage {
   message: string
 }
 
-export const RSVPForm = ({ guestId }: { guestId?: string }) => {
-  const { register, handleSubmit, reset } = useForm<RSVPData>()
+export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?: string }) => {
+  const { register, handleSubmit, reset, setValue } = useForm<RSVPData>()
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [messages, setMessages] = useState<GuestMessage[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (guestName) {
+      setValue('name', guestName)
+    }
+  }, [guestName, setValue])
 
   const fetchMessages = async () => {
     const { data, error } = await supabase
@@ -81,20 +87,11 @@ export const RSVPForm = ({ guestId }: { guestId?: string }) => {
     }
   }
 
-  if (submitted) {
-    return (
-      <div className="text-center py-10 bg-cream rounded-lg border border-terracotta/30 max-w-lg mx-auto my-20">
-        <h3 className="text-xl font-serif text-sage mb-2">Terima Kasih!</h3>
-        <p className="text-sage/80">RSVP Anda telah berhasil dikirim.</p>
-      </div>
-    )
-  }
-
   return (
     <section className="py-20 max-w-6xl mx-auto px-6">
       <h2 className="text-4xl font-serif text-center mb-16 italic text-sage">RSVP & Wishes</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+      <div className={`grid grid-cols-1 ${submitted ? 'md:grid-cols-1 max-w-2xl mx-auto' : 'md:grid-cols-2'} gap-12 items-start`}>
         {/* Left Column: Scrolling Messages */}
         <div className="order-2 md:order-1">
           <h3 className="text-xl font-serif mb-6 text-sage/80 italic">Doa Restu</h3>
@@ -132,62 +129,79 @@ export const RSVPForm = ({ guestId }: { guestId?: string }) => {
             </motion.div>
             
             {/* Gradient Overlays for smooth fade */}
-            <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-white to-transparent pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white/10 to-transparent pointer-events-none" />
           </div>
         </div>
 
-        {/* Right Column: RSVP Form */}
-        <div className="order-1 md:order-2 bg-white p-8 rounded-lg shadow-sm border border-terracotta/10">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label className="block text-sm font-light uppercase tracking-widest text-sage mb-2">Nama</label>
-              <input
-                {...register('name', { required: true })}
-                className="w-full border-b border-gray-200 py-2 focus:border-terracotta outline-none transition-colors bg-transparent font-serif text-lg text-sage"
-                placeholder="Masukkan Nama Anda"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-light uppercase tracking-widest text-sage mb-2">Konfirmasi Kehadiran</label>
-              <select
-                {...register('rsvp_status', { required: true })}
-                className="w-full border-b border-gray-200 py-2 focus:border-terracotta outline-none bg-transparent font-serif text-lg text-sage"
-              >
-                <option value="true">Akan Hadir</option>
-                <option value="false">Tidak Bisa Hadir</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-light uppercase tracking-widest text-sage mb-2">Jumlah Tamu</label>
-              <input
-                type="number"
-                {...register('attendance_count', { min: 1, max: 5 })}
-                defaultValue={1}
-                className="w-full border-b border-gray-200 py-2 focus:border-terracotta outline-none bg-transparent font-serif text-lg text-sage"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-light uppercase tracking-widest text-sage mb-2">Pesan & Doa Restu</label>
-              <textarea
-                {...register('message')}
-                rows={4}
-                className="w-full border border-gray-100 p-3 focus:border-terracotta outline-none rounded-sm transition-colors bg-cream/20 font-serif text-sage"
-                placeholder="Tulis ucapan selamat Anda..."
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-sage text-cream py-4 font-light tracking-[0.2em] uppercase hover:bg-sage/90 transition-colors disabled:bg-gray-300 shadow-md"
+        {/* Right Column: RSVP Form or Success Message */}
+        <div className="order-1 md:order-2">
+          {submitted ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-20 bg-white p-8 rounded-lg shadow-sm border border-terracotta/10"
             >
-              {loading ? 'Mengirim...' : 'Kirim RSVP'}
-            </button>
-          </form>
+              <h3 className="text-2xl font-serif text-sage mb-4 italic">Terima Kasih!</h3>
+              <p className="text-sage/70 font-light leading-relaxed">
+                Konfirmasi kehadiran dan doa restu Anda telah kami terima.<br/>
+                Sampai jumpa di hari bahagia kami!
+              </p>
+            </motion.div>
+          ) : (
+            <div className="bg-white p-8 rounded-lg shadow-sm border border-terracotta/10">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-light uppercase tracking-widest text-sage mb-2">Nama</label>
+                  <input
+                    {...register('name', { required: true })}
+                    disabled={!!guestName}
+                    className={`w-full border-b border-gray-200 py-2 focus:border-terracotta outline-none transition-colors bg-transparent font-serif text-lg text-sage ${guestName ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    placeholder="Masukkan Nama Anda"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-light uppercase tracking-widest text-sage mb-2">Konfirmasi Kehadiran</label>
+                  <select
+                    {...register('rsvp_status', { required: true })}
+                    className="w-full border-b border-gray-200 py-2 focus:border-terracotta outline-none bg-transparent font-serif text-lg text-sage"
+                  >
+                    <option value="true">Akan Hadir</option>
+                    <option value="false">Tidak Bisa Hadir</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-light uppercase tracking-widest text-sage mb-2">Jumlah Tamu</label>
+                  <input
+                    type="number"
+                    {...register('attendance_count', { min: 1, max: 5 })}
+                    defaultValue={1}
+                    className="w-full border-b border-gray-200 py-2 focus:border-terracotta outline-none bg-transparent font-serif text-lg text-sage"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-light uppercase tracking-widest text-sage mb-2">Pesan & Doa Restu</label>
+                  <textarea
+                    {...register('message')}
+                    rows={4}
+                    className="w-full border border-gray-100 p-3 focus:border-terracotta outline-none rounded-sm transition-colors bg-cream/20 font-serif text-sage"
+                    placeholder="Tulis ucapan selamat Anda..."
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-sage text-cream py-4 font-light tracking-[0.2em] uppercase hover:bg-sage/90 transition-colors disabled:bg-gray-300 shadow-md"
+                >
+                  {loading ? 'Mengirim...' : 'Kirim RSVP'}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </section>

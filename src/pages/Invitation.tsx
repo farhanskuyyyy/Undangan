@@ -137,7 +137,7 @@ export const Invitation = () => {
 
         <GuestQR guestId={guestId} />
 
-        <RSVPForm guestId={guestId} />
+        <RSVPForm guestId={guestId} guestName={guestName} />
 
         <footer className="py-20 text-center text-gray-400 text-sm font-light tracking-widest uppercase">
           &copy; {new Date().getFullYear()} {settings?.groom_name} & {settings?.bride_name}. All rights reserved.

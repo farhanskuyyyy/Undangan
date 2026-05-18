@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
-import { CheckCircle, XCircle, Gift, User, ScanLine } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users } from 'lucide-react'
 
 export const AdminCMS = () => {
   const [password, setPassword] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [guest, setGuest] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [arrivedGuests, setArrivedGuests] = useState<any[]>([])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,17 +20,46 @@ export const AdminCMS = () => {
     }
   }
 
+  const fetchArrivedGuests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('guests')
+        .select('name, arrival_time')
+        .eq('has_arrived', true)
+        .order('arrival_time', { ascending: false })
+      
+      if (error) throw error
+      setArrivedGuests(data || [])
+    } catch (error) {
+      console.error('Error fetching arrived guests:', error)
+    }
+  }
+
   const onScanSuccess = async (decodedText: string) => {
     setLoading(true)
+    const trimmedCode = decodedText.trim()
     try {
       const { data, error } = await supabase
         .from('guests')
         .select('*')
-        .eq('qr_code', decodedText)
+        .eq('qr_code', trimmedCode)
         .single()
       
       if (error) throw error
+      
+      // Auto-mark arrival
+      if (data && !data.has_arrived) {
+        const { error: updateError } = await supabase
+          .from('guests')
+          .update({ has_arrived: true, arrival_time: new Date().toISOString() })
+          .eq('id', data.id)
+        
+        if (updateError) console.error('Error marking arrival:', updateError)
+        data.has_arrived = true
+      }
+
       setGuest(data)
+      fetchArrivedGuests()
     } catch (error) {
       console.error('Error fetching guest:', error)
       alert('Tamu tidak ditemukan atau QR Code salah.')
@@ -60,6 +90,7 @@ export const AdminCMS = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      fetchArrivedGuests()
       const scanner = new Html5QrcodeScanner(
         "reader",
         { fps: 10, qrbox: { width: 250, height: 250 } },
@@ -123,15 +154,28 @@ export const AdminCMS = () => {
                   <p className="text-2xl font-serif text-gray-900">{guest.name}</p>
                 </div>
 
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-gray-600">Status Kehadiran</span>
+                <div className="flex items-center justify-between py-2 border-b border-gray-50">
+                  <span className="text-gray-600">Status RSVP</span>
                   {guest.rsvp_status ? (
                     <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
-                      <CheckCircle size={16} /> Hadir ({guest.attendance_count} orang)
+                      <CheckCircle size={16} /> Konfirmasi Hadir ({guest.attendance_count} orang)
                     </span>
                   ) : (
                     <span className="flex items-center gap-1 text-red-500 text-sm font-medium">
                       <XCircle size={16} /> Belum RSVP
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-b border-gray-50">
+                  <span className="text-gray-600">Status Kedatangan</span>
+                  {guest.has_arrived ? (
+                    <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                      <CheckCircle size={16} /> Sudah Tiba
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-gray-400 text-sm font-medium">
+                      <XCircle size={16} /> Belum Tiba
                     </span>
                   )}
                 </div>
@@ -174,6 +218,49 @@ export const AdminCMS = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Arrived Guests List Section */}
+        <div className="mt-12 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Users size={20} />
+              <h2 className="text-lg font-medium">Daftar Tamu Hadir</h2>
+            </div>
+            <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">
+              Total: {arrivedGuests.length}
+            </span>
+          </div>
+
+          {arrivedGuests.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-100 text-sm text-gray-400 uppercase tracking-widest">
+                    <th className="py-3 font-medium">Nama Tamu</th>
+                    <th className="py-3 font-medium text-right">Waktu Kedatangan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {arrivedGuests.map((guest, index) => (
+                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                      <td className="py-4 text-gray-900 font-serif">{guest.name}</td>
+                      <td className="py-4 text-right text-sm text-gray-500">
+                        <div className="flex items-center justify-end gap-1">
+                          <Clock size={14} />
+                          {guest.arrival_time ? new Date(guest.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-300">
+              <p>Belum ada tamu yang hadir</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,8 +1,15 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Invitation } from './pages/Invitation'
+import { AdminCMS } from './pages/AdminCMS'
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <h1 className="text-4xl font-serif text-gray-900">Digital Invitation</h1>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Invitation />} />
+        <Route path="/admin" element={<AdminCMS />} />
+      </Routes>
+    </Router>
   )
 }
 

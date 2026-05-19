@@ -4,7 +4,7 @@ interface StoryPoint {
   title: string;
   event_date: string;
   description: string;
-  image_url: string;
+  image_url: string; // Keeping in interface for compatibility, though unused in view
 }
 
 interface LoveStoryProps {
@@ -47,44 +47,34 @@ export const LoveStory = ({ stories }: LoveStoryProps) => {
             </svg>
           </div>
 
-          <div className="space-y-12 md:space-y-24">
+          <div className="space-y-16 md:space-y-32">
             {stories.map((point, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className={`flex flex-col ${
-                  index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                } items-center gap-8 md:gap-16`}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                className="relative flex justify-center"
               >
-                {/* Image */}
-                <div className="flex-1 w-full">
-                  <div className="relative group">
-                    <div className="absolute -inset-2 bg-sage/20 rounded-2xl blur-lg group-hover:bg-sage/30 transition duration-500"></div>
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border-4 border-white shadow-xl">
-                      <img
-                        src={point.image_url}
-                        alt={point.title}
-                        className="w-full h-full object-cover transform transition duration-700 group-hover:scale-110"
-                      />
-                    </div>
-                  </div>
-                </div>
+                {/* Timeline Dot (Mobile only, or as accent) */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 w-4 h-4 rounded-full bg-terracotta/40 md:hidden"></div>
 
-                {/* Content */}
-                <div className="flex-1 text-center md:text-left">
-                  <div className={`flex flex-col ${index % 2 === 0 ? 'md:items-start' : 'md:items-end'} gap-2`}>
+                {/* Content Block */}
+                <div className={`w-full md:w-1/2 px-8 ${
+                  index % 2 === 0 ? 'md:mr-[50%] md:text-right' : 'md:ml-[50%] md:text-left'
+                } text-center`}>
+                  <div className={`flex flex-col ${
+                    index % 2 === 0 ? 'md:items-end' : 'md:items-start'
+                  } items-center gap-3`}>
                     <span className="text-terracotta font-medium tracking-widest uppercase text-sm">
                       {point.event_date}
                     </span>
-                    <h3 className="text-2xl md:text-3xl font-serif text-sage italic">
+                    <h3 className="text-3xl md:text-4xl font-serif text-sage italic">
                       {point.title}
                     </h3>
-                    <p className={`text-gray-600 font-light leading-relaxed max-w-sm ${
-                      index % 2 === 0 ? 'md:text-left' : 'md:text-right'
-                    }`}>
+                    <div className="w-12 h-px bg-terracotta/30 my-1 md:hidden"></div>
+                    <p className="text-gray-600 font-light leading-relaxed max-w-sm">
                       {point.description}
                     </p>
                   </div>
@@ -97,3 +87,4 @@ export const LoveStory = ({ stories }: LoveStoryProps) => {
     </section>
   );
 };
+

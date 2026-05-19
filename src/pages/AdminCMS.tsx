@@ -31,7 +31,7 @@ export const AdminCMS = () => {
     try {
       const { data: arrivedData, error: arrivedError } = await supabase
         .from('guests')
-        .select('name, arrival_time')
+        .select('name, arrival_time, is_vip')
         .eq('has_arrived', true)
         .order('arrival_time', { ascending: false })
       
@@ -40,7 +40,7 @@ export const AdminCMS = () => {
 
       const { data: pendingData, error: pendingError } = await supabase
         .from('guests')
-        .select('id, name')
+        .select('id, name, is_vip')
         .eq('has_arrived', false)
         .order('name', { ascending: true })
       
@@ -362,7 +362,12 @@ export const AdminCMS = () => {
                             key={guest.id} 
                             className="flex items-center justify-between p-3 rounded-xl border border-[#F3F1ED] hover:bg-[#FDFBF7] transition-all"
                           >
-                            <span className="text-sm font-serif">{guest.name}</span>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-serif flex items-center gap-2">
+                                {guest.name}
+                                {guest.is_vip && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">VIP</span>}
+                              </span>
+                            </div>
                             <button
                               onClick={() => handleManualCheckIn(guest.id)}
                               disabled={loading}
@@ -399,7 +404,14 @@ export const AdminCMS = () => {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div className="pb-4 border-b border-[#F3F1ED]">
-                    <p className="text-[10px] text-[#8C9A8E] uppercase tracking-[0.2em] mb-1 font-sans">Nama Tamu</p>
+                    <div className="flex items-center gap-3 mb-1">
+                      <p className="text-[10px] text-[#8C9A8E] uppercase tracking-[0.2em] font-sans">Nama Tamu</p>
+                      {guest.is_vip && (
+                        <span className="bg-amber-400 text-amber-950 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">
+                          VIP GUEST
+                        </span>
+                      )}
+                    </div>
                     <p className="text-2xl font-serif">{guest.name}</p>
                   </div>
 
@@ -521,7 +533,10 @@ export const AdminCMS = () => {
                       {filteredArrivedGuests.map((guest, index) => (
                         <tr key={index} className="group">
                           <td className="py-4">
-                            <p className="text-[#4A5D4E] font-serif">{guest.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[#4A5D4E] font-serif">{guest.name}</p>
+                              {guest.is_vip && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">VIP</span>}
+                            </div>
                             <div className="flex items-center gap-1.5 text-[11px] text-[#8C9A8E] mt-0.5">
                               <Clock size={12} />
                               {guest.arrival_time ? new Date(guest.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
@@ -557,7 +572,10 @@ export const AdminCMS = () => {
                     <tbody className="divide-y divide-[#F3F1ED]">
                       {filteredPendingGuests.map((guest, index) => (
                         <tr key={index}>
-                          <td className="py-4 text-[#8C9A8E] font-serif">{guest.name}</td>
+                          <td className="py-4 text-[#8C9A8E] font-serif flex items-center gap-2">
+                            {guest.name}
+                            {guest.is_vip && <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-bold border border-amber-100">VIP</span>}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

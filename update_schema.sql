@@ -1,6 +1,7 @@
 -- Add arrival status to guests
 ALTER TABLE guests ADD COLUMN has_arrived BOOLEAN DEFAULT FALSE;
 ALTER TABLE guests ADD COLUMN arrival_time TIMESTAMP WITH TIME ZONE;
+ALTER TABLE guests ADD COLUMN is_vip BOOLEAN DEFAULT FALSE;
 
 -- Table for main wedding settings
 CREATE TABLE wedding_settings (

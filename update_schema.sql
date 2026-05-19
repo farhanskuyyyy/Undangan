@@ -53,3 +53,19 @@ VALUES
 ('/contoh1.JPG', 'aspect-video', 6),
 ('/contoh1.JPG', 'aspect-[3/4]', 7),
 ('/contoh1.JPG', 'aspect-[4/3]', 8);
+
+-- Table for event rundown
+CREATE TABLE rundowns (
+  id SERIAL PRIMARY KEY,
+  time_start TEXT,
+  time_end TEXT,
+  title TEXT,
+  description TEXT,
+  order_index INTEGER
+);
+
+-- Insert initial rundown data
+INSERT INTO rundowns (time_start, time_end, title, description, order_index)
+VALUES 
+('08:00', '10:00', 'Akad Nikah', 'Prosesi ijab qabul dan doa bersama.', 1),
+('11:00', '13:00', 'Resepsi', 'Ramah tamah dan jamuan makan siang.', 2);

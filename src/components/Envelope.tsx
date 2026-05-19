@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { MailOpen } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface EnvelopeProps {
   groomName: string;
@@ -16,6 +15,7 @@ export const Envelope: React.FC<EnvelopeProps> = ({
   onOpen 
 }) => {
   const [isOpening, setIsOpening] = useState(false);
+  const monogram = `${groomName.charAt(0)}&${brideName.charAt(0)}`;
 
   const handleOpen = () => {
     setIsOpening(true);
@@ -35,13 +35,17 @@ export const Envelope: React.FC<EnvelopeProps> = ({
 
       <motion.div 
         className="relative w-[90vw] max-w-[500px] aspect-[3/2]"
-        style={{ perspective: '1000px' }}
+        style={{ perspective: '1200px' }}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
       >
         {/* Shadow */}
-        <div className="absolute -bottom-10 inset-x-10 h-10 bg-black/10 blur-2xl rounded-full" />
+        <motion.div 
+          className="absolute -bottom-10 inset-x-10 h-12 bg-black/20 blur-3xl rounded-[100%]"
+          animate={isOpening ? { scaleX: 1.2, translateY: 20, opacity: 0.1 } : { scaleX: 1, translateY: 0, opacity: 1 }}
+          transition={{ duration: 1.5 }}
+        />
 
         {/* Envelope Body (Back) */}
         <div className="absolute inset-0 bg-sage rounded-lg shadow-2xl" />
@@ -53,7 +57,7 @@ export const Envelope: React.FC<EnvelopeProps> = ({
           animate={isOpening ? { y: '-80%', scale: 1.05 } : { y: 0 }}
           transition={{ 
             delay: 0.8, 
-            duration: 1.5, 
+            duration: 1.8, 
             ease: [0.34, 1.56, 0.64, 1]
           }}
           onAnimationComplete={() => {
@@ -80,10 +84,10 @@ export const Envelope: React.FC<EnvelopeProps> = ({
 
         {/* Envelope Top Flap (3D opening) */}
         <motion.div
-          className="absolute inset-x-0 top-0 h-1/2 bg-sage-dark origin-top z-30"
+          className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[#5F7144] to-sage origin-top z-30"
           initial={{ rotateX: 0 }}
           animate={isOpening ? { rotateX: 180, zIndex: 5 } : { rotateX: 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
+          transition={{ duration: 1.2, ease: [0.45, 0.05, 0.55, 0.95] }}
           style={{ 
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
             transformStyle: 'preserve-3d',
@@ -91,15 +95,17 @@ export const Envelope: React.FC<EnvelopeProps> = ({
           }}
         />
 
-        {/* Envelope Front (Triangular parts) */}
+        {/* Envelope Front (Panels) */}
         <div 
-          className="absolute inset-0 z-20 pointer-events-none"
+          className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-lg"
           style={{ 
             clipPath: 'polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%)',
             background: 'linear-gradient(135deg, #829460 0%, #5F7144 100%)',
             boxShadow: 'inset 0 0 50px rgba(0,0,0,0.1)'
           }}
-        />
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
+        </div>
 
         {/* Wax Seal / Button */}
         <AnimatePresence>
@@ -109,21 +115,28 @@ export const Envelope: React.FC<EnvelopeProps> = ({
               exit={{ opacity: 0, scale: 0.8 }}
             >
               <motion.button
-                whileHover={{ scale: 1.1, rotate: 2 }}
+                whileHover={{ scale: 1.1, rotate: [0, -2, 2, -2, 0] }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleOpen}
                 className="relative group"
               >
-                {/* Wax Seal Effect */}
-                <div className="w-20 h-20 bg-terracotta rounded-full shadow-lg flex items-center justify-center border-4 border-[#a67d7d] relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
-                  <MailOpen className="text-white relative z-10" size={32} />
+                {/* Premium Wax Seal */}
+                <div className="w-24 h-24 bg-terracotta rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.3),inset_0_2px_4px_rgba(255,255,255,0.3)] flex items-center justify-center border-4 border-terracotta/80 relative overflow-hidden transform-gpu">
+                  {/* Wax texture overlay */}
+                  <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] mix-blend-overlay" />
+                  
+                  {/* Inner recessed circle */}
+                  <div className="w-16 h-16 rounded-full border border-black/10 flex items-center justify-center bg-terracotta shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)]">
+                    <span className="text-white font-serif text-2xl font-bold tracking-tighter italic select-none drop-shadow-sm">
+                      {monogram}
+                    </span>
+                  </div>
                 </div>
                 
-                {/* Seal Ripple Effect */}
+                {/* Ripple Effect */}
                 <motion.div 
-                  className="absolute inset-0 bg-terracotta/30 rounded-full"
-                  animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                  className="absolute -inset-4 border-2 border-terracotta/20 rounded-full"
+                  animate={{ scale: [1, 1.4], opacity: [0.5, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
               </motion.button>
@@ -131,7 +144,7 @@ export const Envelope: React.FC<EnvelopeProps> = ({
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sage font-light tracking-[0.2em] uppercase text-sm bg-white/50 backdrop-blur-sm px-4 py-1 rounded-full shadow-sm"
+                className="text-sage font-light tracking-[0.2em] uppercase text-sm bg-white/70 backdrop-blur-md px-6 py-2 rounded-full shadow-lg border border-white/30"
               >
                 Buka Undangan
               </motion.div>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Music as MusicIcon, Music2 } from 'lucide-react'
+import { Music2 } from 'lucide-react'
 
 interface MusicPlayerProps {
   autoPlay?: boolean

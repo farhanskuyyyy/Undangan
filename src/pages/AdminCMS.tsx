@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload } from 'lucide-react'
 
 export const AdminCMS = () => {
   const [password, setPassword] = useState('')
@@ -13,6 +13,7 @@ export const AdminCMS = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isScanning, setIsScanning] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,6 +84,31 @@ export const AdminCMS = () => {
       console.error('Failed to start scanner:', err)
       setIsScanning(false)
       alert('Gagal mengakses kamera. Pastikan izin kamera telah diberikan.')
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setLoading(true)
+    setGuest(null)
+    
+    // Stop camera scanner if it's running
+    if (isScanning) {
+      await stopScanner()
+    }
+
+    try {
+      const html5QrCode = new Html5Qrcode("reader")
+      const decodedText = await html5QrCode.scanFile(file, true)
+      await onScanSuccess(decodedText)
+    } catch (err) {
+      console.error('Failed to scan file:', err)
+      alert('Tidak ada QR Code ditemukan dalam gambar. Pastikan gambar jelas dan berisi QR Code.')
+    } finally {
+      setLoading(false)
+      if (e.target) e.target.value = '' // Reset input
     }
   }
 
@@ -218,16 +244,38 @@ export const AdminCMS = () => {
               {!isScanning && (
                 <div className="text-center p-6">
                   <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-[#E5E1DA] flex items-center justify-center mx-auto mb-4 text-[#4A5D4E]">
-                    <Camera size={32} />
+                    {loading ? <Upload size={32} className="animate-bounce" /> : <Camera size={32} />}
                   </div>
-                  <button
-                    onClick={startScanner}
-                    className="bg-[#4A5D4E] text-white px-6 py-3 rounded-xl hover:bg-[#3d4d41] transition-all font-medium shadow-sm flex items-center gap-2 mx-auto"
-                  >
-                    <Camera size={20} />
-                    Mulai Scanner
-                  </button>
-                  <p className="text-xs text-[#8C9A8E] mt-4">Klik tombol untuk mengaktifkan kamera</p>
+                  
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={startScanner}
+                      disabled={loading}
+                      className="bg-[#4A5D4E] text-white px-6 py-3 rounded-xl hover:bg-[#3d4d41] transition-all font-medium shadow-sm flex items-center gap-2 mx-auto w-full justify-center disabled:opacity-50"
+                    >
+                      <Camera size={20} />
+                      Mulai Scanner
+                    </button>
+                    
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={loading}
+                      className="bg-white text-[#4A5D4E] border border-[#E5E1DA] px-6 py-3 rounded-xl hover:bg-[#FDFBF7] transition-all font-medium shadow-sm flex items-center gap-2 mx-auto w-full justify-center disabled:opacity-50"
+                    >
+                      <Image size={20} />
+                      Upload Gambar QR
+                    </button>
+                    
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handleFileUpload}
+                    />
+                  </div>
+                  
+                  <p className="text-xs text-[#8C9A8E] mt-4">Scan langsung via kamera atau upload foto QR</p>
                 </div>
               )}
             </div>
@@ -305,13 +353,22 @@ export const AdminCMS = () => {
                     )}
                   </div>
                   
-                  <button 
-                    onClick={startScanner}
-                    className="w-full text-[#4A5D4E] bg-[#F0F4F1] hover:bg-[#E2EAE4] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm"
-                  >
-                    <Camera size={18} />
-                    Scan Tamu Lain
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button 
+                      onClick={startScanner}
+                      className="w-full text-[#4A5D4E] bg-[#F0F4F1] hover:bg-[#E2EAE4] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm"
+                    >
+                      <Camera size={18} />
+                      Scan Tamu Lain
+                    </button>
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full text-[#4A5D4E] bg-white border border-[#E5E1DA] hover:bg-[#FDFBF7] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm"
+                    >
+                      <Image size={18} />
+                      Upload QR Tamu Lain
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (

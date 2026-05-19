@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AddToCalendarButton } from 'add-to-calendar-button-react'
 import { Hero } from '../components/Hero'
 import { Countdown } from '../components/Countdown'
+import { Rundown } from '../components/Rundown'
 import { LoveStory } from '../components/LoveStory'
 import Gallery from '../components/Gallery'
 import GuestQR from '../components/GuestQR'
@@ -34,6 +35,13 @@ interface GalleryData {
   aspect_ratio: string
 }
 
+interface RundownData {
+  time_start: string
+  time_end: string
+  title: string
+  description: string
+}
+
 export const Invitation = () => {
   const [searchParams] = useSearchParams()
   const guestId = searchParams.get('to') || undefined
@@ -41,6 +49,7 @@ export const Invitation = () => {
   const [settings, setSettings] = useState<WeddingSettings | null>(null)
   const [loveStories, setLoveStories] = useState<LoveStoryData[]>([])
   const [galleries, setGalleries] = useState<GalleryData[]>([])
+  const [rundowns, setRundowns] = useState<RundownData[]>([])
   const [guestName, setGuestName] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
@@ -74,6 +83,14 @@ export const Invitation = () => {
           .order('order_index', { ascending: true })
         
         if (galleryData) setGalleries(galleryData)
+
+        // Fetch rundowns
+        const { data: rundownData } = await supabase
+          .from('rundowns')
+          .select('*')
+          .order('order_index', { ascending: true })
+        
+        if (rundownData) setRundowns(rundownData)
 
         // Fetch guest name if guestId exists
         if (guestId) {
@@ -145,6 +162,8 @@ export const Invitation = () => {
         >
           <Countdown targetDate={settings?.wedding_date || '2026-05-19T10:00:00'} />
         </motion.section>
+
+        <Rundown items={rundowns} />
 
         <LoveStory stories={loveStories} />
 

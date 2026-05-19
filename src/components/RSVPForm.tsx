@@ -126,17 +126,17 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
                 {[...messages, ...messages].map((msg, index) => (
                   <div 
                     key={`${msg.id}-${index}`} 
-                    className="bg-white p-6 rounded-2xl shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1)] border border-cream-dark/50 relative overflow-hidden group hover:shadow-lg transition-shadow"
+                    className="bg-white/40 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-white/30 relative overflow-hidden group hover:shadow-xl transition-all"
                   >
                     <div className="absolute top-0 left-0 w-1 h-full bg-sage/20" />
                     <p className="text-sage-dark font-serif italic text-lg leading-relaxed mb-4">
                       "{msg.message}"
                     </p>
-                    <div className="flex justify-between items-center pt-4 border-t border-cream-dark/30">
+                    <div className="flex justify-between items-center pt-4 border-t border-white/30">
                       <div>
                         <p className="text-sage font-medium text-sm tracking-widest uppercase">— {msg.name}</p>
                       </div>
-                      <p className="text-[10px] text-gray-400 font-sans tracking-tight">
+                      <p className="text-[10px] text-sage/60 font-sans tracking-tight">
                         {formatDate(msg.created_at)}
                       </p>
                     </div>
@@ -150,8 +150,8 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
             )}
             
             {/* Gradient Overlays for smooth fade */}
-            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#fdfcfb] to-transparent pointer-events-none z-10" />
-            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#fdfcfb] to-transparent pointer-events-none z-10" />
+            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white/10 to-transparent pointer-events-none z-10" />
+            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white/10 to-transparent pointer-events-none z-10" />
           </div>
         </div>
 
@@ -161,7 +161,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-20 bg-white p-12 rounded-2xl shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] border border-cream-dark/50"
+              className="text-center py-20 bg-white/40 backdrop-blur-lg p-12 rounded-2xl shadow-xl border border-white/30"
             >
               <div className="w-20 h-20 bg-sage/10 rounded-full flex items-center justify-center mx-auto mb-8">
                 <motion.div
@@ -181,7 +181,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
               </p>
             </motion.div>
           ) : (
-            <div className="bg-white p-10 rounded-2xl shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] border border-cream-dark/50 relative overflow-hidden">
+            <div className="bg-white/40 backdrop-blur-lg p-10 rounded-2xl shadow-xl border border-white/30 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-sage/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative z-10">
                 <div>
@@ -189,7 +189,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
                   <input
                     {...register('name', { required: true })}
                     disabled={!!guestName}
-                    className={`w-full border-b-2 border-cream-dark/50 py-3 focus:border-sage outline-none transition-colors bg-transparent font-serif text-xl text-sage-dark ${guestName ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`w-full border-b-2 border-sage/20 py-3 focus:border-sage outline-none transition-colors bg-transparent font-serif text-xl text-sage-dark ${guestName ? 'opacity-60 cursor-not-allowed' : ''}`}
                     placeholder="Masukkan Nama Anda"
                   />
                 </div>
@@ -198,7 +198,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
                   <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-sage mb-3">Konfirmasi Kehadiran</label>
                   <select
                     {...register('rsvp_status', { required: true })}
-                    className="w-full border-b-2 border-cream-dark/50 py-3 focus:border-sage outline-none bg-transparent font-serif text-xl text-sage-dark appearance-none cursor-pointer"
+                    className="w-full border-b-2 border-sage/20 py-3 focus:border-sage outline-none bg-transparent font-serif text-xl text-sage-dark appearance-none cursor-pointer"
                   >
                     <option value="true">Akan Hadir</option>
                     <option value="false">Tidak Bisa Hadir</option>
@@ -212,7 +212,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
                       type="number"
                       {...register('attendance_count', { min: 1, max: 5 })}
                       defaultValue={1}
-                      className="w-24 border-b-2 border-cream-dark/50 py-3 focus:border-sage outline-none bg-transparent font-serif text-xl text-sage-dark"
+                      className="w-24 border-b-2 border-sage/20 py-3 focus:border-sage outline-none bg-transparent font-serif text-xl text-sage-dark"
                     />
                     <span className="text-sage/60 font-light italic">Orang</span>
                   </div>
@@ -223,7 +223,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
                   <textarea
                     {...register('message')}
                     rows={4}
-                    className="w-full border border-cream-dark/50 p-4 focus:border-sage outline-none rounded-xl transition-colors bg-cream/10 font-serif text-sage-dark text-lg"
+                    className="w-full border border-sage/20 p-4 focus:border-sage outline-none rounded-xl transition-colors bg-white/30 font-serif text-sage-dark text-lg"
                     placeholder="Tulis ucapan selamat Anda di sini..."
                   />
                 </div>

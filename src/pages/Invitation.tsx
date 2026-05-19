@@ -173,47 +173,51 @@ export const Invitation = () => {
           transition={{ duration: 1 }}
           className="py-24 px-6 text-center bg-transparent relative"
         >
-          <h2 className="text-5xl font-serif italic text-sage-dark mb-12">Wedding Location</h2>
-          <div className="max-w-xl mx-auto mb-12">
-            <p className="text-xl text-sage font-medium mb-2">{settings?.location_name || 'Wedding Venue'}</p>
-            <p className="text-gray-600 font-light leading-relaxed mb-8">
-              {settings?.location_address || ''}
-            </p>
-            {settings && (
-              <div className="flex justify-center mb-8">
-                <AddToCalendarButton
-                  name={`The Wedding of ${settings.groom_name} & ${settings.bride_name}`}
-                  options={['Apple', 'Google', 'Outlook.com']}
-                  location={settings.location_name}
-                  startDate={weddingDateStr}
-                  endDate={weddingDateStr}
-                  startTime="10:00"
-                  endTime="13:00"
-                  timeZone="Asia/Jakarta"
-                  buttonStyle="default"
-                  lightMode="light"
-                />
-              </div>
+          <div className="max-w-4xl mx-auto bg-white/20 backdrop-blur-lg rounded-[3rem] p-8 md:p-16 border border-white/30 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sage/20 to-transparent" />
+            
+            <h2 className="text-5xl font-serif italic text-sage-dark mb-12">Wedding Location</h2>
+            <div className="max-w-xl mx-auto mb-12">
+              <p className="text-xl text-sage font-medium mb-2">{settings?.location_name || 'Wedding Venue'}</p>
+              <p className="text-gray-600 font-light leading-relaxed mb-8">
+                {settings?.location_address || ''}
+              </p>
+              {settings && (
+                <div className="flex justify-center mb-8">
+                  <AddToCalendarButton
+                    name={`The Wedding of ${settings.groom_name} & ${settings.bride_name}`}
+                    options={['Apple', 'Google', 'Outlook.com']}
+                    location={settings.location_name}
+                    startDate={weddingDateStr}
+                    endDate={weddingDateStr}
+                    startTime="10:00"
+                    endTime="13:00"
+                    timeZone="Asia/Jakarta"
+                    buttonStyle="default"
+                    lightMode="light"
+                  />
+                </div>
+              )}
+            </div>
+            {settings?.maps_url && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50"
+              >
+                <iframe
+                  src={settings.maps_url}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </motion.div>
             )}
           </div>
-          {settings?.maps_url && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-2xl border-8 border-white"
-            >
-              <iframe
-                src={settings.maps_url}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
-            </motion.div>
-          )}
         </motion.section>
 
         <GuestQR guestId={guestId} />

@@ -29,7 +29,7 @@ const GuestQR = ({ guestId }: GuestQRProps) => {
       initial={{ opacity: 0, scale: 0.9 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
-      className="flex flex-col items-center justify-center p-8 my-24 mx-auto max-w-sm bg-cream border-2 border-sage rounded-3xl shadow-xl relative overflow-hidden"
+      className="flex flex-col items-center justify-center p-8 my-24 mx-auto max-w-sm bg-white/20 backdrop-blur-lg border border-white/30 rounded-3xl shadow-xl relative overflow-hidden"
     >
       <div className="absolute top-0 right-0 w-24 h-24 bg-sage/5 rounded-full -mr-12 -mt-12" />
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-terracotta/5 rounded-full -ml-12 -mb-12" />

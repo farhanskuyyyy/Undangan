@@ -58,7 +58,7 @@ export const Countdown = ({ targetDate }: { targetDate: string }) => {
   )
 
   return (
-    <div className="flex justify-center items-center py-10 md:py-20 bg-cream/30 backdrop-blur-sm rounded-[2rem] md:rounded-[4rem] border border-sage/10 shadow-sm max-w-2xl mx-auto relative overflow-hidden">
+    <div className="flex justify-center items-center py-10 md:py-20 bg-white/20 backdrop-blur-lg rounded-[2rem] md:rounded-[4rem] border border-white/30 shadow-xl max-w-2xl mx-auto relative overflow-hidden">
       <div className="absolute inset-0 opacity-5 pointer-events-none">
         <div className="absolute inset-2 md:inset-4 border-4 border-sage rounded-[1.8rem] md:rounded-[3rem]" />
       </div>

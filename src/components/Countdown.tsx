@@ -35,16 +35,24 @@ export const Countdown = ({ targetDate }: { targetDate: string }) => {
     return () => clearInterval(timer)
   }, [targetDate])
 
-  const TimeUnit = ({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center mx-2 md:mx-6">
-      <motion.span 
-        key={value}
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="text-4xl md:text-5xl font-serif text-sage"
-      >
-        {value.toString().padStart(2, '0')}
-      </motion.span>
+  const TimeUnit = ({ value, label, animate = false }: { value: number; label: string; animate?: boolean }) => (
+    <div className="flex flex-col items-center mx-2 md:mx-6 min-w-[3rem] md:min-w-[4rem]">
+      <div className="relative overflow-hidden h-[1.2em] flex items-center justify-center">
+        {animate ? (
+          <motion.span 
+            key={value}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="text-4xl md:text-5xl font-serif text-sage tabular-nums block"
+          >
+            {value.toString().padStart(2, '0')}
+          </motion.span>
+        ) : (
+          <span className="text-4xl md:text-5xl font-serif text-sage tabular-nums block">
+            {value.toString().padStart(2, '0')}
+          </span>
+        )}
+      </div>
       <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-terracotta/70 mt-2">{label}</span>
     </div>
   )
@@ -60,7 +68,7 @@ export const Countdown = ({ targetDate }: { targetDate: string }) => {
       <div className="h-8 w-px bg-terracotta/20" />
       <TimeUnit value={timeLeft.minutes} label="Mins" />
       <div className="h-8 w-px bg-terracotta/20" />
-      <TimeUnit value={timeLeft.seconds} label="Secs" />
+      <TimeUnit value={timeLeft.seconds} label="Secs" animate />
     </div>
   )
 }

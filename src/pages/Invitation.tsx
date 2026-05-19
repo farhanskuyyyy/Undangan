@@ -10,7 +10,7 @@ import { MusicPlayer } from '../components/MusicPlayer'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail } from 'lucide-react'
+import { Envelope } from '../components/Envelope'
 
 interface WeddingSettings {
   groom_name: string
@@ -145,55 +145,12 @@ export const Invitation = () => {
 
       <AnimatePresence>
         {!isOpen && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ y: '-100%', opacity: 0 }}
-            transition={{ duration: 0.8, ease: 'easeInOut' }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-cream px-6 text-center"
-          >
-            <div className="absolute inset-0 opacity-10 pointer-events-none">
-              <div className="w-full h-full border-[20px] border-sage m-4 rounded-3xl" />
-            </div>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-sage font-light tracking-[0.3em] uppercase mb-8"
-            >
-              Wedding Invitation
-            </motion.p>
-            
-            <motion.h1 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, duration: 1 }}
-              className="text-5xl md:text-7xl font-serif italic text-sage mb-12 leading-tight"
-            >
-              {settings?.groom_name || 'Groom'} & {settings?.bride_name || 'Bride'}
-            </motion.h1>
-            
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="mb-12"
-            >
-              <p className="text-gray-500 italic mb-2 font-light">Kepada Yth. Bapak/Ibu/Saudara/i</p>
-              <h2 className="text-2xl md:text-3xl font-serif text-sage">{guestName || 'Tamu Undangan'}</h2>
-            </motion.div>
-            
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              onClick={() => setIsOpen(true)}
-              className="group flex items-center gap-3 bg-sage text-cream px-8 py-4 rounded-full font-light tracking-[0.2em] uppercase hover:bg-sage/90 transition-all shadow-lg active:scale-95"
-            >
-              <Mail className="group-hover:animate-bounce" size={20} />
-              Buka Undangan
-            </motion.button>
-          </motion.div>
+          <Envelope 
+            groomName={settings?.groom_name || 'Groom'}
+            brideName={settings?.bride_name || 'Bride'}
+            guestName={guestName}
+            onOpen={() => setIsOpen(true)}
+          />
         )}
       </AnimatePresence>
 

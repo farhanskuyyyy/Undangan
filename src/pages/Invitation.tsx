@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AddToCalendarButton } from 'add-to-calendar-button-react'
 import { Hero } from '../components/Hero'
 import { Countdown } from '../components/Countdown'
 import { LoveStory } from '../components/LoveStory'
@@ -42,6 +43,8 @@ export const Invitation = () => {
   const [guestName, setGuestName] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
+
+  const weddingDateStr = settings?.wedding_date ? settings.wedding_date.split('T')[0] : ''
 
   useEffect(() => {
     const fetchData = async () => {
@@ -241,9 +244,25 @@ export const Invitation = () => {
           <h2 className="text-5xl font-serif italic text-sage-dark mb-12">Wedding Location</h2>
           <div className="max-w-xl mx-auto mb-12">
             <p className="text-xl text-sage font-medium mb-2">{settings?.location_name || 'Wedding Venue'}</p>
-            <p className="text-gray-600 font-light leading-relaxed">
+            <p className="text-gray-600 font-light leading-relaxed mb-8">
               {settings?.location_address || ''}
             </p>
+            {settings && (
+              <div className="flex justify-center mb-8">
+                <AddToCalendarButton
+                  name={`The Wedding of ${settings.groom_name} & ${settings.bride_name}`}
+                  options={['Apple', 'Google', 'Outlook.com']}
+                  location={settings.location_name}
+                  startDate={weddingDateStr}
+                  endDate={weddingDateStr}
+                  startTime="10:00"
+                  endTime="13:00"
+                  timeZone="Asia/Jakarta"
+                  buttonStyle="default"
+                  lightMode="light"
+                />
+              </div>
+            )}
           </div>
           {settings?.maps_url && (
             <motion.div 

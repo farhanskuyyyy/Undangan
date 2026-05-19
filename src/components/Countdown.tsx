@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 
 interface TimeLeft {
   days: number
@@ -35,17 +36,30 @@ export const Countdown = ({ targetDate }: { targetDate: string }) => {
   }, [targetDate])
 
   const TimeUnit = ({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center mx-4">
-      <span className="text-3xl font-serif text-gray-800">{value.toString().padStart(2, '0')}</span>
-      <span className="text-xs uppercase tracking-tighter text-gray-400">{label}</span>
+    <div className="flex flex-col items-center mx-2 md:mx-6">
+      <motion.span 
+        key={value}
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="text-4xl md:text-5xl font-serif text-sage"
+      >
+        {value.toString().padStart(2, '0')}
+      </motion.span>
+      <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-terracotta/70 mt-2">{label}</span>
     </div>
   )
 
   return (
-    <div className="flex justify-center py-12 bg-white/50 backdrop-blur-sm rounded-lg border border-gray-100 shadow-sm max-w-xl mx-auto">
+    <div className="flex justify-center items-center py-16 bg-cream/30 backdrop-blur-sm rounded-[3rem] border border-sage/10 shadow-sm max-w-2xl mx-auto relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+        <div className="w-full h-full border-4 border-sage m-2 rounded-[2.5rem]" />
+      </div>
       <TimeUnit value={timeLeft.days} label="Days" />
+      <div className="h-8 w-px bg-terracotta/20" />
       <TimeUnit value={timeLeft.hours} label="Hours" />
+      <div className="h-8 w-px bg-terracotta/20" />
       <TimeUnit value={timeLeft.minutes} label="Mins" />
+      <div className="h-8 w-px bg-terracotta/20" />
       <TimeUnit value={timeLeft.seconds} label="Secs" />
     </div>
   )

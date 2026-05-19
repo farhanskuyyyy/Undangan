@@ -8,7 +8,7 @@ interface HeroProps {
 }
 
 export const Hero = ({ groomName, brideName, weddingDate, guestName }: HeroProps) => {
-  const formattedDate = weddingDate ? new Date(weddingDate).toLocaleDateString('en-GB', {
+  const formattedDate = weddingDate ? new Date(weddingDate).toLocaleDateString('id-ID', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -16,22 +16,43 @@ export const Hero = ({ groomName, brideName, weddingDate, guestName }: HeroProps
   }) : ''
 
   return (
-    <section className="py-20 text-center">
+    <section className="min-h-screen flex items-center justify-center py-20 text-center px-6">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+        className="max-w-3xl"
       >
-        {guestName && (
-          <div className="mb-12">
-            <p className="text-gray-500 font-light italic mb-2">Kepada Yth. Bapak/Ibu/Saudara/i</p>
-            <h2 className="text-2xl font-serif text-gray-800">{guestName}</h2>
+        <p className="text-sage tracking-[0.4em] uppercase mb-12 text-sm font-light">The Wedding of</p>
+        
+        <div className="relative mb-12">
+          <motion.h1 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.5, delay: 0.2 }}
+            className="text-7xl md:text-9xl font-serif text-sage italic leading-tight"
+          >
+            {groomName} <span className="block text-4xl md:text-6xl my-4 text-terracotta/60 font-sans not-italic">&</span> {brideName}
+          </motion.h1>
+        </div>
+
+        <div className="w-24 h-px bg-terracotta/30 mx-auto mb-12"></div>
+        
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, delay: 0.8 }}
+        >
+          <p className="text-xl md:text-2xl font-serif text-sage mb-2 italic">{formattedDate}</p>
+          <div className="flex items-center justify-center gap-4 text-gray-500 uppercase tracking-[0.2em] text-xs font-light">
+            <span>Jakarta</span>
+            <span className="w-1 h-1 bg-terracotta rounded-full"></span>
+            <span>Indonesia</span>
           </div>
-        )}
-        <p className="text-sm tracking-widest uppercase mb-4 text-gray-500">The Wedding of</p>
-        <h1 className="text-6xl md:text-8xl font-serif mb-6 text-gray-900 italic">{groomName} & {brideName}</h1>
-        <div className="w-24 h-px bg-gray-300 mx-auto mb-6"></div>
-        <p className="text-xl font-light tracking-wide text-gray-600">{formattedDate}</p>
+        </motion.div>
       </motion.div>
     </section>
   )

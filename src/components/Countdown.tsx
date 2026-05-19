@@ -37,7 +37,7 @@ export const Countdown = ({ targetDate }: { targetDate: string }) => {
 
   const TimeUnit = ({ value, label, animate = false }: { value: number; label: string; animate?: boolean }) => (
     <div className="flex flex-col items-center mx-1 md:mx-6 min-w-[2.5rem] md:min-w-[4rem]">
-      <div className="relative h-[1.4em] md:h-[1.6em] flex items-center justify-center overflow-hidden">
+      <div className="relative h-[1.4em] md:h-[2.6em] flex items-center justify-center overflow-hidden">
         {animate ? (
           <motion.span 
             key={value}

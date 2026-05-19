@@ -112,6 +112,34 @@ export const Invitation = () => {
 
   return (
     <div className="bg-[#fdfcfb] min-h-screen font-sans text-gray-900 selection:bg-sage/20 relative overflow-x-hidden">
+      {/* Floating Decorative Elements */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <motion.div
+          animate={{ 
+            y: [0, -20, 0],
+            rotate: [0, 5, 0]
+          }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[10%] -left-10 w-40 h-40 opacity-[0.03] text-sage"
+        >
+          <svg viewBox="0 0 200 200" fill="currentColor">
+            <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" />
+          </svg>
+        </motion.div>
+        <motion.div
+          animate={{ 
+            y: [0, 30, 0],
+            rotate: [0, -10, 0]
+          }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute bottom-[20%] -right-10 w-60 h-60 opacity-[0.03] text-sage"
+        >
+          <svg viewBox="0 0 200 200" fill="currentColor">
+            <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" />
+          </svg>
+        </motion.div>
+      </div>
+
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -171,7 +199,6 @@ export const Invitation = () => {
           groomName={settings?.groom_name || 'Groom'} 
           brideName={settings?.bride_name || 'Bride'} 
           weddingDate={settings?.wedding_date || ''}
-          guestName={guestName}
         />
         
         <motion.section 
@@ -186,17 +213,32 @@ export const Invitation = () => {
 
         <LoveStory stories={loveStories} />
 
+        {/* Section Divider */}
+        <div className="flex justify-center py-12">
+          <svg className="w-24 h-8 text-sage/30" viewBox="0 0 100 20" fill="none" stroke="currentColor">
+            <path d="M0,10 Q25,0 50,10 Q75,20 100,10" strokeWidth="0.5" />
+            <circle cx="50" cy="10" r="2" fill="currentColor" />
+          </svg>
+        </div>
+
         <Gallery images={galleries} />
+
+        {/* Section Divider */}
+        <div className="flex justify-center py-12">
+          <svg className="w-24 h-8 text-sage/30" viewBox="0 0 100 20" fill="none" stroke="currentColor">
+            <path d="M0,10 Q25,20 50,10 Q75,0 100,10" strokeWidth="0.5" />
+            <circle cx="50" cy="10" r="2" fill="currentColor" />
+          </svg>
+        </div>
 
         <motion.section 
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
-          className="py-24 px-6 text-center bg-cream/20 relative"
+          className="py-24 px-6 text-center bg-transparent relative"
         >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-terracotta/30" />
-          <h2 className="text-4xl font-serif italic text-sage mb-8">Location</h2>
+          <h2 className="text-5xl font-serif italic text-sage-dark mb-12">Wedding Location</h2>
           <div className="max-w-xl mx-auto mb-12">
             <p className="text-xl text-sage font-medium mb-2">{settings?.location_name || 'Wedding Venue'}</p>
             <p className="text-gray-600 font-light leading-relaxed">

@@ -4,10 +4,9 @@ interface HeroProps {
   groomName: string
   brideName: string
   weddingDate: string
-  guestName?: string
 }
 
-export const Hero = ({ groomName, brideName, weddingDate, guestName }: HeroProps) => {
+export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
   const formattedDate = weddingDate ? new Date(weddingDate).toLocaleDateString('id-ID', {
     weekday: 'long',
     year: 'numeric',

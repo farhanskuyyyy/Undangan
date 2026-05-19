@@ -4,16 +4,30 @@ export default {
   theme: {
     extend: {
       colors: {
-        sage: '#829460',
-        cream: '#F3EFE0',
+        sage: {
+          DEFAULT: '#829460',
+          dark: '#5F7144',
+          light: '#A0B084',
+        },
+        cream: {
+          DEFAULT: '#F3EFE0',
+          dark: '#E5E1D1',
+        },
         terracotta: '#BC8F8F',
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'serif'],
-        sans: ['"Inter"', 'sans-serif'],
+        serif: ['"Cormorant Garamond"', 'serif'],
+        sans: ['"Montserrat"', 'sans-serif'],
       },
       animation: {
         'spin-slow': 'spin 8s linear infinite',
+        'float': 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' },
+        }
       }
     },
   },

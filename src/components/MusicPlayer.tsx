@@ -11,7 +11,7 @@ export const MusicPlayer = ({ autoPlay = false }: MusicPlayerProps) => {
 
   useEffect(() => {
     if (autoPlay && audioRef.current && !isPlaying) {
-      audioRef.current.currentTime = 69 // Start from 1:09 (Risk it all / highlight part)
+      audioRef.current.currentTime = 70 // Start from 1:09 (Risk it all / highlight part)
       audioRef.current.play().catch(err => console.log('Autoplay blocked:', err))
       setIsPlaying(true)
     }

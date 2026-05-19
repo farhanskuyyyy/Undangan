@@ -11,6 +11,8 @@ export const AdminCMS = () => {
   const [arrivedGuests, setArrivedGuests] = useState<any[]>([])
   const [pendingGuests, setPendingGuests] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [checkInMode, setCheckInMode] = useState<'scan' | 'search'>('scan')
+  const [manualSearchQuery, setManualSearchQuery] = useState('')
   const [isScanning, setIsScanning] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -38,7 +40,7 @@ export const AdminCMS = () => {
 
       const { data: pendingData, error: pendingError } = await supabase
         .from('guests')
-        .select('name')
+        .select('id, name')
         .eq('has_arrived', false)
         .order('name', { ascending: true })
       
@@ -147,6 +149,30 @@ export const AdminCMS = () => {
     }
   }
 
+  const handleManualCheckIn = async (guestId: string) => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('guests')
+        .update({ has_arrived: true, arrival_time: new Date().toISOString() })
+        .eq('id', guestId)
+        .select()
+        .single()
+      
+      if (error) throw error
+      
+      setGuest(data)
+      fetchGuests()
+      setManualSearchQuery('') // Clear search after successful check-in
+      alert(`Berhasil check-in: ${data.name}`)
+    } catch (error) {
+      console.error('Error manual check-in:', error)
+      alert('Gagal melakukan check-in manual.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const claimSouvenir = async () => {
     if (!guest) return
     setLoading(true)
@@ -182,6 +208,10 @@ export const AdminCMS = () => {
 
   const filteredPendingGuests = pendingGuests.filter(g => 
     g.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredManualPendingGuests = pendingGuests.filter(g => 
+    g.name.toLowerCase().includes(manualSearchQuery.toLowerCase())
   )
 
   if (!isAuthenticated) {
@@ -221,64 +251,141 @@ export const AdminCMS = () => {
         </header>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
-          {/* Scanner Section */}
+          {/* Check-in Section */}
           <div className="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-[#E5E1DA] flex flex-col">
-            <div className="flex items-center justify-between mb-4 text-[#4A5D4E]">
-              <div className="flex items-center gap-2">
-                <ScanLine size={20} />
-                <h2 className="text-lg font-medium">Scan QR Code</h2>
-              </div>
-              {isScanning && (
-                <button 
-                  onClick={stopScanner}
-                  className="text-xs text-red-500 hover:text-red-600 font-medium"
-                >
-                  Batal
-                </button>
-              )}
+            <div className="flex bg-[#FDFBF7] p-1 rounded-xl mb-6 border border-[#E5E1DA]">
+              <button 
+                onClick={() => {
+                  setCheckInMode('scan')
+                  stopScanner()
+                }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${checkInMode === 'scan' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
+              >
+                <ScanLine size={16} />
+                Scan QR
+              </button>
+              <button 
+                onClick={() => {
+                  setCheckInMode('search')
+                  stopScanner()
+                }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${checkInMode === 'search' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
+              >
+                <Search size={16} />
+                Cari Nama
+              </button>
             </div>
-            
-            <div className="relative flex-1 min-h-[300px] flex items-center justify-center bg-[#FDFBF7] rounded-xl border border-[#F3F1ED] overflow-hidden">
-              <div id="reader" className={`w-full h-full ${!isScanning ? 'hidden' : ''}`}></div>
-              
-              {!isScanning && (
-                <div className="text-center p-6">
-                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-[#E5E1DA] flex items-center justify-center mx-auto mb-4 text-[#4A5D4E]">
-                    {loading ? <Upload size={32} className="animate-bounce" /> : <Camera size={32} />}
+
+            {checkInMode === 'scan' ? (
+              <>
+                <div className="flex items-center justify-between mb-4 text-[#4A5D4E]">
+                  <div className="flex items-center gap-2">
+                    <ScanLine size={20} />
+                    <h2 className="text-lg font-medium">Scan QR Code</h2>
                   </div>
-                  
-                  <div className="flex flex-col gap-3">
-                    <button
-                      onClick={startScanner}
-                      disabled={loading}
-                      className="bg-[#4A5D4E] text-white px-6 py-3 rounded-xl hover:bg-[#3d4d41] transition-all font-medium shadow-sm flex items-center gap-2 mx-auto w-full justify-center disabled:opacity-50"
+                  {isScanning && (
+                    <button 
+                      onClick={stopScanner}
+                      className="text-xs text-red-500 hover:text-red-600 font-medium"
                     >
-                      <Camera size={20} />
-                      Mulai Scanner
+                      Batal
                     </button>
-                    
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={loading}
-                      className="bg-white text-[#4A5D4E] border border-[#E5E1DA] px-6 py-3 rounded-xl hover:bg-[#FDFBF7] transition-all font-medium shadow-sm flex items-center gap-2 mx-auto w-full justify-center disabled:opacity-50"
-                    >
-                      <Image size={20} />
-                      Upload Gambar QR
-                    </button>
-                    
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      accept="image/*" 
-                      onChange={handleFileUpload}
-                    />
-                  </div>
-                  
-                  <p className="text-xs text-[#8C9A8E] mt-4">Scan langsung via kamera atau upload foto QR</p>
+                  )}
                 </div>
-              )}
-            </div>
+                
+                <div className="relative flex-1 min-h-[300px] flex items-center justify-center bg-[#FDFBF7] rounded-xl border border-[#F3F1ED] overflow-hidden">
+                  <div id="reader" className={`w-full h-full ${!isScanning ? 'hidden' : ''}`}></div>
+                  
+                  {!isScanning && (
+                    <div className="text-center p-6">
+                      <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-[#E5E1DA] flex items-center justify-center mx-auto mb-4 text-[#4A5D4E]">
+                        {loading ? <Upload size={32} className="animate-bounce" /> : <Camera size={32} />}
+                      </div>
+                      
+                      <div className="flex flex-col gap-3">
+                        <button
+                          onClick={startScanner}
+                          disabled={loading}
+                          className="bg-[#4A5D4E] text-white px-6 py-3 rounded-xl hover:bg-[#3d4d41] transition-all font-medium shadow-sm flex items-center gap-2 mx-auto w-full justify-center disabled:opacity-50"
+                        >
+                          <Camera size={20} />
+                          Mulai Scanner
+                        </button>
+                        
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={loading}
+                          className="bg-white text-[#4A5D4E] border border-[#E5E1DA] px-6 py-3 rounded-xl hover:bg-[#FDFBF7] transition-all font-medium shadow-sm flex items-center gap-2 mx-auto w-full justify-center disabled:opacity-50"
+                        >
+                          <Image size={20} />
+                          Upload Gambar QR
+                        </button>
+                        
+                        <input 
+                          type="file" 
+                          ref={fileInputRef} 
+                          className="hidden" 
+                          accept="image/*" 
+                          onChange={handleFileUpload}
+                        />
+                      </div>
+                      
+                      <p className="text-xs text-[#8C9A8E] mt-4">Scan langsung via kamera atau upload foto QR</p>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col flex-1 h-full min-h-[400px]">
+                <div className="flex items-center gap-2 mb-4 text-[#4A5D4E]">
+                  <Search size={20} />
+                  <h2 className="text-lg font-medium">Cari Nama Tamu</h2>
+                </div>
+                
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C9A8E]" size={16} />
+                  <input 
+                    type="text"
+                    placeholder="Ketik nama tamu..."
+                    value={manualSearchQuery}
+                    onChange={(e) => setManualSearchQuery(e.target.value)}
+                    className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2 pl-10 pr-4 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all text-sm"
+                  />
+                </div>
+
+                <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
+                  {manualSearchQuery.length > 0 ? (
+                    filteredManualPendingGuests.length > 0 ? (
+                      <div className="space-y-2">
+                        {filteredManualPendingGuests.map((guest) => (
+                          <div 
+                            key={guest.id} 
+                            className="flex items-center justify-between p-3 rounded-xl border border-[#F3F1ED] hover:bg-[#FDFBF7] transition-all"
+                          >
+                            <span className="text-sm font-serif">{guest.name}</span>
+                            <button
+                              onClick={() => handleManualCheckIn(guest.id)}
+                              disabled={loading}
+                              className="text-[10px] bg-[#4A5D4E] text-white px-3 py-1.5 rounded-lg hover:bg-[#3d4d41] transition-all font-medium disabled:opacity-50"
+                            >
+                              Check In
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-[#8C9A8E]">
+                        <p className="text-xs">Tamu tidak ditemukan</p>
+                      </div>
+                    )
+                  ) : (
+                    <div className="text-center py-12 text-[#8C9A8E]">
+                      <p className="text-xs">Mulai ketik untuk mencari tamu yang belum check-in</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Guest Info Section */}

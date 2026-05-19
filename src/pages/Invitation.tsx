@@ -11,6 +11,7 @@ import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Envelope } from '../components/Envelope'
+import { ParallaxDecor } from '../components/ParallaxDecor'
 
 interface WeddingSettings {
   groom_name: string
@@ -115,33 +116,7 @@ export const Invitation = () => {
 
   return (
     <div className="bg-[#fdfcfb] min-h-screen font-sans text-gray-900 selection:bg-sage/20 relative overflow-x-hidden">
-      {/* Floating Decorative Elements */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <motion.div
-          animate={{ 
-            y: [0, -20, 0],
-            rotate: [0, 5, 0]
-          }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[10%] -left-10 w-40 h-40 opacity-[0.03] text-sage"
-        >
-          <svg viewBox="0 0 200 200" fill="currentColor">
-            <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" />
-          </svg>
-        </motion.div>
-        <motion.div
-          animate={{ 
-            y: [0, 30, 0],
-            rotate: [0, -10, 0]
-          }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-[20%] -right-10 w-60 h-60 opacity-[0.03] text-sage"
-        >
-          <svg viewBox="0 0 200 200" fill="currentColor">
-            <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" />
-          </svg>
-        </motion.div>
-      </div>
+      <ParallaxDecor />
 
       <AnimatePresence>
         {!isOpen && (

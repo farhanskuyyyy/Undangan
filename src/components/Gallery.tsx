@@ -13,8 +13,8 @@ const Gallery = ({ images }: GalleryProps) => {
   if (!images || images.length === 0) return null;
 
   return (
-    <section className="py-16 px-4 bg-cream/30" id="gallery">
-      <div className="max-w-6xl mx-auto">
+    <div id="gallery">
+      <div className="max-w-6xl mx-auto px-4">
         <motion.h2 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

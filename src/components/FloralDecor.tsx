@@ -46,7 +46,7 @@ const FloralDecor: React.FC = () => {
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none pointer-events-none"
+      className="fixed inset-0 pointer-events-none z-20 overflow-hidden select-none"
     >
       {/* Top Left Floral */}
       <img

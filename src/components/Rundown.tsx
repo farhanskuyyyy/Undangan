@@ -15,12 +15,12 @@ export const Rundown = ({ items }: RundownProps) => {
   if (!items || items.length === 0) return null
 
   return (
-    <motion.section 
+    <motion.div 
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 1 }}
-      className="py-24 px-6 relative"
+      className="relative"
     >
       <div className="max-w-4xl mx-auto bg-white/20 backdrop-blur-lg rounded-[3rem] p-8 md:p-16 border border-white/30 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sage/20 to-transparent" />

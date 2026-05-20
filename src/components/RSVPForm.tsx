@@ -99,7 +99,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
   }
 
   return (
-    <section className="py-20 max-w-6xl mx-auto px-6">
+    <div className="relative">
       <h2 className="text-4xl font-serif text-center mb-16 italic text-sage">RSVP & Wishes</h2>
       
       <div className={`grid grid-cols-1 ${submitted ? 'md:grid-cols-1 max-w-2xl mx-auto' : 'md:grid-cols-2'} gap-12 items-start`}>

@@ -34,7 +34,7 @@ export const ParallaxDecor: React.FC = () => {
   const rotate2 = useTransform(scrollYProgress, [0, 1], [0, -90]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
+    <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden select-none">
       {/* Top Left - Sage Leaf */}
       <motion.div 
         style={{ y: y1, rotate: rotate1, opacity: 0.07 }}

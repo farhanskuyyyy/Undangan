@@ -15,7 +15,7 @@ export const LoveStory = ({ stories }: LoveStoryProps) => {
   if (!stories || stories.length === 0) return null;
 
   return (
-    <section className="py-24 bg-cream relative overflow-hidden">
+    <div className="relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 relative">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

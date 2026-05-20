@@ -148,111 +148,121 @@ export const Invitation = () => {
         )}
       </AnimatePresence>
 
-      <div className={`max-w-4xl mx-auto transition-all duration-1000 ${isOpen ? 'opacity-100' : 'opacity-0 blur-sm'}`}>
-        <Hero 
-          groomName={settings?.groom_name || 'Groom'} 
-          brideName={settings?.bride_name || 'Bride'} 
-          weddingDate={settings?.wedding_date || ''}
-        />
-        
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="mb-24 px-6"
-        >
-          <Countdown targetDate={settings?.wedding_date || '2026-05-19T10:00:00'} />
-        </motion.section>
-
-        <Rundown items={rundowns} />
-
-        <LoveStory stories={loveStories} />
-
-        {/* Section Divider */}
-        <div className="flex justify-center py-12">
-          <svg className="w-24 h-8 text-sage/30" viewBox="0 0 100 20" fill="none" stroke="currentColor">
-            <path d="M0,10 Q25,0 50,10 Q75,20 100,10" strokeWidth="0.5" />
-            <circle cx="50" cy="10" r="2" fill="currentColor" />
-          </svg>
-        </div>
-
-        <Gallery images={galleries} />
-
-        {/* Section Divider */}
-        <div className="flex justify-center py-12">
-          <svg className="w-24 h-8 text-sage/30" viewBox="0 0 100 20" fill="none" stroke="currentColor">
-            <path d="M0,10 Q25,20 50,10 Q75,0 100,10" strokeWidth="0.5" />
-            <circle cx="50" cy="10" r="2" fill="currentColor" />
-          </svg>
-        </div>
-
-        <motion.section 
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="py-24 px-6 text-center bg-transparent relative"
-        >
-          <div className="max-w-4xl mx-auto bg-white/20 backdrop-blur-lg rounded-[3rem] p-8 md:p-16 border border-white/30 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sage/20 to-transparent" />
-            
-            <h2 className="text-5xl font-serif italic text-sage-dark mb-12">Wedding Location</h2>
-            <div className="max-w-xl mx-auto mb-12">
-              <p className="text-xl text-sage font-medium mb-2">{settings?.location_name || 'Wedding Venue'}</p>
-              <p className="text-gray-600 font-light leading-relaxed mb-8">
-                {settings?.location_address || ''}
-              </p>
-              {settings && (
-                <div className="flex justify-center mb-8">
-                  <AddToCalendarButton
-                    name={`The Wedding of ${settings.groom_name} & ${settings.bride_name}`}
-                    options={['Apple', 'Google', 'Outlook.com']}
-                    location={settings.location_name}
-                    startDate={weddingDateStr}
-                    endDate={weddingDateStr}
-                    startTime="10:00"
-                    endTime="13:00"
-                    timeZone="Asia/Jakarta"
-                    buttonStyle="default"
-                    lightMode="light"
-                  />
-                </div>
-              )}
-            </div>
-            {settings?.maps_url && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50"
-              >
-                <iframe
-                  src={settings.maps_url}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
-              </motion.div>
-            )}
+      <div className={`transition-all duration-1000 ${isOpen ? 'opacity-100' : 'opacity-0 blur-sm'}`}>
+        {/* Hero Section */}
+        <section className="bg-[#FDFBF7]">
+          <div className="max-w-4xl mx-auto">
+            <Hero 
+              groomName={settings?.groom_name || 'Groom'} 
+              brideName={settings?.bride_name || 'Bride'} 
+              weddingDate={settings?.wedding_date || ''}
+            />
           </div>
-        </motion.section>
+        </section>
+        
+        {/* Countdown & Rundown Section */}
+        <section className="bg-[#F4F1EA] py-24">
+          <div className="max-w-4xl mx-auto px-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+              className="mb-24"
+            >
+              <Countdown targetDate={settings?.wedding_date || '2026-05-19T10:00:00'} />
+            </motion.div>
+            <Rundown items={rundowns} />
+          </div>
+        </section>
 
-        <GuestQR guestId={guestId} />
+        {/* Love Story Section */}
+        <section className="bg-[#E8EDE7] py-24">
+          <div className="max-w-4xl mx-auto">
+            <LoveStory stories={loveStories} />
+          </div>
+        </section>
 
-        <RSVPForm guestId={guestId} guestName={guestName} />
+        {/* Gallery Section */}
+        <section className="bg-[#FDFBF7] py-24">
+          <div className="max-w-4xl mx-auto">
+            <Gallery images={galleries} />
+          </div>
+        </section>
 
-        <footer className="py-24 text-center px-6">
-          <div className="w-16 h-px bg-terracotta/30 mx-auto mb-8" />
-          <p className="text-sage font-serif italic text-xl mb-4">
-            {settings?.groom_name} & {settings?.bride_name}
-          </p>
-          <p className="text-gray-400 text-xs font-light tracking-[0.3em] uppercase">
-            &copy; {new Date().getFullYear()} • All rights reserved.
-          </p>
+        {/* Location & RSVP Section */}
+        <section className="bg-[#F0F4F1] py-24">
+          <div className="max-w-4xl mx-auto px-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+              className="text-center relative mb-24"
+            >
+              <div className="bg-white/20 backdrop-blur-lg rounded-[3rem] p-8 md:p-16 border border-white/30 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sage/20 to-transparent" />
+                
+                <h2 className="text-5xl font-serif italic text-sage-dark mb-12">Wedding Location</h2>
+                <div className="max-w-xl mx-auto mb-12">
+                  <p className="text-xl text-sage font-medium mb-2">{settings?.location_name || 'Wedding Venue'}</p>
+                  <p className="text-gray-600 font-light leading-relaxed mb-8">
+                    {settings?.location_address || ''}
+                  </p>
+                  {settings && (
+                    <div className="flex justify-center mb-8">
+                      <AddToCalendarButton
+                        name={`The Wedding of ${settings.groom_name} & ${settings.bride_name}`}
+                        options={['Apple', 'Google', 'Outlook.com']}
+                        location={settings.location_name}
+                        startDate={weddingDateStr}
+                        endDate={weddingDateStr}
+                        startTime="10:00"
+                        endTime="13:00"
+                        timeZone="Asia/Jakarta"
+                        buttonStyle="default"
+                        lightMode="light"
+                      />
+                    </div>
+                  )}
+                </div>
+                {settings?.maps_url && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50"
+                  >
+                    <iframe
+                      src={settings.maps_url}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                  </motion.div>
+                )}
+              </div>
+            </motion.section>
+
+            <GuestQR guestId={guestId} />
+
+            <RSVPForm guestId={guestId} guestName={guestName} />
+          </div>
+        </section>
+
+        <footer className="bg-[#F0F4F1] py-24 text-center px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="w-16 h-px bg-terracotta/30 mx-auto mb-8" />
+            <p className="text-sage font-serif italic text-xl mb-4">
+              {settings?.groom_name} & {settings?.bride_name}
+            </p>
+            <p className="text-gray-400 text-xs font-light tracking-[0.3em] uppercase">
+              &copy; {new Date().getFullYear()} • All rights reserved.
+            </p>
+          </div>
         </footer>
       </div>
       <MusicPlayer autoPlay={isOpen} />

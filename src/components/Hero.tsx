@@ -15,7 +15,7 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
   }) : ''
 
   return (
-    <section className="min-h-screen flex items-center justify-center py-20 text-center px-6">
+    <div className="min-h-screen flex items-center justify-center text-center px-6">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}

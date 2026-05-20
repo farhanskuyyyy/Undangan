@@ -5,25 +5,34 @@ import { useGSAP } from '@gsap/react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FloralDecor: React.FC = () => {
+interface FloralDecorProps {
+  leftImage: string;
+  rightImage: string;
+  className?: string;
+  opacity?: string;
+}
+
+const FloralDecor: React.FC<FloralDecorProps> = ({ 
+  leftImage, 
+  rightImage, 
+  className = "",
+  opacity = "opacity-60"
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const topLeftRef = useRef<HTMLImageElement>(null);
-  const bottomRightRef = useRef<HTMLImageElement>(null);
-  const bottomLeftRef = useRef<HTMLImageElement>(null);
-  const topRightRef = useRef<HTMLImageElement>(null);
+  const leftRef = useRef<HTMLImageElement>(null);
+  const rightRef = useRef<HTMLImageElement>(null);
 
   useGSAP(() => {
-    // 1. Continuous Floating/Swaying Animation
-    const items = [topLeftRef.current, bottomRightRef.current, bottomLeftRef.current, topRightRef.current];
+    const items = [leftRef.current, rightRef.current];
     
     items.forEach((item, index) => {
       if (!item) return;
       
-      // Infinite subtle floating
+      // 1. Continuous Floating/Swaying Animation
       gsap.to(item, {
         y: '+=20',
-        x: index % 2 === 0 ? '+=10' : '-=10',
-        rotation: index % 2 === 0 ? 3 : -3,
+        x: index === 0 ? '+=10' : '-=10',
+        rotation: index === 0 ? 3 : -3,
         duration: 3 + index,
         repeat: -1,
         yoyo: true,
@@ -32,11 +41,11 @@ const FloralDecor: React.FC = () => {
 
       // 2. Parallax Effect with ScrollTrigger
       gsap.to(item, {
-        y: index % 2 === 0 ? '-=150' : '-=250', // Move up at different rates
+        y: index === 0 ? '-=100' : '-=150',
         scrollTrigger: {
-          trigger: 'body',
-          start: 'top top',
-          end: 'bottom bottom',
+          trigger: containerRef.current,
+          start: 'top bottom',
+          end: 'bottom top',
           scrub: 1,
         },
       });
@@ -46,38 +55,22 @@ const FloralDecor: React.FC = () => {
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 pointer-events-none z-20 overflow-hidden select-none"
+      className={`absolute inset-0 pointer-events-none z-10 overflow-hidden select-none ${className}`}
     >
-      {/* Top Left Floral */}
+      {/* Left Floral */}
       <img
-        ref={topLeftRef}
-        src="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
+        ref={leftRef}
+        src={leftImage}
         alt=""
-        className="absolute -top-10 -left-10 w-48 md:w-80 opacity-60 md:opacity-80 drop-shadow-2xl"
+        className={`absolute -top-10 -left-10 w-48 md:w-80 ${opacity} drop-shadow-2xl`}
       />
 
-      {/* Bottom Right Floral */}
+      {/* Right Floral */}
       <img
-        ref={bottomRightRef}
-        src="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
+        ref={rightRef}
+        src={rightImage}
         alt=""
-        className="absolute -bottom-20 -right-20 w-56 md:w-96 opacity-60 md:opacity-80 drop-shadow-2xl"
-      />
-
-      {/* Subtle Bottom Left - Adding more depth */}
-      <img
-        ref={bottomLeftRef}
-        src="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
-        alt=""
-        className="absolute top-[60%] -left-20 w-32 md:w-56 opacity-30 md:opacity-40 rotate-180 brightness-75 contrast-75"
-      />
-
-      {/* Subtle Top Right - Adding more depth */}
-      <img
-        ref={topRightRef}
-        src="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
-        alt=""
-        className="absolute top-[20%] -right-16 w-32 md:w-48 opacity-30 md:opacity-40 rotate-90 grayscale-[0.2]"
+        className={`absolute -bottom-20 -right-20 w-56 md:w-96 ${opacity} drop-shadow-2xl`}
       />
     </div>
   );

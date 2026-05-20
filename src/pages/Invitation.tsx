@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Envelope } from '../components/Envelope'
 import { ParallaxDecor } from '../components/ParallaxDecor'
+import FloralDecor from '../components/FloralDecor'
 
 interface WeddingSettings {
   groom_name: string
@@ -134,6 +135,7 @@ export const Invitation = () => {
   return (
     <div className="bg-[#fdfcfb] min-h-screen font-sans text-gray-900 selection:bg-sage/20 relative overflow-x-hidden">
       <ParallaxDecor />
+      <FloralDecor />
 
       <AnimatePresence>
         {!isOpen && (

@@ -151,8 +151,10 @@ export const Invitation = () => {
         {/* Hero Section */}
         <section className="bg-[#FDFBF7] relative overflow-hidden">
           <FloralDecor 
-            leftImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
-            rightImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
+            topLeftImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
+            topRightImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
+            bottomLeftImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
+            bottomRightImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
             className="rotate-12"
           />
           <div className="max-w-4xl mx-auto relative z-10">
@@ -167,8 +169,8 @@ export const Invitation = () => {
         {/* Countdown & Rundown Section */}
         <section className="bg-[#F4F1EA] py-24 relative overflow-hidden">
           <FloralDecor 
-            leftImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
-            rightImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
+            topLeftImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
+            bottomRightImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
             opacity="opacity-40"
             className="-rotate-6"
           />
@@ -182,15 +184,22 @@ export const Invitation = () => {
             >
               <Countdown targetDate={settings?.wedding_date || '2026-05-19T10:00:00'} />
             </motion.div>
-            <Rundown items={rundowns} />
+            
+            {rundowns.length > 0 && (
+              <div className="relative z-20">
+                <Rundown items={rundowns} />
+              </div>
+            )}
           </div>
         </section>
 
         {/* Love Story Section */}
         <section className="bg-[#E8EDE7] py-24 relative overflow-hidden">
           <FloralDecor 
-            leftImage="https://www.freeiconspng.com/uploads/watercolor-floral-wedding-invitation-flower-png-2.png"
-            rightImage="https://www.freeiconspng.com/uploads/watercolor-floral-wedding-invitation-flower-png-2.png"
+            topLeftImage="https://www.freeiconspng.com/uploads/watercolor-floral-wedding-invitation-flower-png-2.png"
+            bottomRightImage="https://www.freeiconspng.com/uploads/watercolor-floral-wedding-invitation-flower-png-2.png"
+            topRightImage="https://www.freeiconspng.com/uploads/watercolor-floral-wedding-invitation-flower-png-2.png"
+            bottomLeftImage="https://www.freeiconspng.com/uploads/watercolor-floral-wedding-invitation-flower-png-2.png"
             opacity="opacity-50"
           />
           <div className="max-w-4xl mx-auto relative z-10">
@@ -201,8 +210,8 @@ export const Invitation = () => {
         {/* Gallery Section */}
         <section className="bg-[#FDFBF7] py-24 relative overflow-hidden">
           <FloralDecor 
-            leftImage="https://www.freeiconspng.com/uploads/flower-png-25.png"
-            rightImage="https://www.freeiconspng.com/uploads/flower-png-25.png"
+            topLeftImage="https://www.freeiconspng.com/uploads/flower-png-25.png"
+            bottomRightImage="https://www.freeiconspng.com/uploads/flower-png-25.png"
             opacity="opacity-40"
             className="rotate-45 scale-110"
           />
@@ -214,8 +223,10 @@ export const Invitation = () => {
         {/* Location & RSVP Section */}
         <section className="bg-[#F0F4F1] py-24 relative overflow-hidden">
           <FloralDecor 
-            leftImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-transparent-17.png"
-            rightImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-transparent-17.png"
+            topLeftImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-transparent-17.png"
+            topRightImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-transparent-17.png"
+            bottomLeftImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-transparent-17.png"
+            bottomRightImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-transparent-17.png"
             opacity="opacity-50"
             className="-rotate-12"
           />

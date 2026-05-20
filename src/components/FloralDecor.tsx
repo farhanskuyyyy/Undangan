@@ -10,6 +10,7 @@ interface FloralDecorProps {
   topRightImage?: string;
   bottomLeftImage?: string;
   bottomRightImage?: string;
+  bottomCenterImage?: string;
   className?: string;
   opacity?: string;
   scale?: number;
@@ -20,6 +21,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
   topRightImage,
   bottomLeftImage,
   bottomRightImage,
+  bottomCenterImage,
   className = "",
   opacity = "opacity-80 md:opacity-90",
   scale = 1
@@ -29,6 +31,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
   const trRef = useRef<HTMLImageElement>(null);
   const blRef = useRef<HTMLImageElement>(null);
   const brRef = useRef<HTMLImageElement>(null);
+  const bcRef = useRef<HTMLImageElement>(null);
 
   useGSAP(() => {
     const refs = [
@@ -36,6 +39,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
       { ref: trRef, x: -8, y: 15, rot: -2, duration: 6.5, delay: 0.5, pX: 30, pY: -70 },
       { ref: blRef, x: 6, y: -10, rot: 3, duration: 6.2, delay: 1, pX: -20, pY: 60 },
       { ref: brRef, x: -6, y: -12, rot: -3, duration: 7, delay: 1.5, pX: 20, pY: 80 },
+      { ref: bcRef, x: 0, y: 10, rot: 1, duration: 8, delay: 2, pX: 0, pY: 40 },
     ];
     
     refs.forEach((item) => {
@@ -113,6 +117,17 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           alt=""
           style={{ transform: `scale(${scale})` }}
           className={`absolute -bottom-20 -right-20 w-80 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
+        />
+      )}
+
+      {/* Bottom Center Floral */}
+      {bottomCenterImage && (
+        <img
+          ref={bcRef}
+          src={bottomCenterImage}
+          alt=""
+          style={{ transform: `translateX(-50%) scale(${scale})` }}
+          className={`absolute -bottom-10 left-1/2 w-80 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
         />
       )}
     </div>

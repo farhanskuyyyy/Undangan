@@ -162,10 +162,8 @@ export const Invitation = () => {
         {/* Countdown & Rundown Section */}
         <section className="bg-[#F4F1EA] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/flowers2.png"
-            topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/vases1.png"
-            bottomLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/vases1.png"
-            bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/flowers2.png"
+            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/pinklush-green-vines-hanging-decor-nature-foliage-greenery-plants-leaves-background1.png"
+            topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/pinklush-green-vines-hanging-decor-nature-foliage-greenery-plants-leaves-background1.png"
           />
           <div className="max-w-4xl mx-auto px-6 relative z-10">
             <motion.div 
@@ -205,8 +203,7 @@ export const Invitation = () => {
           <FloralDecor 
             topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame3.png"
             topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame3.png"
-            bottomLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/vases1.png"
-            bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/vases1.png"
+            bottomCenterImage="https://wp.envelope.id/wp-content/uploads/2025/02/pinklush-green-vines-hanging-decor-nature-foliage-greenery-plants-leaves-background1.png"
             scale={1.1}
           />
           <div className="max-w-4xl mx-auto relative z-10">
@@ -218,9 +215,6 @@ export const Invitation = () => {
         <section className="bg-[#F0F4F1] py-24 relative overflow-hidden">
           <FloralDecor 
             topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/pinklush-green-vines-hanging-decor-nature-foliage-greenery-plants-leaves-background1.png"
-            topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/lamps1.png"
-            bottomLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/lamps1.png"
-            bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/pinklush-green-vines-hanging-decor-nature-foliage-greenery-plants-leaves-background1.png"
           />
           <div className="max-w-4xl mx-auto px-6 relative z-10">
             <motion.div 
@@ -283,8 +277,11 @@ export const Invitation = () => {
           </div>
         </section>
 
-        <footer className="bg-[#F0F4F1] py-24 text-center px-6">
-          <div className="max-w-4xl mx-auto">
+        <footer className="bg-[#F0F4F1] py-24 text-center px-6 relative overflow-hidden">
+          <FloralDecor 
+            bottomCenterImage="https://wp.envelope.id/wp-content/uploads/2025/02/pinklush-green-vines-hanging-decor-nature-foliage-greenery-plants-leaves-background1.png"
+          />
+          <div className="max-w-4xl mx-auto relative z-10">
             <div className="w-16 h-px bg-terracotta/30 mx-auto mb-8" />
             <p className="text-sage font-serif italic text-xl mb-4">
               {settings?.groom_name} & {settings?.bride_name}

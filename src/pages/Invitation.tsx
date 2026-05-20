@@ -162,10 +162,10 @@ export const Invitation = () => {
         {/* Countdown & Rundown Section */}
         <section className="bg-[#F4F1EA] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-10.png"
-            topRightImage="https://www.freeiconspng.com/uploads/pink-watercolor-flower-png-6.png"
-            bottomLeftImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-transparent-17.png"
-            bottomRightImage="https://www.freeiconspng.com/uploads/wedding-flowers-png-15.png"
+            topLeftImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
+            topRightImage="https://freepngimg.com/download/flower/5-2-flower-png-hd.png"
+            bottomLeftImage="https://freepngimg.com/download/flower/4-2-flower-png-it.png"
+            bottomRightImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
           />
           <div className="max-w-4xl mx-auto px-6 relative z-10">
             <motion.div 
@@ -189,9 +189,9 @@ export const Invitation = () => {
         {/* Love Story Section */}
         <section className="bg-[#E8EDE7] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://www.freeiconspng.com/uploads/watercolor-floral-wedding-invitation-flower-png-2.png"
-            topRightImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
-            bottomLeftImage="https://www.freeiconspng.com/uploads/flower-png-25.png"
+            topLeftImage="https://freepngimg.com/download/flower/3-2-flower-png.png"
+            topRightImage="https://freepngimg.com/download/flower/2-2-flower-png-image.png"
+            bottomLeftImage="https://freepngimg.com/download/flower/5-2-flower-png-hd.png"
             bottomRightImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
           />
           <div className="max-w-4xl mx-auto relative z-10">
@@ -202,10 +202,10 @@ export const Invitation = () => {
         {/* Gallery Section */}
         <section className="bg-[#FDFBF7] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://www.freeiconspng.com/uploads/pink-flowers-png-25.png"
-            topRightImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-18.png"
-            bottomLeftImage="https://www.freeiconspng.com/uploads/floral-wedding-invitation-flower-png-9.png"
-            bottomRightImage="https://www.freeiconspng.com/uploads/wedding-flowers-png-2.png"
+            topLeftImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
+            topRightImage="https://freepngimg.com/download/flower/4-2-flower-png-it.png"
+            bottomLeftImage="https://freepngimg.com/download/flower/3-2-flower-png.png"
+            bottomRightImage="https://freepngimg.com/download/flower/2-2-flower-png-image.png"
           />
           <div className="max-w-4xl mx-auto relative z-10">
             <Gallery images={galleries} />
@@ -215,10 +215,10 @@ export const Invitation = () => {
         {/* Location & RSVP Section */}
         <section className="bg-[#F0F4F1] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-23.png"
-            topRightImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-21.png"
-            bottomLeftImage="https://www.freeiconspng.com/uploads/watercolor-flower-png-1.png"
-            bottomRightImage="https://www.freeiconspng.com/uploads/pink-watercolor-flowers-png-2.png"
+            topLeftImage="https://freepngimg.com/download/flower/5-2-flower-png-hd.png"
+            topRightImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
+            bottomLeftImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
+            bottomRightImage="https://freepngimg.com/download/flower/4-2-flower-png-it.png"
           />
           <div className="max-w-4xl mx-auto px-6 relative z-10">
             <motion.div 

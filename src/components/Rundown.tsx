@@ -62,6 +62,6 @@ export const Rundown = ({ items }: RundownProps) => {
           </div>
         </div>
       </div>
-    </motion.section>
+    </motion.div>
   )
 }

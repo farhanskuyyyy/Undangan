@@ -240,6 +240,6 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
           )}
         </div>
       </div>
-    </section>
+    </div>
   )
 }

@@ -84,7 +84,7 @@ export const LoveStory = ({ stories }: LoveStoryProps) => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

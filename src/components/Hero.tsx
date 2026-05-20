@@ -53,6 +53,6 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
           </div>
         </motion.div>
       </motion.div>
-    </section>
+    </div>
   )
 }

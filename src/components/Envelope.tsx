@@ -111,9 +111,25 @@ export const Envelope: React.FC<EnvelopeProps> = ({
         <AnimatePresence>
           {!isOpening && (
             <motion.div 
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-6"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-4 md:gap-6 w-full px-12"
               exit={{ opacity: 0, scale: 0.8 }}
             >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5, type: 'spring', stiffness: 100 }}
+                className="text-center mb-4 md:mb-6 bg-cream/90 backdrop-blur-sm px-10 py-6 rounded-sm shadow-xl border-t-2 border-b-2 border-sage/20 relative"
+              >
+                {/* Decorative side lines */}
+                <div className="absolute left-2 top-1/2 -translate-y-1/2 w-px h-8 bg-sage/20" />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 w-px h-8 bg-sage/20" />
+                
+                <p className="text-sage/60 italic text-[10px] md:text-xs mb-2 font-light tracking-[0.3em] uppercase">Special Guest</p>
+                <h2 className="text-sage-dark text-2xl md:text-4xl font-serif tracking-wide">
+                  {guestName || 'Tamu Undangan'}
+                </h2>
+              </motion.div>
+
               <motion.button
                 whileHover={{ scale: 1.1, rotate: [0, -2, 2, -2, 0] }}
                 whileTap={{ scale: 0.9 }}
@@ -144,7 +160,7 @@ export const Envelope: React.FC<EnvelopeProps> = ({
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sage font-light tracking-[0.2em] uppercase text-sm bg-white/70 backdrop-blur-md px-6 py-2 rounded-full shadow-lg border border-white/30"
+                className="text-sage font-light tracking-[0.2em] uppercase text-xs md:text-sm bg-white/70 backdrop-blur-md px-4 md:px-6 py-2 rounded-full shadow-lg border border-white/30"
               >
                 Buka Undangan
               </motion.div>

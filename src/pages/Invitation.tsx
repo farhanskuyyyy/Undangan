@@ -245,7 +245,7 @@ export const Invitation = () => {
                   </motion.div>
                 )}
               </div>
-            </motion.section>
+            </motion.div>
 
             <GuestQR guestId={guestId} />
 

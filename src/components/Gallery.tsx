@@ -44,7 +44,7 @@ const Gallery = ({ images }: GalleryProps) => {
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

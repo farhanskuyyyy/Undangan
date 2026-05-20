@@ -37,30 +37,33 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
           </motion.h1>
         </div>
 
-        <div className="flex justify-center items-center -space-x-4 md:space-x-8 mb-12">
+        <div className="flex justify-center items-center -space-x-8 md:-space-x-12 mb-16 relative">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -30, rotate: -5 }}
+            whileInView={{ opacity: 1, x: 0, rotate: -2 }}
             viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.4 }}
+            transition={{ duration: 1.2, delay: 0.4 }}
             className="relative z-10"
           >
-            <div className="w-28 h-28 md:w-48 md:h-48 rounded-full border-4 border-white shadow-xl overflow-hidden ring-1 ring-terracotta/10">
+            <div className="w-40 h-56 md:w-64 md:h-80 rounded-t-full shadow-2xl overflow-hidden">
               <img src="/cowo.png" alt="Groom" className="w-full h-full object-cover" />
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: 30, rotate: 5 }}
+            whileInView={{ opacity: 1, x: 0, rotate: 2 }}
             viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="relative z-0"
+            transition={{ duration: 1.2, delay: 0.6 }}
+            className="relative z-20 -mt-8 md:-mt-12"
           >
-            <div className="w-28 h-28 md:w-48 md:h-48 rounded-full border-4 border-white shadow-xl overflow-hidden ring-1 ring-terracotta/10">
+            <div className="w-40 h-56 md:w-64 md:h-80 rounded-t-full shadow-2xl overflow-hidden border-4 border-white/50 backdrop-blur-sm">
               <img src="/cewe.png" alt="Bride" className="w-full h-full object-cover" />
             </div>
           </motion.div>
+          
+          {/* Subtle decorative circle behind */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-96 md:h-96 bg-terracotta/5 rounded-full blur-3xl -z-10" />
         </div>
 
         <div className="w-24 h-px bg-terracotta/30 mx-auto mb-12"></div>

@@ -25,6 +25,18 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
       >
         <p className="text-sage tracking-[0.4em] uppercase mb-8 text-sm font-light">The Wedding of</p>
         
+        <div className="relative mb-8 md:mb-12">
+          <motion.h1 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.5, delay: 0.2 }}
+            className="text-7xl md:text-9xl font-serif text-sage italic leading-tight"
+          >
+            {groomName} <span className="block text-4xl md:text-6xl my-4 text-terracotta/60 font-sans not-italic">&</span> {brideName}
+          </motion.h1>
+        </div>
+
         <div className="flex justify-center items-center -space-x-4 md:space-x-8 mb-12">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -49,18 +61,6 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
               <img src="/cewe.png" alt="Bride" className="w-full h-full object-cover" />
             </div>
           </motion.div>
-        </div>
-
-        <div className="relative mb-12">
-          <motion.h1 
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5, delay: 0.2 }}
-            className="text-7xl md:text-9xl font-serif text-sage italic leading-tight"
-          >
-            {groomName} <span className="block text-4xl md:text-6xl my-4 text-terracotta/60 font-sans not-italic">&</span> {brideName}
-          </motion.h1>
         </div>
 
         <div className="w-24 h-px bg-terracotta/30 mx-auto mb-12"></div>

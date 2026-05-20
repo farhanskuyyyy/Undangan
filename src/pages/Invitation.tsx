@@ -67,7 +67,10 @@ export const Invitation = () => {
           .select('*')
           .single()
         
-        if (settingsData) setSettings(settingsData)
+        if (settingsData) {
+          setSettings(settingsData)
+          document.title = `The Wedding of ${settingsData.groom_name} & ${settingsData.bride_name}`
+        }
 
         // Fetch love stories
         const { data: storiesData } = await supabase

@@ -45,8 +45,8 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
             transition={{ duration: 1.2, delay: 0.4 }}
             className="relative z-10"
           >
-            <div className="w-40 h-56 md:w-64 md:h-80 rounded-t-full shadow-2xl overflow-hidden">
-              <img src="/cowo.png" alt="Groom" className="w-full h-full object-cover" />
+            <div className="w-40 h-56 md:w-64 md:h-80 overflow-visible">
+              <img src="/cowo.png" alt="Groom" className="w-full h-full object-contain drop-shadow-2xl" />
             </div>
           </motion.div>
 
@@ -57,8 +57,8 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
             transition={{ duration: 1.2, delay: 0.6 }}
             className="relative z-20 -mt-8 md:-mt-12"
           >
-            <div className="w-40 h-56 md:w-64 md:h-80 rounded-t-full shadow-2xl overflow-hidden border-4 border-white/50 backdrop-blur-sm">
-              <img src="/cewe.png" alt="Bride" className="w-full h-full object-cover" />
+            <div className="w-40 h-56 md:w-64 md:h-80 overflow-visible">
+              <img src="/cewe.png" alt="Bride" className="w-full h-full object-contain drop-shadow-2xl" />
             </div>
           </motion.div>
           

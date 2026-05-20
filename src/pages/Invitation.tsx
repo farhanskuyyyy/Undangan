@@ -162,10 +162,10 @@ export const Invitation = () => {
         {/* Countdown & Rundown Section */}
         <section className="bg-[#F4F1EA] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
-            topRightImage="https://freepngimg.com/download/flower/5-2-flower-png-hd.png"
-            bottomLeftImage="https://freepngimg.com/download/flower/4-2-flower-png-it.png"
-            bottomRightImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
+            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/flowers2.png"
+            topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/vases1.png"
+            bottomLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/vases1.png"
+            bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/flowers2.png"
           />
           <div className="max-w-4xl mx-auto px-6 relative z-10">
             <motion.div 
@@ -189,10 +189,11 @@ export const Invitation = () => {
         {/* Love Story Section */}
         <section className="bg-[#E8EDE7] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://freepngimg.com/download/flower/3-2-flower-png.png"
-            topRightImage="https://freepngimg.com/download/flower/2-2-flower-png-image.png"
-            bottomLeftImage="https://freepngimg.com/download/flower/5-2-flower-png-hd.png"
-            bottomRightImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
+            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
+            topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/flowers2.png"
+            bottomLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/flowers2.png"
+            bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
+            scale={1.1}
           />
           <div className="max-w-4xl mx-auto relative z-10">
             <LoveStory stories={loveStories} />
@@ -202,10 +203,11 @@ export const Invitation = () => {
         {/* Gallery Section */}
         <section className="bg-[#FDFBF7] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
-            topRightImage="https://freepngimg.com/download/flower/4-2-flower-png-it.png"
-            bottomLeftImage="https://freepngimg.com/download/flower/3-2-flower-png.png"
-            bottomRightImage="https://freepngimg.com/download/flower/2-2-flower-png-image.png"
+            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame3.png"
+            topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame3.png"
+            bottomLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/vases1.png"
+            bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/vases1.png"
+            scale={1.1}
           />
           <div className="max-w-4xl mx-auto relative z-10">
             <Gallery images={galleries} />
@@ -215,10 +217,10 @@ export const Invitation = () => {
         {/* Location & RSVP Section */}
         <section className="bg-[#F0F4F1] py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://freepngimg.com/download/flower/5-2-flower-png-hd.png"
-            topRightImage="https://freepngimg.com/download/flower/1-2-flower-png-file.png"
-            bottomLeftImage="https://freepngimg.com/download/flower/6-2-flower-png-picture.png"
-            bottomRightImage="https://freepngimg.com/download/flower/4-2-flower-png-it.png"
+            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/pinklush-green-vines-hanging-decor-nature-foliage-greenery-plants-leaves-background1.png"
+            topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/lamps1.png"
+            bottomLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/lamps1.png"
+            bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/pinklush-green-vines-hanging-decor-nature-foliage-greenery-plants-leaves-background1.png"
           />
           <div className="max-w-4xl mx-auto px-6 relative z-10">
             <motion.div 

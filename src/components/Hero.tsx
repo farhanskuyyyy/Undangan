@@ -39,8 +39,8 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
           </div>
         </div>
 
-        <div className="flex-grow flex items-center justify-center relative min-h-0">
-          <div className="flex justify-center items-center -space-x-10 md:-space-x-20 relative scale-[0.8] md:scale-100 transition-transform duration-500">
+        <div className="flex-grow flex items-center justify-center relative min-h-0 max-h-[45vh] md:max-h-none my-4 md:my-0">
+          <div className="flex justify-center items-center -space-x-10 md:-space-x-20 relative scale-[0.75] md:scale-100 transition-transform duration-500">
             <motion.div
               initial={{ opacity: 0, x: -40, rotate: -8 }}
               whileInView={{ opacity: 1, x: 0, rotate: -4 }}

@@ -111,14 +111,14 @@ export const Envelope: React.FC<EnvelopeProps> = ({
         <AnimatePresence>
           {!isOpening && (
             <motion.div 
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 md:gap-6 w-full px-8 md:px-12"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[52%] z-40 flex flex-col items-center gap-3 md:gap-4 w-full px-8 md:px-12"
               exit={{ opacity: 0, scale: 0.8 }}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, type: 'spring', stiffness: 100 }}
-                className="text-center mb-2 md:mb-6 bg-cream/90 backdrop-blur-sm px-6 md:px-10 py-4 md:py-6 rounded-sm shadow-xl border-t-2 border-b-2 border-sage/20 relative w-fit max-w-full"
+                className="text-center mb-2 md:mb-4 bg-cream/90 backdrop-blur-sm px-6 md:px-10 py-4 md:py-5 rounded-sm shadow-xl border-t-2 border-b-2 border-sage/20 relative w-fit max-w-full"
               >
                 {/* Decorative side lines */}
                 <div className="absolute left-2 top-1/2 -translate-y-1/2 w-px h-6 md:h-8 bg-sage/20" />
@@ -130,7 +130,7 @@ export const Envelope: React.FC<EnvelopeProps> = ({
                 </h2>
               </motion.div>
 
-              <div className="flex flex-col items-center gap-3 md:gap-4">
+              <div className="flex flex-col items-center gap-2 md:gap-3">
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: [0, -2, 2, -2, 0] }}
                   whileTap={{ scale: 0.9 }}

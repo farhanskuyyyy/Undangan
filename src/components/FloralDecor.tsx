@@ -20,7 +20,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
   bottomLeftImage,
   bottomRightImage,
   className = "",
-  opacity = "opacity-80"
+  opacity = "opacity-80 md:opacity-90"
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<HTMLImageElement>(null);
@@ -30,10 +30,10 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
 
   useGSAP(() => {
     const refs = [
-      { ref: tlRef, x: 10, y: 20, rot: 3, delay: 0, pX: -50, pY: -100 },
-      { ref: trRef, x: -15, y: 25, rot: -4, delay: 0.5, pX: 60, pY: -120 },
-      { ref: blRef, x: 12, y: -18, rot: 5, delay: 1, pX: -40, pY: 100 },
-      { ref: brRef, x: -10, y: -22, rot: -3, delay: 1.5, pX: 50, pY: 150 },
+      { ref: tlRef, x: 12, y: 25, rot: 5, duration: 4.5, delay: 0, pX: -60, pY: -110 },
+      { ref: trRef, x: -18, y: 30, rot: -6, duration: 5.2, delay: 0.8, pX: 70, pY: -130 },
+      { ref: blRef, x: 15, y: -22, rot: 8, duration: 4.8, delay: 1.2, pX: -50, pY: 110 },
+      { ref: brRef, x: -12, y: -28, rot: -5, duration: 5.5, delay: 1.8, pX: 60, pY: 160 },
     ];
     
     refs.forEach((item) => {
@@ -44,7 +44,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
         y: `+=${item.y}`,
         x: `+=${item.x}`,
         rotation: item.rot,
-        duration: 4 + Math.random() * 2,
+        duration: item.duration,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
@@ -76,7 +76,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           ref={tlRef}
           src={topLeftImage}
           alt=""
-          className={`absolute -top-16 -left-16 w-64 md:w-96 ${opacity} drop-shadow-2xl object-contain`}
+          className={`absolute -top-24 -left-24 w-72 md:w-[28rem] ${opacity} drop-shadow-2xl object-contain`}
         />
       )}
 
@@ -86,7 +86,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           ref={trRef}
           src={topRightImage}
           alt=""
-          className={`absolute -top-20 -right-20 w-72 md:w-[28rem] ${opacity} drop-shadow-2xl object-contain rotate-90 scale-x-[-1]`}
+          className={`absolute -top-28 -right-28 w-80 md:w-[32rem] ${opacity} drop-shadow-2xl object-contain rotate-90 scale-x-[-1]`}
         />
       )}
 
@@ -96,7 +96,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           ref={blRef}
           src={bottomLeftImage}
           alt=""
-          className={`absolute -bottom-24 -left-20 w-80 md:w-[32rem] ${opacity} drop-shadow-2xl object-contain -rotate-90 scale-y-[-1]`}
+          className={`absolute -bottom-32 -left-28 w-80 md:w-[36rem] ${opacity} drop-shadow-2xl object-contain -rotate-90 scale-y-[-1]`}
         />
       )}
 
@@ -106,7 +106,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           ref={brRef}
           src={bottomRightImage}
           alt=""
-          className={`absolute -bottom-28 -right-24 w-72 md:w-[30rem] ${opacity} drop-shadow-2xl object-contain rotate-180`}
+          className={`absolute -bottom-36 -right-32 w-80 md:w-[34rem] ${opacity} drop-shadow-2xl object-contain rotate-180`}
         />
       )}
     </div>

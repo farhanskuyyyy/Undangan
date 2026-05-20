@@ -69,3 +69,16 @@ INSERT INTO rundowns (time_start, time_end, title, description, order_index)
 VALUES 
 ('08:00', '10:00', 'Akad Nikah', 'Prosesi ijab qabul dan doa bersama.', 1),
 ('11:00', '13:00', 'Resepsi', 'Ramah tamah dan jamuan makan siang.', 2);
+
+-- Enable RLS on tables
+ALTER TABLE wedding_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE love_stories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE galleries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rundowns ENABLE ROW LEVEL SECURITY;
+
+-- Create public select policies
+CREATE POLICY "Allow public select on wedding_settings" ON wedding_settings FOR SELECT USING (true);
+CREATE POLICY "Allow public select on love_stories" ON love_stories FOR SELECT USING (true);
+CREATE POLICY "Allow public select on galleries" ON galleries FOR SELECT USING (true);
+CREATE POLICY "Allow public select on rundowns" ON rundowns FOR SELECT USING (true);
+

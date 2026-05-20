@@ -23,8 +23,34 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
         transition={{ duration: 1.2, ease: "easeOut" }}
         className="max-w-3xl"
       >
-        <p className="text-sage tracking-[0.4em] uppercase mb-12 text-sm font-light">The Wedding of</p>
+        <p className="text-sage tracking-[0.4em] uppercase mb-8 text-sm font-light">The Wedding of</p>
         
+        <div className="flex justify-center items-center -space-x-4 md:space-x-8 mb-12">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="relative z-10"
+          >
+            <div className="w-28 h-28 md:w-48 md:h-48 rounded-full border-4 border-white shadow-xl overflow-hidden ring-1 ring-terracotta/10">
+              <img src="/cowo.png" alt="Groom" className="w-full h-full object-cover" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="relative z-0"
+          >
+            <div className="w-28 h-28 md:w-48 md:h-48 rounded-full border-4 border-white shadow-xl overflow-hidden ring-1 ring-terracotta/10">
+              <img src="/cewe.png" alt="Bride" className="w-full h-full object-cover" />
+            </div>
+          </motion.div>
+        </div>
+
         <div className="relative mb-12">
           <motion.h1 
             initial={{ opacity: 0, scale: 0.9 }}

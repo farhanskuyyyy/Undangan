@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload } from 'lucide-react'
+import { useAuth } from '../lib/AuthContext'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut } from 'lucide-react'
 
 export const AdminCMS = () => {
-  const [password, setPassword] = useState('')
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { user, signOut } = useAuth()
   const [guest, setGuest] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [arrivedGuests, setArrivedGuests] = useState<any[]>([])
@@ -16,16 +16,6 @@ export const AdminCMS = () => {
   const [isScanning, setIsScanning] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    const adminPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123'
-    if (password === adminPass) {
-      setIsAuthenticated(true)
-    } else {
-      alert('Password salah!')
-    }
-  }
 
   const fetchGuests = async () => {
     try {
@@ -194,13 +184,11 @@ export const AdminCMS = () => {
   }
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchGuests()
-    }
+    fetchGuests()
     return () => {
       stopScanner()
     }
-  }, [isAuthenticated])
+  }, [])
 
   const filteredArrivedGuests = arrivedGuests.filter(g => 
     g.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -214,25 +202,6 @@ export const AdminCMS = () => {
     g.name.toLowerCase().includes(manualSearchQuery.toLowerCase())
   )
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] px-6 font-serif">
-        <form onSubmit={handleLogin} className="w-full max-w-sm bg-white p-8 rounded-2xl shadow-sm border border-[#E5E1DA]">
-          <h1 className="text-2xl text-center mb-6 text-[#4A5D4E]">Admin Login</h1>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-[#E5E1DA] rounded-xl px-4 py-3 mb-4 focus:ring-1 focus:ring-[#4A5D4E] outline-none transition-all"
-            placeholder="Masukkan Password"
-          />
-          <button className="w-full bg-[#4A5D4E] text-white py-3 rounded-xl hover:bg-[#3d4d41] transition-colors font-medium">
-            Login
-          </button>
-        </form>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] p-6 md:p-12 text-[#4A5D4E]">
@@ -240,12 +209,13 @@ export const AdminCMS = () => {
         <header className="flex justify-between items-center mb-12">
           <div>
             <h1 className="text-3xl font-serif italic mb-1">CMS Penerima Tamu</h1>
-            <p className="text-sm text-[#8C9A8E]">Kelola kehadiran dan souvenir tamu</p>
+            <p className="text-sm text-[#8C9A8E]">{user?.email}</p>
           </div>
           <button 
-            onClick={() => setIsAuthenticated(false)} 
-            className="text-sm bg-white px-4 py-2 rounded-full border border-[#E5E1DA] hover:border-red-200 hover:text-red-500 transition-all shadow-sm"
+            onClick={signOut} 
+            className="text-sm bg-white px-4 py-2 rounded-full border border-[#E5E1DA] hover:border-red-200 hover:text-red-500 transition-all shadow-sm flex items-center gap-1.5"
           >
+            <LogOut size={14} />
             Logout
           </button>
         </header>

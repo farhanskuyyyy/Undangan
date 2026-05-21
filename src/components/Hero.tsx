@@ -250,7 +250,6 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
               className="relative z-10"
             >
               <div className="w-32 h-48 sm:w-40 sm:h-56 md:w-[22rem] md:h-[30rem] overflow-visible">
-                <div className="absolute inset-0 border-4 border-gold/40 rounded-3xl -m-2 -z-10" />
                 <img
                   src="/cowo.png"
                   alt="Groom"
@@ -267,7 +266,6 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
               className="relative z-20 -mt-5 sm:-mt-8 md:-mt-20"
             >
               <div className="w-32 h-48 sm:w-40 sm:h-56 md:w-[22rem] md:h-[30rem] overflow-visible">
-                <div className="absolute inset-0 border-4 border-gold/40 rounded-3xl -m-2 -z-10" />
                 <img
                   src="/cewe.png"
                   alt="Bride"

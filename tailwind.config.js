@@ -14,14 +14,22 @@ export default {
           dark: '#E5E1D1',
         },
         terracotta: '#BC8F8F',
+        // Premium Wedding Design System Colors
+        primary: '#DB2777', // Romantic Pink/Rose
+        secondary: '#F472B6', // Soft Pink
+        gold: '#CA8A04', // Elegant Gold
+        blush: '#FDF2F8', // Blush Background
+        burgundy: '#831843', // Deep text/accent burgundy
       },
       fontFamily: {
-        serif: ['"Cormorant Garamond"', 'serif'],
-        sans: ['"Montserrat"', 'sans-serif'],
+        serif: ['"Cormorant Infant"', '"Cormorant Garamond"', 'serif'],
+        sans: ['"Montserrat"', '"Inter"', 'sans-serif'],
+        script: ['"Great Vibes"', 'cursive'],
       },
       animation: {
-        'spin-slow': 'spin 8s linear infinite',
+        'spin-slow': 'spin 12s linear infinite',
         'float': 'float 6s ease-in-out infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         float: {
@@ -33,4 +41,5 @@ export default {
   },
   plugins: [],
 }
+
 

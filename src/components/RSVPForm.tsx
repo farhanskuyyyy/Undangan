@@ -1,7 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { supabase } from '../lib/supabase'
-import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Send, Check, Heart, User, Calendar, MessageSquare, ShieldCheck, Users } from 'lucide-react'
 
 interface RSVPData {
   name: string
@@ -14,6 +15,8 @@ interface GuestMessage {
   id: string
   name: string
   message: string
+  rsvp_status: boolean
+  attendance_count: number
   created_at: string
 }
 
@@ -22,7 +25,6 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [messages, setMessages] = useState<GuestMessage[]>([])
-  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (guestName) {
@@ -33,15 +35,23 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
   const fetchMessages = async () => {
     const { data, error } = await supabase
       .from('guests')
-      .select('id, name, message, created_at')
-      .eq('rsvp_status', true)
+      .select('id, name, message, rsvp_status, attendance_count, created_at')
       .not('message', 'is', null)
       .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching messages:', error)
     } else if (data) {
-      setMessages(data)
+      // Parse RSVP status in case of type variations from db
+      const formatted: GuestMessage[] = data.map((d: any) => ({
+        id: d.id,
+        name: d.name,
+        message: d.message,
+        rsvp_status: d.rsvp_status === true || String(d.rsvp_status) === 'true',
+        attendance_count: Number(d.attendance_count) || 1,
+        created_at: d.created_at,
+      }))
+      setMessages(formatted)
     }
   }
 
@@ -55,36 +65,48 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
       month: 'long',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
+  }
+
+  const getInitials = (fullName: string) => {
+    return fullName
+      .split(' ')
+      .slice(0, 2)
+      .map((word) => word.charAt(0))
+      .join('')
+      .toUpperCase()
   }
 
   const onSubmit = async (data: RSVPData) => {
     setLoading(true)
     try {
+      const parsedStatus = data.rsvp_status === true || String(data.rsvp_status) === 'true'
+      const parsedCount = parsedStatus ? Number(data.attendance_count) : 0
+
       if (guestId) {
         // Update existing guest record if guestId provided (e.g. from URL)
         const { error } = await supabase
           .from('guests')
           .update({
-            rsvp_status: data.rsvp_status === true || (data.rsvp_status as any) === 'true',
-            attendance_count: Number(data.attendance_count),
-            message: data.message
+            rsvp_status: parsedStatus,
+            attendance_count: parsedCount,
+            message: data.message,
           })
           .eq('qr_code', guestId)
-        
+
         if (error) throw error
       } else {
         // Fallback or generic RSVP entry
-        const { error } = await supabase
-          .from('guests')
-          .insert([{ 
-            ...data, 
-            rsvp_status: data.rsvp_status === true || (data.rsvp_status as any) === 'true',
-            attendance_count: Number(data.attendance_count),
-            qr_code: `manual-${Date.now()}` 
-          }])
-        
+        const { error } = await supabase.from('guests').insert([
+          {
+            ...data,
+            rsvp_status: parsedStatus,
+            attendance_count: parsedCount,
+            qr_code: `manual-${Date.now()}`,
+          },
+        ])
+
         if (error) throw error
       }
       setSubmitted(true)
@@ -100,105 +122,54 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
 
   return (
     <div className="relative">
-      <h2 className="text-4xl font-serif text-center mb-16 italic text-sage">RSVP & Wishes</h2>
-      
-      <div className={`grid grid-cols-1 ${submitted ? 'md:grid-cols-1 max-w-2xl mx-auto' : 'md:grid-cols-2'} gap-12 items-start`}>
-        {/* Left Column: Scrolling Messages */}
-        <div className="order-2 md:order-1">
-          <h3 className="text-xl font-serif mb-8 text-sage/80 italic text-center md:text-left">Doa Restu dari Tamu</h3>
-          <div 
-            ref={containerRef}
-            className="h-[500px] overflow-hidden relative bg-transparent px-2"
-          >
-            {messages.length > 0 ? (
-              <motion.div
-                animate={{
-                  y: [0, '-50%'],
-                }}
-                transition={{
-                  duration: Math.max(messages.length * 8, 20),
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                className="space-y-6"
-              >
-                {/* Double the messages for seamless loop */}
-                {[...messages, ...messages].map((msg, index) => (
-                  <div 
-                    key={`${msg.id}-${index}`} 
-                    className="bg-white/40 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-white/30 relative overflow-hidden group hover:shadow-xl transition-all"
-                  >
-                    <div className="absolute top-0 left-0 w-1 h-full bg-sage/20" />
-                    <p className="text-sage-dark font-serif italic text-lg leading-relaxed mb-4">
-                      "{msg.message}"
-                    </p>
-                    <div className="flex justify-between items-center pt-4 border-t border-white/30">
-                      <div>
-                        <p className="text-sage font-medium text-sm tracking-widest uppercase">— {msg.name}</p>
-                      </div>
-                      <p className="text-[10px] text-sage/60 font-sans tracking-tight">
-                        {formatDate(msg.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            ) : (
-              <div className="text-center text-sage/60 py-20 font-serif italic">
-                Belum ada pesan doa restu.
-              </div>
-            )}
-            
-            {/* Gradient Overlays for smooth fade */}
-            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white/10 to-transparent pointer-events-none z-10" />
-            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white/10 to-transparent pointer-events-none z-10" />
-          </div>
-        </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-center mb-16"
+      >
+        <span className="text-primary font-medium tracking-[0.3em] text-xs uppercase mb-3 block">RSVP & Guestbook</span>
+        <h2 className="text-5xl font-script italic text-burgundy mb-6 leading-tight">Konfirmasi Kehadiran & Doa Restu</h2>
+        <div className="w-12 h-px bg-gold/50 mx-auto" />
+      </motion.div>
 
-        {/* Right Column: RSVP Form or Success Message */}
-        <div className="order-1 md:order-2">
-          {submitted ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-20 bg-white/40 backdrop-blur-lg p-12 rounded-2xl shadow-xl border border-white/30"
-            >
-              <div className="w-20 h-20 bg-sage/10 rounded-full flex items-center justify-center mx-auto mb-8">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 10 }}
-                >
-                  <svg className="w-10 h-10 text-sage" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                </motion.div>
-              </div>
-              <h3 className="text-3xl font-serif text-sage-dark mb-4 italic">Terima Kasih!</h3>
-              <p className="text-sage/70 font-light leading-relaxed text-lg">
-                Konfirmasi kehadiran dan doa restu Anda telah kami terima.<br/>
-                Sampai jumpa di hari bahagia kami!
-              </p>
-            </motion.div>
-          ) : (
-            <div className="bg-white/40 backdrop-blur-lg p-10 rounded-2xl shadow-xl border border-white/30 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-sage/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative z-10">
+      <div className={`grid grid-cols-1 ${submitted ? 'max-w-3xl mx-auto' : 'lg:grid-cols-12'} gap-12 items-start`}>
+        {/* RSVP Form Column */}
+        {!submitted && (
+          <div className="lg:col-span-5">
+            <div className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[2.5rem] shadow-xl border border-primary/10 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gold/5 rounded-full -ml-12 -mb-12 pointer-events-none" />
+              
+              <h3 className="text-2xl font-serif text-burgundy italic mb-8 border-b border-primary/10 pb-4 flex items-center gap-2.5">
+                <Calendar className="w-5 h-5 text-primary" /> RSVP Form
+              </h3>
+
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-sage mb-3">Nama Lengkap</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" /> Nama Lengkap
+                  </label>
                   <input
                     {...register('name', { required: true })}
                     disabled={!!guestName}
-                    className={`w-full border-b-2 border-sage/20 py-3 focus:border-sage outline-none transition-colors bg-transparent font-serif text-xl text-sage-dark ${guestName ? 'opacity-60 cursor-not-allowed' : ''}`}
-                    placeholder="Masukkan Nama Anda"
+                    className={`w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy ${
+                      guestName ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''
+                    }`}
+                    placeholder="Masukkan Nama Lengkap Anda"
                   />
+                  {guestName && (
+                    <span className="text-[10px] text-gray-400 italic mt-1 block">Nama dikunci berdasarkan tautan undangan</span>
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-sage mb-3">Konfirmasi Kehadiran</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Konfirmasi Kehadiran
+                  </label>
                   <select
                     {...register('rsvp_status', { required: true })}
-                    className="w-full border-b-2 border-sage/20 py-3 focus:border-sage outline-none bg-transparent font-serif text-xl text-sage-dark appearance-none cursor-pointer"
+                    className="w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy cursor-pointer appearance-none"
                   >
                     <option value="true">Akan Hadir</option>
                     <option value="false">Tidak Bisa Hadir</option>
@@ -206,38 +177,131 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-sage mb-3">Jumlah Tamu</label>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="number"
-                      {...register('attendance_count', { min: 1, max: 5 })}
-                      defaultValue={1}
-                      className="w-24 border-b-2 border-sage/20 py-3 focus:border-sage outline-none bg-transparent font-serif text-xl text-sage-dark"
-                    />
-                    <span className="text-sage/60 font-light italic">Orang</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-sage mb-3">Pesan & Doa Restu</label>
-                  <textarea
-                    {...register('message')}
-                    rows={4}
-                    className="w-full border border-sage/20 p-4 focus:border-sage outline-none rounded-xl transition-colors bg-white/30 font-serif text-sage-dark text-lg"
-                    placeholder="Tulis ucapan selamat Anda di sini..."
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" /> Jumlah Hadir
+                  </label>
+                  <input
+                    type="number"
+                    {...register('attendance_count', { min: 1, max: 10 })}
+                    defaultValue={1}
+                    className="w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy"
                   />
                 </div>
 
-                <button
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5" /> Pesan & Doa Restu
+                  </label>
+                  <textarea
+                    {...register('message')}
+                    rows={4}
+                    className="w-full bg-white/50 border border-primary/20 rounded-2xl p-5 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy"
+                    placeholder="Tulis ucapan selamat & doa restu tulus Anda di sini..."
+                  />
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-sage-dark text-cream py-5 rounded-xl font-medium tracking-[0.2em] uppercase hover:bg-sage transition-all disabled:bg-gray-300 shadow-xl active:scale-[0.98]"
+                  className="w-full bg-burgundy hover:bg-primary text-white py-4.5 rounded-2xl font-bold tracking-widest uppercase text-xs shadow-lg transition-all duration-300 cursor-pointer disabled:bg-gray-300 flex items-center justify-center gap-2.5"
                 >
-                  {loading ? 'Mengirim...' : 'Kirim RSVP'}
-                </button>
+                  <Send className="w-4 h-4" />
+                  {loading ? 'Mengirim...' : 'Kirim Konfirmasi'}
+                </motion.button>
               </form>
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Wishes Wall Column */}
+        <div className={submitted ? 'w-full' : 'lg:col-span-7'}>
+          {submitted ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-16 bg-white/80 backdrop-blur-lg p-10 rounded-[3rem] shadow-xl border border-primary/10 mb-12 max-w-xl mx-auto"
+            >
+              <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Check className="w-10 h-10 text-green-600" />
+              </div>
+              <h3 className="text-3xl font-serif text-burgundy mb-3 italic">Terima Kasih Banyak!</h3>
+              <p className="text-gray-600 font-light leading-relaxed mb-6">
+                Konfirmasi kehadiran dan doa restu berharga Anda telah berhasil disimpan. Kami sangat menghargai perhatian Anda!
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSubmitted(false)}
+                className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors"
+              >
+                Isi RSVP Lagi
+              </motion.button>
+            </motion.div>
+          ) : null}
+
+          {/* Messages Listing */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-serif italic text-burgundy border-b border-primary/10 pb-4 flex items-center gap-2.5">
+              <Heart className="w-5 h-5 text-primary fill-primary/10" /> Doa Restu & Ucapan Selamat ({messages.length})
+            </h3>
+
+            <div className="max-h-[600px] overflow-y-auto pr-3 space-y-4 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
+              {messages.length > 0 ? (
+                <AnimatePresence>
+                  {messages.map((msg, index) => (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(index * 0.05, 0.5) }}
+                      className="bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-primary/10 shadow-sm flex gap-4 group hover:shadow-md hover:border-primary/20 transition-all duration-300 relative overflow-hidden"
+                    >
+                      {/* Avatar */}
+                      <div className="flex-none">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary/20 to-gold/20 flex items-center justify-center border border-primary/10">
+                          <span className="text-burgundy font-serif font-bold text-sm">
+                            {msg.name ? getInitials(msg.name) : '?'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-grow min-w-0">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                          <h4 className="text-burgundy font-serif font-medium text-lg leading-tight truncate">
+                            {msg.name}
+                          </h4>
+                          <span
+                            className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                              msg.rsvp_status
+                                ? 'bg-green-500/10 text-green-600 border border-green-500/20'
+                                : 'bg-rose-500/10 text-rose-600 border border-rose-500/20'
+                            }`}
+                          >
+                            {msg.rsvp_status ? `Hadir (${msg.attendance_count})` : 'Tidak Hadir'}
+                          </span>
+                        </div>
+
+                        <p className="text-gray-600 font-light leading-relaxed text-sm italic pr-2 break-words">
+                          "{msg.message}"
+                        </p>
+
+                        <div className="text-[10px] text-gray-400 font-light mt-3">
+                          {formatDate(msg.created_at)}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              ) : (
+                <div className="text-center py-20 bg-white/30 rounded-3xl border border-dashed border-primary/20 font-serif italic text-gray-400">
+                  Belum ada pesan ucapan dari tamu.
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

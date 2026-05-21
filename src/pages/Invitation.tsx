@@ -156,17 +156,15 @@ export const Invitation = () => {
       <div className={`transition-all duration-1000 ${isOpen ? 'opacity-100' : 'opacity-0 blur-sm'}`}>
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-[#FFF] to-blush relative overflow-hidden">
-          <div className="max-w-4xl mx-auto relative z-10">
-            <Hero 
-              groomName={settings?.groom_name || 'Groom'} 
-              brideName={settings?.bride_name || 'Bride'} 
-              weddingDate={settings?.wedding_date || ''}
-            />
-          </div>
+          <Hero 
+            groomName={settings?.groom_name || 'Groom'} 
+            brideName={settings?.bride_name || 'Bride'} 
+            weddingDate={settings?.wedding_date || ''}
+          />
         </section>
         
         {/* Countdown & Rundown Section */}
-        <section className="bg-gradient-to-b from-blush to-[#FFF] py-24 relative overflow-hidden">
+        <section className="bg-gradient-to-b from-blush to-[#FFF] py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
             topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
           />
@@ -190,7 +188,7 @@ export const Invitation = () => {
         </section>
 
         {/* Love Story Section */}
-        <section className="bg-gradient-to-b from-[#FFF] to-blush py-24 relative overflow-hidden">
+        <section className="bg-gradient-to-b from-[#FFF] to-blush py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
             topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
             bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
@@ -202,7 +200,7 @@ export const Invitation = () => {
         </section>
 
         {/* Gallery Section */}
-        <section className="bg-transparent py-24 relative overflow-hidden">
+        <section className="bg-transparent py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
             topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame3.png"
             scale={1.1}
@@ -216,7 +214,7 @@ export const Invitation = () => {
         <GiftRegistry />
 
         {/* Location & RSVP Section */}
-        <section className="bg-gradient-to-b from-blush to-[#FFF] py-24 relative overflow-hidden">
+        <section className="bg-gradient-to-b from-blush to-[#FFF] py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
             topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
           />
@@ -226,15 +224,15 @@ export const Invitation = () => {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1 }}
-              className="text-center relative mb-24"
+              className="text-center relative mb-14 sm:mb-20 md:mb-24"
             >
-              <div className="bg-white/80 backdrop-blur-md rounded-[3rem] p-8 md:p-16 border border-primary/10 shadow-xl relative overflow-hidden">
+              <div className="bg-white/80 backdrop-blur-md rounded-[2rem] sm:rounded-[2.5rem] md:rounded-[3rem] p-6 sm:p-8 md:p-16 border border-primary/10 shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
                 
-                <h2 className="text-5xl font-script italic text-burgundy mb-12 leading-tight">Wedding Location</h2>
-                <div className="max-w-xl mx-auto mb-12">
-                  <p className="text-2xl text-primary font-serif font-medium mb-3 tracking-wide">{settings?.location_name || 'Wedding Venue'}</p>
-                  <p className="text-gray-600 font-light leading-relaxed mb-8 max-w-md mx-auto text-base">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-script italic text-burgundy mb-6 sm:mb-8 md:mb-12 leading-tight">Wedding Location</h2>
+                <div className="max-w-xl mx-auto mb-6 sm:mb-8 md:mb-12">
+                  <p className="text-lg sm:text-xl md:text-2xl text-primary font-serif font-medium mb-2 sm:mb-3 tracking-wide">{settings?.location_name || 'Wedding Venue'}</p>
+                  <p className="text-gray-600 font-light leading-relaxed mb-5 sm:mb-6 md:mb-8 max-w-md mx-auto text-sm sm:text-base">
                     {settings?.location_address || ''}
                   </p>
                   {settings && (
@@ -259,7 +257,7 @@ export const Invitation = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50"
+                    className="aspect-video w-full max-w-2xl mx-auto rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white/50"
                   >
                     <iframe
                       src={settings.maps_url}
@@ -281,7 +279,7 @@ export const Invitation = () => {
           </div>
         </section>
 
-        <footer className="bg-white py-24 text-center px-6 relative overflow-hidden border-t border-primary/5">
+        <footer className="bg-white py-14 sm:py-20 md:py-24 text-center px-4 sm:px-6 relative overflow-hidden border-t border-primary/5">
           <FloralDecor 
             bottomCenterImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
           />

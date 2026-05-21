@@ -54,7 +54,7 @@ export const MusicPlayer = ({ autoPlay = false }: MusicPlayerProps) => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-[90] flex flex-col items-center">
+    <div className="fixed bottom-6 right-4 sm:right-6 z-[90] flex flex-col items-center pb-[env(safe-area-inset-bottom,0px)]">
       {/* Floating Notes */}
       <div className="relative w-0 h-0 overflow-visible pointer-events-none">
         <AnimatePresence>

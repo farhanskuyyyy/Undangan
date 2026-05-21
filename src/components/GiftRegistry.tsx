@@ -35,7 +35,7 @@ export const GiftRegistry: React.FC = () => {
   }
 
   return (
-    <section className="py-24 bg-gradient-to-b from-[#FDF2F8] to-[#FFF] relative overflow-hidden">
+    <section className="py-14 sm:py-20 md:py-24 bg-gradient-to-b from-[#FDF2F8] to-[#FFF] relative overflow-hidden">
       {/* Decorative frame vectors */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
         <svg width="100%" height="100%">
@@ -55,8 +55,8 @@ export const GiftRegistry: React.FC = () => {
           className="text-center mb-16"
         >
           <span className="text-primary font-medium tracking-[0.3em] text-xs uppercase mb-3 block">Share Your Love</span>
-          <h2 className="text-5xl font-script italic text-burgundy mb-6 leading-tight">Digital Gift & Wedding Gift</h2>
-          <p className="text-gray-600 font-light leading-relaxed max-w-xl mx-auto text-lg">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-script italic text-burgundy mb-4 sm:mb-6 leading-tight">Digital Gift & Wedding Gift</h2>
+          <p className="text-gray-600 font-light leading-relaxed max-w-xl mx-auto text-sm sm:text-base md:text-lg">
             Doa restu Anda adalah karunia terindah bagi kami. Namun, apabila Anda ingin memberikan tanda kasih secara digital atau mengirim kado fisik, silakan gunakan informasi di bawah ini.
           </p>
         </motion.div>
@@ -66,10 +66,10 @@ export const GiftRegistry: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowGiftOptions(!showGiftOptions)}
-            className="flex items-center gap-3 bg-burgundy hover:bg-primary text-white font-medium px-8 py-4 rounded-full shadow-lg transition-all duration-300 font-sans tracking-wider uppercase text-xs cursor-pointer"
+            className="flex items-center gap-2 sm:gap-3 bg-burgundy hover:bg-primary text-white font-medium px-6 sm:px-8 py-3.5 sm:py-4 rounded-full shadow-lg transition-all duration-300 font-sans tracking-wider uppercase text-[10px] sm:text-xs cursor-pointer"
           >
-            <Gift className="w-5 h-5" />
-            {showGiftOptions ? 'Sembunyikan Informasi Kado' : 'Kirim Kado / Amplop Digital'}
+            <Gift className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="truncate">{showGiftOptions ? 'Sembunyikan Informasi Kado' : 'Kirim Kado / Amplop Digital'}</span>
           </motion.button>
         </div>
 
@@ -103,7 +103,7 @@ export const GiftRegistry: React.FC = () => {
                         <span className="bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">
                           {acc.bankName}
                         </span>
-                        <p className="text-2xl font-mono font-bold text-burgundy tracking-wider mb-1">
+                        <p className="text-lg sm:text-2xl font-mono font-bold text-burgundy tracking-wider mb-1 break-all">
                           {acc.accountNumber}
                         </p>
                         <p className="text-gray-500 font-light text-sm uppercase tracking-wider">
@@ -140,7 +140,7 @@ export const GiftRegistry: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-primary/10 shadow-md flex flex-col justify-between h-[216px] group hover:shadow-xl hover:border-primary/20 transition-all duration-300 relative overflow-hidden"
+                    className="bg-white/70 backdrop-blur-md p-5 sm:p-6 rounded-3xl border border-primary/10 shadow-md flex flex-col justify-between group hover:shadow-xl hover:border-primary/20 transition-all duration-300 relative overflow-hidden"
                   >
                     <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-gold to-primary" />
                     

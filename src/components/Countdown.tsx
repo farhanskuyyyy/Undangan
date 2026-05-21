@@ -36,38 +36,38 @@ export const Countdown = ({ targetDate }: { targetDate: string }) => {
   }, [targetDate])
 
   const TimeUnit = ({ value, label, animate = false }: { value: number; label: string; animate?: boolean }) => (
-    <div className="flex flex-col items-center mx-1 md:mx-6 min-w-[2.5rem] md:min-w-[4rem]">
-      <div className="relative h-[3em] md:h-[4em] flex items-center justify-center overflow-hidden">
+    <div className="flex flex-col items-center mx-2 sm:mx-3 md:mx-6 min-w-[2.5rem] sm:min-w-[3rem] md:min-w-[4rem]">
+      <div className="relative h-[2.6em] sm:h-[3em] md:h-[4em] flex items-center justify-center overflow-hidden">
         {animate ? (
           <motion.span 
             key={value}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-3xl md:text-5xl font-serif text-sage tabular-nums block leading-none"
+            className="text-2xl sm:text-3xl md:text-5xl font-serif text-sage tabular-nums block leading-none"
           >
             {value.toString().padStart(2, '0')}
           </motion.span>
         ) : (
-          <span className="text-3xl md:text-5xl font-serif text-sage tabular-nums block leading-none">
+          <span className="text-2xl sm:text-3xl md:text-5xl font-serif text-sage tabular-nums block leading-none">
             {value.toString().padStart(2, '0')}
           </span>
         )}
       </div>
-      <span className="text-[8px] md:text-xs uppercase tracking-[0.2em] text-terracotta/70 mt-1 md:mt-2">{label}</span>
+      <span className="text-[7px] sm:text-[8px] md:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] text-terracotta/70 mt-1 md:mt-2">{label}</span>
     </div>
   )
 
   return (
-    <div className="flex justify-center items-center py-10 md:py-20 bg-white/20 backdrop-blur-lg rounded-[2rem] md:rounded-[4rem] border border-white/30 shadow-xl max-w-2xl mx-auto relative overflow-hidden">
+    <div className="flex justify-center items-center px-4 sm:px-0 py-8 sm:py-10 md:py-20 bg-white/20 backdrop-blur-lg rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[4rem] border border-white/30 shadow-xl max-w-2xl mx-auto relative overflow-hidden">
       <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute inset-2 md:inset-4 border-4 border-sage rounded-[1.8rem] md:rounded-[3rem]" />
+        <div className="absolute inset-2 md:inset-4 border-4 border-sage rounded-[1.2rem] sm:rounded-[1.8rem] md:rounded-[3rem]" />
       </div>
       <TimeUnit value={timeLeft.days} label="Days" />
-      <div className="h-6 md:h-12 w-px bg-terracotta/20" />
+      <div className="h-5 sm:h-6 md:h-12 w-px bg-terracotta/20" />
       <TimeUnit value={timeLeft.hours} label="Hours" />
-      <div className="h-6 md:h-12 w-px bg-terracotta/20" />
+      <div className="h-5 sm:h-6 md:h-12 w-px bg-terracotta/20" />
       <TimeUnit value={timeLeft.minutes} label="Mins" />
-      <div className="h-6 md:h-12 w-px bg-terracotta/20" />
+      <div className="h-5 sm:h-6 md:h-12 w-px bg-terracotta/20" />
       <TimeUnit value={timeLeft.seconds} label="Secs" animate />
     </div>
   )

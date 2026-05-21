@@ -129,7 +129,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
         className="text-center mb-16"
       >
         <span className="text-primary font-medium tracking-[0.3em] text-xs uppercase mb-3 block">RSVP & Guestbook</span>
-        <h2 className="text-5xl font-script italic text-burgundy mb-6 leading-tight">Konfirmasi Kehadiran & Doa Restu</h2>
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-script italic text-burgundy mb-4 sm:mb-6 leading-tight">Konfirmasi Kehadiran & Doa Restu</h2>
         <div className="w-12 h-px bg-gold/50 mx-auto" />
       </motion.div>
 
@@ -137,7 +137,7 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
         {/* RSVP Form Column */}
         {!submitted && (
           <div className="lg:col-span-5">
-            <div className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[2.5rem] shadow-xl border border-primary/10 relative overflow-hidden">
+            <div className="bg-white/80 backdrop-blur-md p-5 sm:p-8 md:p-10 rounded-[1.75rem] sm:rounded-[2.5rem] shadow-xl border border-primary/10 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-gold/5 rounded-full -ml-12 -mb-12 pointer-events-none" />
               

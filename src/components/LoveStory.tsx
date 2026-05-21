@@ -4,7 +4,7 @@ interface StoryPoint {
   title: string;
   event_date: string;
   description: string;
-  image_url: string; // Keeping in interface for compatibility, though unused in view
+  image_url: string;
 }
 
 interface LoveStoryProps {
@@ -16,20 +16,25 @@ export const LoveStory = ({ stories }: LoveStoryProps) => {
 
   return (
     <div className="relative overflow-hidden">
-      <div className="max-w-4xl mx-auto px-4 relative">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 relative">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          className="text-center mb-12 sm:mb-16 md:mb-20"
         >
-          <h2 className="text-4xl md:text-5xl font-serif text-sage italic mb-4">Our Love Story</h2>
-          <div className="w-24 h-1 bg-terracotta mx-auto rounded-full"></div>
+          <span className="text-primary font-bold tracking-[0.3em] text-[9px] sm:text-xs uppercase mb-3 block">
+            Our Journey
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-sage italic mb-4">
+            Our Love Story
+          </h2>
+          <div className="w-16 sm:w-24 h-1 bg-terracotta mx-auto rounded-full" />
         </motion.div>
 
         <div className="relative">
-          {/* Wavy Timeline Line */}
+          {/* Wavy Timeline Line — desktop only */}
           <div className="absolute left-1/2 -translate-x-1/2 h-full w-1 hidden md:block">
             <svg
               className="h-full w-full"
@@ -47,34 +52,44 @@ export const LoveStory = ({ stories }: LoveStoryProps) => {
             </svg>
           </div>
 
-          <div className="space-y-16 md:space-y-32">
+          {/* Mobile: left-aligned vertical timeline line */}
+          <div className="absolute left-3 top-2 bottom-2 w-px bg-terracotta/30 md:hidden" />
+
+          <div className="space-y-10 sm:space-y-14 md:space-y-32">
             {stories.map((point, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
+                viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.8, delay: 0.1 }}
-                className="relative flex justify-center"
+                className="relative flex items-start gap-4 md:block md:justify-center"
               >
-                {/* Timeline Dot (Mobile only, or as accent) */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-0 w-4 h-4 rounded-full bg-terracotta/40 md:hidden"></div>
+                {/* Mobile: timeline dot */}
+                <div className="flex-none md:hidden mt-1">
+                  <div className="w-3 h-3 rounded-full bg-terracotta/50 border-2 border-white relative z-10" />
+                </div>
+
+                {/* Desktop: center timeline dot */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-1 w-4 h-4 rounded-full bg-terracotta/40 hidden md:block z-10" />
 
                 {/* Content Block */}
-                <div className={`w-full md:w-1/2 px-8 ${
-                  index % 2 === 0 ? 'md:mr-[50%] md:text-right' : 'md:ml-[50%] md:text-left'
-                } text-center`}>
+                <div className={`flex-1 md:w-1/2 md:px-8 ${
+                  index % 2 === 0
+                    ? 'md:mr-[50%] md:text-right'
+                    : 'md:ml-[50%] md:text-left'
+                } text-left md:text-inherit`}>
                   <div className={`flex flex-col ${
                     index % 2 === 0 ? 'md:items-end' : 'md:items-start'
-                  } items-center gap-3`}>
-                    <span className="text-terracotta font-medium tracking-widest uppercase text-sm">
+                  } items-start gap-1.5 sm:gap-2 md:gap-3`}>
+                    <span className="text-terracotta font-medium tracking-widest uppercase text-xs sm:text-sm">
                       {point.event_date}
                     </span>
-                    <h3 className="text-3xl md:text-4xl font-serif text-sage italic">
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif text-sage italic leading-tight">
                       {point.title}
                     </h3>
-                    <div className="w-12 h-px bg-terracotta/30 my-1 md:hidden"></div>
-                    <p className="text-gray-600 font-light leading-relaxed max-w-sm">
+                    <div className="w-10 sm:w-12 h-px bg-terracotta/30 my-0.5" />
+                    <p className="text-gray-600 font-light leading-relaxed max-w-sm text-sm sm:text-base">
                       {point.description}
                     </p>
                   </div>
@@ -87,4 +102,3 @@ export const LoveStory = ({ stories }: LoveStoryProps) => {
     </div>
   );
 };
-

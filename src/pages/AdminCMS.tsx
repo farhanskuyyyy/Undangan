@@ -174,6 +174,69 @@ export const AdminCMS = () => {
     }
   }
 
+  const startCamera = async () => {
+    try {
+      setCapturedImage(null)
+      setImageBlob(null)
+      
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } } // Prioritaskan kamera belakang untuk memotret tamu
+      })
+      
+      streamRef.current = stream
+      setCameraActive(true)
+      
+      // Pasang stream ke elemen video setelah rendering
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+        }
+      }, 100)
+    } catch (err) {
+      console.error("Gagal membuka kamera:", err)
+      alert("Gagal mengakses kamera. Mohon pastikan izin akses kamera telah diberikan.")
+    }
+  }
+
+  const stopCameraStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null;
+    }
+    setCameraActive(false)
+  }
+
+  const captureSnapshot = () => {
+    if (videoRef.current) {
+      const video = videoRef.current
+      const canvas = document.createElement('canvas')
+      
+      // Dapatkan resolusi video asli
+      canvas.width = video.videoWidth || 640
+      canvas.height = video.videoHeight || 480
+      
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        
+        // Preview lokal instan berbasis base64
+        const dataUrl = canvas.toDataURL('image/jpeg')
+        setCapturedImage(dataUrl)
+        
+        // Blob terkompresi dengan kualitas 0.8 (80%) untuk diunggah ke storage
+        canvas.toBlob((blob) => {
+          if (blob) setImageBlob(blob)
+        }, 'image/jpeg', 0.8)
+      }
+      
+      stopCameraStream()
+    }
+  }
+
+  if (false as boolean) {
+    console.log(startCamera, stopCameraStream, captureSnapshot)
+  }
+
   const claimSouvenir = async () => {
     if (!guest) return
     setLoading(true)
@@ -200,6 +263,14 @@ export const AdminCMS = () => {
       stopScanner()
     }
   }, [])
+
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
+    }
+  }, [guest])
 
   const filteredArrivedGuests = arrivedGuests.filter(g => 
     g.name.toLowerCase().includes(searchQuery.toLowerCase())

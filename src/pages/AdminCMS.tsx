@@ -2,7 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart } from 'lucide-react'
+
+const QUICK_WISHES_TEMPLATES = [
+  "Selamat menempuh hidup baru! Semoga cinta kalian abadi hingga hari tua.",
+  "Selamat atas pernikahannya! Semoga menjadi keluarga yang sakinah, mawaddah, warahmah.",
+  "Happy wedding! Semoga hari-hari kalian dipenuhi dengan kebahagiaan dan tawa bersama.",
+  "Selamat berbahagia! Semoga dilancarkan selalu dalam membangun bahtera rumah tangga yang indah.",
+  "Barakallahu lakuma wa baraka 'alaikuma wa jama'a bainakuma fii khair."
+];
 
 export const AdminCMS = () => {
   const { user, signOut } = useAuth()
@@ -335,10 +343,6 @@ export const AdminCMS = () => {
     } finally {
       setSavingWishes(false)
     }
-  }
-
-  if (false as boolean) {
-    console.log(wishesText, setWishesText, savingWishes, setSavingWishes, saveGuestWishes)
   }
 
   const claimSouvenir = async () => {
@@ -765,6 +769,63 @@ export const AdminCMS = () => {
                         </button>
                       </div>
                     )}
+                  </div>
+
+                  {/* Blok Ucapan & Doa Tamu */}
+                  <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] space-y-4">
+                    <div className="flex items-center justify-between border-b border-[#F3F1ED] pb-2">
+                      <span className="text-sm font-semibold text-[#4A5D4E] flex items-center gap-1.5">
+                        <Heart size={16} className="text-[#C17E61]" /> Ucapan & Doa Tamu
+                      </span>
+                    </div>
+
+                    {/* Quick Wishes Recommendations */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-[#8C9A8E] font-medium">Rekomendasi ucapan cepat (Klik untuk memilih):</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {QUICK_WISHES_TEMPLATES.map((tmpl, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setWishesText(tmpl);
+                              document.getElementById('wishes-textarea')?.focus();
+                            }}
+                            className="text-[9px] bg-[#F0F4F1] hover:bg-[#E2EAE4] text-[#4A5D4E] px-2 py-1 rounded-full transition-all font-medium border border-transparent hover:border-[#4A5D4E]/20 text-left truncate max-w-[180px]"
+                            title={tmpl}
+                          >
+                            {idx + 1}. {tmpl.substring(0, 18)}...
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Textarea Input & Save Button */}
+                    <div className="space-y-2">
+                      <textarea
+                        id="wishes-textarea"
+                        rows={3}
+                        value={wishesText}
+                        onChange={(e) => setWishesText(e.target.value)}
+                        placeholder="Tuliskan ucapan selamat atau harapan dari tamu di sini..."
+                        className="w-full bg-white border border-[#E5E1DA] rounded-xl p-3 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all text-xs resize-none"
+                      />
+                      <button
+                        onClick={saveGuestWishes}
+                        disabled={savingWishes || !wishesText.trim()}
+                        className="w-full bg-[#4A5D4E] hover:bg-[#3D4C40] disabled:bg-gray-200 disabled:text-gray-400 text-white py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                      >
+                        {savingWishes ? (
+                          <>
+                            <RefreshCw size={12} className="animate-spin" /> Menyimpan...
+                          </>
+                        ) : (
+                          <>
+                            <Check size={14} /> Simpan Ucapan
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="flex flex-col gap-2">

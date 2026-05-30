@@ -24,6 +24,8 @@ export const AdminCMS = () => {
   const streamRef = useRef<MediaStream | null>(null)
   const [galleryPage, setGalleryPage] = useState(1)
   const [lightboxGuest, setLightboxGuest] = useState<any>(null)
+  const [wishesText, setWishesText] = useState('')
+  const [savingWishes, setSavingWishes] = useState(false)
 
 
 
@@ -143,6 +145,7 @@ export const AdminCMS = () => {
       }
 
       setGuest(data)
+      setWishesText(data?.message || '')
       fetchGuests()
     } catch (error) {
       console.error('Error fetching guest:', error)
@@ -165,6 +168,7 @@ export const AdminCMS = () => {
       if (error) throw error
       
       setGuest(data)
+      setWishesText(data?.message || '')
       fetchGuests()
       setManualSearchQuery('') // Clear search after successful check-in
       alert(`Berhasil check-in: ${data.name}`)
@@ -309,7 +313,33 @@ export const AdminCMS = () => {
     }
   }
 
+  const saveGuestWishes = async () => {
+    if (!guest) return
+    setSavingWishes(true)
+    
+    try {
+      const { error } = await supabase
+        .from('guests')
+        .update({ message: wishesText })
+        .eq('id', guest.id)
+        
+      if (error) throw error
+      
+      // Perbarui data guest lokal
+      setGuest({ ...guest, message: wishesText })
+      fetchGuests() // Segarkan daftar tamu hadir/belum hadir
+      alert("Ucapan tamu berhasil disimpan!")
+    } catch (err: any) {
+      console.error("Gagal menyimpan ucapan:", err)
+      alert(`Gagal menyimpan ucapan: ${err.message || 'Error tidak diketahui'}`)
+    } finally {
+      setSavingWishes(false)
+    }
+  }
 
+  if (false as boolean) {
+    console.log(wishesText, setWishesText, savingWishes, setSavingWishes, saveGuestWishes)
+  }
 
   const claimSouvenir = async () => {
     if (!guest) return

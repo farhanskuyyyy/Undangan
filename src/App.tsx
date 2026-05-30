@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { Invitation } from './pages/Invitation'
 import { AdminCMS } from './pages/AdminCMS'
 import { LoginPage } from './pages/LoginPage'
+import { ProjectorSlideshow } from './pages/ProjectorSlideshow'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/projector" element={<ProjectorSlideshow />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

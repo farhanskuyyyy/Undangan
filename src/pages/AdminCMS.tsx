@@ -45,7 +45,7 @@ export const AdminCMS = () => {
     try {
       const { data: arrivedData, error: arrivedError } = await supabase
         .from('guests')
-        .select('id, name, arrival_time, is_vip, photo_url')
+        .select('id, name, arrival_time, is_vip, photo_url, souvenir_taken, attendance_count')
         .eq('has_arrived', true)
         .order('arrival_time', { ascending: false })
       
@@ -54,7 +54,7 @@ export const AdminCMS = () => {
 
       const { data: pendingData, error: pendingError } = await supabase
         .from('guests')
-        .select('id, name, is_vip')
+        .select('id, name, is_vip, attendance_count')
         .eq('has_arrived', false)
         .order('name', { ascending: true })
       
@@ -422,6 +422,7 @@ export const AdminCMS = () => {
       
       if (error) throw error
       setGuest({ ...guest, souvenir_taken: true })
+      fetchGuests() // Segarkan statistik dan dasbor analitik secara real-time!
       alert('Souvenir berhasil diberikan!')
     } catch (error) {
       console.error('Error updating souvenir status:', error)

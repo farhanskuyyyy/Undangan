@@ -25,9 +25,7 @@ export const AdminCMS = () => {
   const [galleryPage, setGalleryPage] = useState(1)
   const [lightboxGuest, setLightboxGuest] = useState<any>(null)
 
-  if (false as boolean) {
-    console.log(galleryPage, setGalleryPage, ChevronLeft, ChevronRight)
-  }
+
 
 
 
@@ -50,6 +48,7 @@ export const AdminCMS = () => {
       
       if (pendingError) throw pendingError
       setPendingGuests(pendingData || [])
+      setGalleryPage(1)
     } catch (error) {
       console.error('Error fetching guests:', error)
     }
@@ -353,6 +352,14 @@ export const AdminCMS = () => {
 
   const filteredPendingGuests = pendingGuests.filter(g => 
     g.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const ITEMS_PER_PAGE = 8
+  const guestsWithPhotos = arrivedGuests.filter(g => g.photo_url)
+  const totalPages = Math.max(1, Math.ceil(guestsWithPhotos.length / ITEMS_PER_PAGE))
+  const paginatedGuests = guestsWithPhotos.slice(
+    (galleryPage - 1) * ITEMS_PER_PAGE,
+    galleryPage * ITEMS_PER_PAGE
   )
 
   const filteredManualPendingGuests = pendingGuests.filter(g => 
@@ -845,6 +852,85 @@ export const AdminCMS = () => {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Galeri Kehadiran Tamu Berpaginasi */}
+          <div className="mt-12 pt-10 border-t border-[#E5E1DA] space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-[#4A5D4E]">
+                <Camera size={20} />
+                <h2 className="text-xl font-medium font-serif">Galeri Kehadiran Tamu</h2>
+              </div>
+              <span className="bg-[#F0F4F1] text-[#4A5D4E] px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                {guestsWithPhotos.length} Foto Tamu
+              </span>
+            </div>
+
+            {paginatedGuests.length > 0 ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                  {paginatedGuests.map((g) => (
+                    <div 
+                      key={g.id} 
+                      className="bg-white rounded-xl overflow-hidden border border-[#E5E1DA] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col group"
+                    >
+                      <div 
+                        className="aspect-square w-full overflow-hidden bg-gray-50 relative cursor-zoom-in"
+                        onClick={() => setLightboxGuest(g)}
+                      >
+                        <img 
+                          src={g.photo_url} 
+                          alt={g.name} 
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                          <span className="bg-white/95 text-[#4A5D4E] text-[10px] px-3 py-1.5 rounded-lg font-medium shadow flex items-center gap-1">
+                            <Eye size={12} /> Lihat Foto
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-3 flex flex-col flex-1 border-t border-[#F3F1ED]">
+                        <div className="flex items-center justify-between gap-1 mb-1">
+                          <span className="font-serif text-sm font-semibold text-[#4A5D4E] truncate flex-1">{g.name}</span>
+                          {g.is_vip && <span className="text-[8px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold border border-amber-200">VIP</span>}
+                        </div>
+                        <span className="text-[10px] text-[#8C9A8E] flex items-center gap-1">
+                          <Clock size={10} /> Tiba pukul {g.arrival_time ? new Date(g.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Kontrol Paginasi Galeri */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-4 pt-4 border-t border-[#F3F1ED]">
+                    <button
+                      onClick={() => setGalleryPage(p => Math.max(1, p - 1))}
+                      disabled={galleryPage === 1}
+                      className="flex items-center gap-1 text-xs text-[#4A5D4E] hover:text-[#3D4C40] disabled:text-gray-300 font-semibold transition-all disabled:pointer-events-none"
+                    >
+                      <ChevronLeft size={16} /> Sebelumnya
+                    </button>
+                    <span className="text-xs text-[#8C9A8E] font-medium">
+                      Halaman {galleryPage} dari {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setGalleryPage(p => Math.min(totalPages, p + 1))}
+                      disabled={galleryPage === totalPages}
+                      className="flex items-center gap-1 text-xs text-[#4A5D4E] hover:text-[#3D4C40] disabled:text-gray-300 font-semibold transition-all disabled:pointer-events-none"
+                    >
+                      Selanjutnya <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50/40 rounded-2xl border border-dashed border-[#E5E1DA]">
+                <Camera size={32} className="text-gray-300 mb-2" />
+                <p className="text-xs font-medium text-[#8C9A8E]">Belum ada foto tamu yang terdokumentasi.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

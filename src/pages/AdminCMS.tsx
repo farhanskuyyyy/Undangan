@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, AlertCircle } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw } from 'lucide-react'
 
 export const AdminCMS = () => {
   const { user, signOut } = useAuth()
@@ -23,10 +23,7 @@ export const AdminCMS = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  // Temporary references to prevent unused compiler errors in step-by-step setup
-  if (false as boolean) {
-    console.log(cameraActive, setCameraActive, capturedImage, setCapturedImage, uploadingPhoto, videoRef, streamRef, Trash2, Check, RefreshCw, AlertCircle)
-  }
+
 
   const fetchGuests = async () => {
     try {
@@ -307,9 +304,7 @@ export const AdminCMS = () => {
     }
   }
 
-  if (false as boolean) {
-    console.log(startCamera, stopCameraStream, captureSnapshot, savePhoto, deletePhoto)
-  }
+
 
   const claimSouvenir = async () => {
     if (!guest) return
@@ -594,6 +589,131 @@ export const AdminCMS = () => {
                           <CheckCircle size={20} />
                         </div>
                         <p className="text-sm font-medium">Souvenir telah diserahkan</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Blok Kamera & Foto Tamu */}
+                  <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] space-y-4">
+                    <div className="flex items-center justify-between border-b border-[#F3F1ED] pb-2">
+                      <span className="text-sm font-semibold text-[#4A5D4E] flex items-center gap-1.5">
+                        <Camera size={16} /> Foto Kehadiran Tamu
+                      </span>
+                      {guest.photo_url && (
+                        <span className="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                          <Check size={10} /> Tersimpan
+                        </span>
+                      )}
+                    </div>
+
+                    {/* STATE 1: Kamera Aktif (Live Streaming) */}
+                    {cameraActive && !capturedImage && (
+                      <div className="space-y-3">
+                        <div className="relative aspect-square w-full max-w-[280px] mx-auto overflow-hidden rounded-xl bg-black border border-[#E5E1DA] shadow-inner">
+                          <video 
+                            ref={videoRef} 
+                            autoPlay 
+                            playsInline 
+                            className="w-full h-full object-cover transform scale-x-[-1]"
+                          />
+                          <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm animate-pulse">
+                            Kamera Aktif
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={captureSnapshot}
+                            className="flex-1 bg-[#C17E61] hover:bg-[#A96B51] text-white py-2 rounded-xl transition-all font-medium text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                          >
+                            <Camera size={16} /> Tangkap Foto
+                          </button>
+                          <button
+                            onClick={stopCameraStream}
+                            className="bg-white hover:bg-gray-50 border border-[#E5E1DA] text-gray-500 px-3 py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center"
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE 2: Preview Hasil Foto (Menunggu Konfirmasi Simpan) */}
+                    {capturedImage && (
+                      <div className="space-y-3">
+                        <div className="aspect-square w-full max-w-[280px] mx-auto overflow-hidden rounded-xl bg-gray-100 border border-[#E5E1DA] shadow-sm">
+                          <img 
+                            src={capturedImage} 
+                            alt="Preview Tamu" 
+                            className="w-full h-full object-cover transform scale-x-[-1]" 
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={savePhoto}
+                            disabled={uploadingPhoto}
+                            className="flex-1 bg-[#4A5D4E] hover:bg-[#3D4C40] disabled:bg-gray-400 text-white py-2 rounded-xl transition-all font-medium text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                          >
+                            {uploadingPhoto ? (
+                              <>
+                                <RefreshCw size={14} className="animate-spin" /> Menyimpan...
+                              </>
+                            ) : (
+                              <>
+                                <Check size={16} /> Simpan Foto
+                              </>
+                            )}
+                          </button>
+                          <button
+                            onClick={startCamera}
+                            disabled={uploadingPhoto}
+                            className="bg-white hover:bg-gray-50 disabled:opacity-50 border border-[#E5E1DA] text-gray-600 px-3 py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center gap-1"
+                          >
+                            <RefreshCw size={14} /> Ulang
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE 3: Foto Sudah Tersimpan & Ditampilkan */}
+                    {!cameraActive && !capturedImage && guest.photo_url && (
+                      <div className="space-y-3 text-center">
+                        <div className="relative aspect-square w-full max-w-[240px] mx-auto overflow-hidden rounded-xl border-2 border-[#E5E1DA] shadow-md group">
+                          <img 
+                            src={guest.photo_url} 
+                            alt={`Foto ${guest.name}`} 
+                            className="w-full h-full object-cover" 
+                          />
+                          <button
+                            onClick={deletePhoto}
+                            disabled={uploadingPhoto}
+                            className="absolute bottom-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all shadow-md active:scale-95"
+                            title="Hapus Foto"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                        <button
+                          onClick={startCamera}
+                          className="text-xs text-[#C17E61] hover:text-[#A96B51] font-semibold border-b border-[#C17E61] hover:border-[#A96B51] transition-all inline-flex items-center gap-1"
+                        >
+                          <RefreshCw size={12} /> Ambil Ulang Foto Tamu
+                        </button>
+                      </div>
+                    )}
+
+                    {/* STATE 4: Kosong / Belum Ada Foto */}
+                    {!cameraActive && !capturedImage && !guest.photo_url && (
+                      <div className="flex flex-col items-center justify-center py-6 text-center bg-gray-50/50 rounded-xl border border-dashed border-[#E5E1DA]">
+                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
+                          <Camera size={22} />
+                        </div>
+                        <p className="text-xs font-medium text-[#8C9A8E] mb-3">Belum ada foto kehadiran tamu</p>
+                        <button
+                          onClick={startCamera}
+                          className="bg-[#4A5D4E] hover:bg-[#3D4C40] text-white text-xs px-4 py-2 rounded-xl transition-all font-medium flex items-center gap-1.5 shadow-sm active:scale-[0.98]"
+                        >
+                          <Camera size={14} /> Ambil Foto Tamu
+                        </button>
                       </div>
                     )}
                   </div>

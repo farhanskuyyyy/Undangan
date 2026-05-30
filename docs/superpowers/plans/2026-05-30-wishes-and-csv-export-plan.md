@@ -93,7 +93,7 @@
 **Files:**
 - Modify: `src/pages/AdminCMS.tsx`
 
-- [ ] **Step 1: Sisipkan array QUICK_WISHES_TEMPLATES**
+- [x] **Step 1: Sisipkan array QUICK_WISHES_TEMPLATES**
   Tambahkan konstanta daftar ucapan kustom di luar komponen `AdminCMS` (misalnya di bagian atas file, di bawah import ikon).
 
   ```typescript
@@ -106,7 +106,7 @@
   ];
   ```
 
-- [ ] **Step 2: Sisipkan UI Wishes Card**
+- [x] **Step 2: Sisipkan UI Wishes Card**
   Cari akhir dari blok kartu Foto Tamu (sekitar baris 720). Blok kartu foto diakhiri dengan `</div>` penutup, tepat di atas blok tombol scan tamu lain `<div className="flex flex-col gap-2">`.
 
   Sisipkan JSX berikut tepat di bawah kartu foto tamu dan di atas pembungkus tombol scan:
@@ -170,14 +170,14 @@
                   </div>
   ```
 
-- [ ] **Step 3: Tambahkan Heart ke impor lucide-react**
+- [x] **Step 3: Tambahkan Heart ke impor lucide-react**
   Tambahkan `Heart` di baris import lucide-react bagian atas berkas `src/pages/AdminCMS.tsx`.
 
-- [ ] **Step 4: Uji Build Kompilasi**
+- [x] **Step 4: Uji Build Kompilasi**
   Run: `npm run build`
   Expected: PASS tanpa error TypeScript.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   ```bash
   git add src/pages/AdminCMS.tsx
   git commit -m "feat: integrate wishes form cards and 5 quick template pills in Admin CMS"

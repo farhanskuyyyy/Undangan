@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles } from 'lucide-react'
 
 const QUICK_WISHES_TEMPLATES = [
   "Selamat menempuh hidup baru! Semoga cinta kalian abadi hingga hari tua.",
@@ -481,10 +481,6 @@ export const AdminCMS = () => {
   const maxExpectedPax = totalGuestsCount * 2; // Asumsi rata-rata maksimal 2 pax per undangan
   const paxPercent = maxExpectedPax > 0 ? totalPaxArrived / maxExpectedPax : 0;
 
-  if (false as boolean) {
-    console.log(totalGuestsCount, arrivalPercent, souvenirPercent, arrivedVIPsCount, totalVIPsCount, vipArrivalPercent, totalPaxArrived, maxExpectedPax, paxPercent)
-  }
-
   const filteredManualPendingGuests = pendingGuests.filter(g => 
     g.name.toLowerCase().includes(manualSearchQuery.toLowerCase())
   )
@@ -506,6 +502,128 @@ export const AdminCMS = () => {
             Logout
           </button>
         </header>
+
+        {/* Dashboard Analytics Section */}
+        {false && <Sparkles />}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Card 1: Rasio Kehadiran */}
+          <div className="bg-white p-4 rounded-2xl border border-[#E5E1DA] shadow-sm flex items-center justify-between group hover:shadow transition-all duration-300">
+            <div className="space-y-1">
+              <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+                <Users size={12} /> Kehadiran Tamu
+              </span>
+              <p className="text-xl font-bold text-[#4A5D4E] font-serif">{arrivedGuests.length} <span className="text-xs text-gray-400 font-sans font-normal">/ {totalGuestsCount}</span></p>
+              <p className="text-[10px] text-[#8C9A8E]">Rasio: {(arrivalPercent * 100).toFixed(1)}%</p>
+            </div>
+            <div className="relative w-14 h-14 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="28" cy="28" r="24" stroke="#F3F1ED" strokeWidth="4" fill="transparent" />
+                <circle 
+                  cx="28" 
+                  cy="28" 
+                  r="24" 
+                  stroke="#4A5D4E" 
+                  strokeWidth="4" 
+                  fill="transparent" 
+                  strokeDasharray="150.8"
+                  strokeDashoffset={150.8 * (1 - arrivalPercent)}
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <span className="absolute text-[10px] font-bold text-[#4A5D4E]">{(arrivalPercent * 100).toFixed(0)}%</span>
+            </div>
+          </div>
+
+          {/* Card 2: Pembagian Souvenir */}
+          <div className="bg-white p-4 rounded-2xl border border-[#E5E1DA] shadow-sm flex items-center justify-between group hover:shadow transition-all duration-300">
+            <div className="space-y-1">
+              <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+                <Gift size={12} /> Souvenir Terbagi
+              </span>
+              <p className="text-xl font-bold text-[#4A5D4E] font-serif">
+                {arrivedGuests.filter(g => g.souvenir_taken).length} <span className="text-xs text-gray-400 font-sans font-normal">/ {arrivedGuests.length}</span>
+              </p>
+              <p className="text-[10px] text-[#8C9A8E]">Rasio: {(souvenirPercent * 100).toFixed(1)}%</p>
+            </div>
+            <div className="relative w-14 h-14 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="28" cy="28" r="24" stroke="#F3F1ED" strokeWidth="4" fill="transparent" />
+                <circle 
+                  cx="28" 
+                  cy="28" 
+                  r="24" 
+                  stroke="#C17E61" 
+                  strokeWidth="4" 
+                  fill="transparent" 
+                  strokeDasharray="150.8"
+                  strokeDashoffset={150.8 * (1 - souvenirPercent)}
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <span className="absolute text-[10px] font-bold text-[#C17E61]">{(souvenirPercent * 100).toFixed(0)}%</span>
+            </div>
+          </div>
+
+          {/* Card 3: Kehadiran VIP */}
+          <div className="bg-white p-4 rounded-2xl border border-[#E5E1DA] shadow-sm flex items-center justify-between group hover:shadow transition-all duration-300">
+            <div className="space-y-1">
+              <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+                <Award size={12} /> Kehadiran VIP
+              </span>
+              <p className="text-xl font-bold text-[#4A5D4E] font-serif">
+                {arrivedVIPsCount} <span className="text-xs text-gray-400 font-sans font-normal">/ {totalVIPsCount}</span>
+              </p>
+              <p className="text-[10px] text-[#8C9A8E]">VIP Tiba: {(vipArrivalPercent * 100).toFixed(1)}%</p>
+            </div>
+            <div className="relative w-14 h-14 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="28" cy="28" r="24" stroke="#F3F1ED" strokeWidth="4" fill="transparent" />
+                <circle 
+                  cx="28" 
+                  cy="28" 
+                  r="24" 
+                  stroke="#D97706" 
+                  strokeWidth="4" 
+                  fill="transparent" 
+                  strokeDasharray="150.8"
+                  strokeDashoffset={150.8 * (1 - vipArrivalPercent)}
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <span className="absolute text-[10px] font-bold text-amber-600">{(vipArrivalPercent * 100).toFixed(0)}%</span>
+            </div>
+          </div>
+
+          {/* Card 4: Total Pax Hadir */}
+          <div className="bg-white p-4 rounded-2xl border border-[#E5E1DA] shadow-sm flex items-center justify-between group hover:shadow transition-all duration-300">
+            <div className="space-y-1">
+              <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+                <TrendingUp size={12} /> Total Pax (Tamu)
+              </span>
+              <p className="text-xl font-bold text-[#4A5D4E] font-serif">
+                {totalPaxArrived} <span className="text-xs text-gray-400 font-sans font-normal">pax</span>
+              </p>
+              <p className="text-[10px] text-[#8C9A8E]">Estimasi Porsi Hadir</p>
+            </div>
+            <div className="relative w-14 h-14 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="28" cy="28" r="24" stroke="#F3F1ED" strokeWidth="4" fill="transparent" />
+                <circle 
+                  cx="28" 
+                  cy="28" 
+                  r="24" 
+                  stroke="#3B82F6" 
+                  strokeWidth="4" 
+                  fill="transparent" 
+                  strokeDasharray="150.8"
+                  strokeDashoffset={150.8 * (1 - paxPercent)}
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <span className="absolute text-[10px] font-bold text-blue-600">{totalPaxArrived}</span>
+            </div>
+          </div>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
           {/* Check-in Section */}

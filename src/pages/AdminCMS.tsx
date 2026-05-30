@@ -25,7 +25,7 @@ export const AdminCMS = () => {
 
   // Temporary references to prevent unused compiler errors in step-by-step setup
   if (false as boolean) {
-    console.log(cameraActive, setCameraActive, capturedImage, setCapturedImage, imageBlob, setImageBlob, uploadingPhoto, setUploadingPhoto, videoRef, streamRef, Trash2, Check, RefreshCw, AlertCircle)
+    console.log(cameraActive, setCameraActive, capturedImage, setCapturedImage, uploadingPhoto, videoRef, streamRef, Trash2, Check, RefreshCw, AlertCircle)
   }
 
   const fetchGuests = async () => {
@@ -233,8 +233,82 @@ export const AdminCMS = () => {
     }
   }
 
+  const savePhoto = async () => {
+    if (!imageBlob || !guest) return
+    setUploadingPhoto(true)
+    
+    const filePath = `photos/${guest.id}.jpg`
+    
+    try {
+      // 1. Upload ke bucket Supabase Storage dengan upsert: true
+      const { error: uploadError } = await supabase.storage
+        .from('guest-photos')
+        .upload(filePath, imageBlob, {
+          contentType: 'image/jpeg',
+          upsert: true
+        })
+        
+      if (uploadError) throw uploadError
+      
+      // 2. Ambil URL Publik
+      const { data: { publicUrl } } = supabase.storage
+        .from('guest-photos')
+        .getPublicUrl(filePath)
+        
+      // 3. Update database di tabel guests
+      const { error: dbError } = await supabase
+        .from('guests')
+        .update({ photo_url: publicUrl })
+        .eq('id', guest.id)
+        
+      if (dbError) throw dbError
+      
+      // 4. Perbarui state lokal guest agar UI langsung merender foto baru
+      setGuest({ ...guest, photo_url: publicUrl })
+      setCapturedImage(null)
+      setImageBlob(null)
+      fetchGuests() // Refresh daftar tamu
+      alert("Foto tamu berhasil disimpan!")
+    } catch (err: any) {
+      console.error("Gagal menyimpan foto:", err)
+      alert(`Gagal menyimpan foto: ${err.message || 'Error tidak diketahui'}`)
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
+  const deletePhoto = async () => {
+    if (!guest || !guest.photo_url) return
+    if (!confirm("Apakah Anda yakin ingin menghapus foto tamu ini?")) return
+    
+    setUploadingPhoto(true)
+    const filePath = `photos/${guest.id}.jpg`
+    
+    try {
+      // Hapus dari Storage
+      await supabase.storage.from('guest-photos').remove([filePath])
+      
+      // Reset di Database
+      const { error: dbError } = await supabase
+        .from('guests')
+        .update({ photo_url: null })
+        .eq('id', guest.id)
+        
+      if (dbError) throw dbError
+      
+      setGuest({ ...guest, photo_url: null })
+      fetchGuests()
+      alert("Foto tamu berhasil dihapus!")
+    } catch (err: any) {
+      console.error("Gagal menghapus foto:", err)
+      alert(`Gagal menghapus foto: ${err.message}`)
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
   if (false as boolean) {
-    console.log(startCamera, stopCameraStream, captureSnapshot)
+    console.log(startCamera, stopCameraStream, captureSnapshot, savePhoto, deletePhoto)
   }
 
   const claimSouvenir = async () => {

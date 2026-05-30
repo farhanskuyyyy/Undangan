@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, AlertCircle } from 'lucide-react'
 
 export const AdminCMS = () => {
   const { user, signOut } = useAuth()
@@ -16,6 +16,17 @@ export const AdminCMS = () => {
   const [isScanning, setIsScanning] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [cameraActive, setCameraActive] = useState(false)
+  const [capturedImage, setCapturedImage] = useState<string | null>(null)
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+
+  // Temporary references to prevent unused compiler errors in step-by-step setup
+  if (false as boolean) {
+    console.log(cameraActive, setCameraActive, capturedImage, setCapturedImage, imageBlob, setImageBlob, uploadingPhoto, setUploadingPhoto, videoRef, streamRef, Trash2, Check, RefreshCw, AlertCircle)
+  }
 
   const fetchGuests = async () => {
     try {

@@ -220,14 +220,14 @@
 **Files:**
 - Modify: `src/pages/AdminCMS.tsx`
 
-- [ ] **Step 1: Tambahkan antrean state untuk Toasts**
+- [x] **Step 1: Tambahkan antrean state untuk Toasts**
   Tambahkan definisi antrean state `toasts` di bagian atas komponen `AdminCMS` (sekitar baris 28-32, di bawah state `wishesText`).
 
   ```typescript
     const [toasts, setToasts] = useState<any[]>([])
   ```
 
-- [ ] **Step 2: Hubungkan jalur WebSockets untuk Sinkronisasi Gerbang**
+- [x] **Step 2: Hubungkan jalur WebSockets untuk Sinkronisasi Gerbang**
   Sisipkan `useEffect` hook langganan real-time database di komponen `AdminCMS` (sekitar baris 170, di samping useEffect cleanup kamera).
 
   ```typescript
@@ -276,11 +276,11 @@
     }, [])
   ```
 
-- [ ] **Step 3: Uji kompilasi mandiri**
+- [x] **Step 3: Uji kompilasi mandiri**
   Run: `npm run build`
   Expected: PASS (Abaikan jika ada unused variables terkait toasts linter sebelum UI dipasang).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   ```bash
   git add src/pages/AdminCMS.tsx
   git commit -m "feat: add real-time postgres sync listener and toasts state queue"
@@ -293,7 +293,7 @@
 **Files:**
 - Modify: `src/pages/AdminCMS.tsx`
 
-- [ ] **Step 1: Sisipkan UI Feed Notifikasi Melayang di bagian bawah halaman**
+- [x] **Step 1: Sisipkan UI Feed Notifikasi Melayang di bagian bawah halaman**
   Kita letakkan kontainer melayang `toasts` ini di baris paling bawah, tepat di samping JSX Lightbox Modal (sebelum tag `)` penutup return komponen).
 
   Cari tag penutup modal lightbox (sekitar baris 830+):
@@ -346,7 +346,7 @@
         </div>
   ```
 
-- [ ] **Step 2: Tambahkan AnimatePresence ke impor framer-motion**
+- [x] **Step 2: Tambahkan AnimatePresence ke impor framer-motion**
   Impor `AnimatePresence` dan `motion` dari `framer-motion` di bagian atas berkas `src/pages/AdminCMS.tsx`.
 
   Cari baris impor:
@@ -359,11 +359,11 @@
   import { motion, AnimatePresence } from 'framer-motion'
   ```
 
-- [ ] **Step 3: Uji produksi kompilasi proyek akhir**
+- [x] **Step 3: Uji produksi kompilasi proyek akhir**
   Run: `npm run build`
   Expected: PASS build produksi Vite 100% sukses tanpa ada error.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   ```bash
   git add src/pages/AdminCMS.tsx
   git commit -m "feat: render live toast check-in notifications feed using framer-motion and Lucide"

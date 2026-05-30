@@ -1,205 +1,210 @@
-# Design Spec: Fitur Foto Tamu Undangan di Admin CMS
+# Design Spec: Fitur Foto Tamu Undangan di Admin CMS (Updated)
 
 > [!NOTE]
-> Dokumen ini menjelaskan spesifikasi desain untuk penambahan fitur pengambilan foto tamu undangan secara langsung melalui kamera di Admin CMS setelah melakukan check-in / scan QR Code. Data foto akan diunggah ke Supabase Storage Bucket dan disimpan ke database Supabase.
+> Dokumen ini menjelaskan spesifikasi desain terpadu untuk fitur foto tamu undangan di Admin CMS: proses pengambilan foto menggunakan kamera, penyimpanan di Supabase Storage & DB, penambahan **Modal Lightbox Zoom**, serta **Galeri Tamu Hadir Berpaginasi** di bagian bawah halaman.
 
 ---
 
-## 1. Tujuan & Latar Belakang
+## 1. Tujuan & Fitur Utama
 
-Fitur ini dirancang untuk mendokumentasikan kehadiran tamu undangan pernikahan secara visual di meja penerima tamu (Check-in / Gate). Setelah proses verifikasi QR Code atau pencarian manual berhasil, penerima tamu (Admin) dapat langsung mengambil foto tamu sebagai bukti kehadiran fisik dan kenang-kenangan, ditempatkan tepat di bawah status penyerahan souvenir.
+Fitur ini dirancang untuk mendokumentasikan kehadiran tamu undangan secara visual di Admin CMS Check-in:
+1. **Ambil Foto**: Kamera native menangkap snapshot tamu terkompresi (JPEG 80%), diunggah ke Supabase Storage `guest-photos`, dan disimpan ke kolom `photo_url`.
+2. **Modal Lightbox Zoom**: Admin dapat mengklik gambar tamu di kartu informasi atau di galeri untuk memperbesar foto tamu dalam modal popup bergaya *glassmorphism backdrop blur* yang elegan.
+3. **Galeri Tamu Hadir Berpaginasi**: Menampilkan grid modern visual seluruh tamu hadir yang memiliki foto di bagian bawah CMS dengan kapasitas 8 kartu per halaman, lengkap dengan navigasi paginasi.
 
 ---
 
 ## 2. Arsitektur & Perubahan Database
 
-### 2.1 Tambahan Kolom Database
-Kita perlu menambahkan kolom baru pada tabel `guests` di database Supabase untuk menampung tautan URL foto tamu.
+### 2.1 Tambahan Kolom Database & Storage
+- **Database**: Kolom `photo_url` (`TEXT`) pada tabel `guests`.
+- **Storage**: Bucket publik Supabase bernama `guest-photos` dengan path berkas `photos/[guest_id].jpg`.
 
-```sql
--- Query migrasi database
-ALTER TABLE guests ADD COLUMN photo_url TEXT;
+### 2.2 Perubahan Kueri Pengambilan Data
+Kueri pengambilan tamu hadir pada fungsi `fetchGuests` diubah agar turut memuat kolom `id` dan `photo_url` untuk memfasilitasi kebutuhan galeri foto tamu hadir:
+```typescript
+const { data: arrivedData, error: arrivedError } = await supabase
+  .from('guests')
+  .select('id, name, arrival_time, is_vip, photo_url')
+  .eq('has_arrived', true)
+  .order('arrival_time', { ascending: false })
 ```
-
-### 2.2 Konfigurasi Supabase Storage
-Foto tamu akan diunggah langsung ke layanan penyimpanan Supabase Storage:
-- **Nama Bucket**: `guest-photos`
-- **Aksesibilitas**: **Public** (agar foto dapat diakses dan ditampilkan di browser melalui URL publik).
-- **Struktur File**: `photos/[guest_id].jpg`
-- **Kebijakan Akses (RLS - Row Level Security)**:
-  - `SELECT`: Diizinkan untuk publik (`true`).
-  - `INSERT` / `UPDATE`: Diizinkan untuk semua pengakses (atau dibatasi ke pengguna terotentikasi).
-  - `DELETE`: Diizinkan untuk pengguna terotentikasi (admin).
 
 ---
 
 ## 3. Desain Antarmuka (UI/UX States)
 
-Fitur ini akan diintegrasikan pada berkas [AdminCMS.tsx](file:///Users/farhanarfianto/Projects/react/Undangan/src/pages/AdminCMS.tsx) di dalam kartu informasi tamu detail, tepat di bawah kartu **Status Souvenir**.
-
+### 3.1 Modal Lightbox Zoom
+Modal melayang yang merender foto tamu dalam resolusi tinggi di tengah layar.
 ```
 +------------------------------------------+
-|             STATUS SOUVENIR              |
-| [ Sudah Diambil ] / [ Belum Diambil ]    |
-|   (Tombol: Berikan Souvenir)             |
+|  [X]                                     |
+|                                          |
+|                [ FOTO ]                  |
+|                                          |
+|        NAMA TAMU [ VIP ]                 |
+|        Tiba: 19:45 WIB                   |
 +------------------------------------------+
-|                FOTO TAMU                 |
-|                                          |
-|  [State 1: Kosong]                       |
-|  (Ikon Kamera)                           |
-|  [ Tombol: Buka Kamera ]                 |
-|                                          |
-|  [State 2: Kamera Aktif]                 |
-|  [ Video Stream (Live) ]                 |
-|  [ Tombol: Ambil Foto ] [ Tombol: Batal ]|
-|                                          |
-|  [State 3: Preview Hasil]                |
-|  [ Foto Beku (Freeze)  ]                 |
-|  [ Tombol: Simpan ] [ Tombol: Ulang ]    |
-|                                          |
-|  [State 4: Foto Terunggah]               |
-|  [ Gambar Tamu (Rounded) ]               |
-|  (Lencana: Foto Tersimpan)               |
-|  [ Tombol: Ambil Foto Baru ]             |
-+------------------------------------------+
+```
+- **CSS Styling**: `fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md transition-all duration-300`
+- **Interaksi**: Klik tombol [X] atau area gelap di luar foto untuk menutup modal.
+
+### 3.2 Galeri Tamu Hadir (Bagian Bawah Halaman)
+Diposisikan di bawah tabel "Tamu Hadir" & "Belum Hadir".
+```
+============================================================
+                  📸 Galeri Kehadiran Tamu (12 Foto)
+============================================================
++----------------+ +----------------+ +----------------+
+|    [ FOTO ]    | |    [ FOTO ]    | |    [ FOTO ]    |
+| Nama [VIP]     | | Nama [VIP]     | | Nama [VIP]     |
+| 19:45 WIB      | | 19:48 WIB      | | 19:50 WIB      |
++----------------+ +----------------+ +----------------+
+                 Halaman 1 dari 2
+             [< Sebelum]  [Sesudah >]
 ```
 
 ---
 
-## 4. Logika Teknis & Implementasi Code
+## 4. Logika Teknis & Penambahan State
 
-### 4.1 State Management (React)
-Beberapa state baru yang diperlukan di `AdminCMS.tsx`:
+### 4.1 State Management Baru (React)
 ```typescript
-const [cameraActive, setCameraActive] = useState(false);
-const [capturedImage, setCapturedImage] = useState<string | null>(null); // base64 untuk preview lokal
-const [imageBlob, setImageBlob] = useState<Blob | null>(null); // blob untuk di-upload ke Supabase
-const [uploadingPhoto, setUploadingPhoto] = useState(false);
-const videoRef = useRef<HTMLVideoElement | null>(null);
-const streamRef = useRef<MediaStream | null>(null);
+const [galleryPage, setGalleryPage] = useState(1);
+const [lightboxGuest, setLightboxGuest] = useState<any>(null);
 ```
 
-### 4.2 Alur Logika Kamera (Native API)
-
-1. **Mengaktifkan Kamera**:
-   ```typescript
-   const startCamera = async () => {
-     try {
-       const stream = await navigator.mediaDevices.getUserMedia({
-         video: { facingMode: 'environment' } // Mengutamakan kamera belakang (admin memotret tamu)
-       });
-       if (videoRef.current) {
-         videoRef.current.srcObject = stream;
-       }
-       streamRef.current = stream;
-       setCameraActive(true);
-       setCapturedImage(null);
-     } catch (err) {
-       console.error("Gagal membuka kamera:", err);
-       alert("Gagal mengakses kamera. Mohon berikan izin akses kamera.");
-     }
-   };
-   ```
-
-2. **Menangkap Foto (Snapshot)**:
-   ```typescript
-   const captureSnapshot = () => {
-     if (videoRef.current) {
-       const video = videoRef.current;
-       const canvas = document.createElement('canvas');
-       
-       // Mengatur resolusi canvas sesuai resolusi video asli
-       canvas.width = video.videoWidth;
-       canvas.height = video.videoHeight;
-       
-       const ctx = canvas.getContext('2d');
-       if (ctx) {
-         // Gambar frame video ke canvas
-         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-         
-         // Konversi ke base64 untuk preview lokal instan
-         const dataUrl = canvas.toDataURL('image/jpeg');
-         setCapturedImage(dataUrl);
-         
-         // Konversi ke Blob terkompresi (kualitas 0.8) untuk di-upload
-         canvas.toBlob((blob) => {
-           setImageBlob(blob);
-         }, 'image/jpeg', 0.8);
-       }
-       
-       // Matikan kamera setelah snapshot diambil
-       stopCameraStream();
-     }
-   };
-   ```
-
-3. **Menghentikan Aliran Kamera**:
-   ```typescript
-   const stopCameraStream = () => {
-     if (streamRef.current) {
-       streamRef.current.getTracks().forEach(track => track.stop());
-       streamRef.current = null;
-     }
-     setCameraActive(false);
-   };
-   ```
-
-4. **Mengunggah & Menyimpan ke Supabase**:
-   ```typescript
-   const savePhoto = async () => {
-     if (!imageBlob || !guest) return;
-     setUploadingPhoto(true);
-     
-     const filePath = `photos/${guest.id}.jpg`;
-     
-     try {
-       // 1. Upload ke Supabase Storage (upsert = true untuk overwrite jika ambil foto ulang)
-       const { error: uploadError } = await supabase.storage
-         .from('guest-photos')
-         .upload(filePath, imageBlob, {
-           contentType: 'image/jpeg',
-           upsert: true
-         });
-         
-       if (uploadError) throw uploadError;
-       
-       // 2. Dapatkan URL Publik
-       const { data: { publicUrl } } = supabase.storage
-         .from('guest-photos')
-         .getPublicUrl(filePath);
-         
-       // 3. Update data URL foto di tabel guests
-       const { error: dbError } = await supabase
-         .from('guests')
-         .update({ photo_url: publicUrl })
-         .eq('id', guest.id);
-         
-       if (dbError) throw dbError;
-       
-       // 4. Perbarui state guest lokal
-       setGuest({ ...guest, photo_url: publicUrl });
-       setCapturedImage(null);
-       setImageBlob(null);
-       alert("Foto tamu berhasil disimpan!");
-       
-     } catch (err) {
-       console.error("Gagal menyimpan foto:", err);
-       alert("Gagal mengunggah foto tamu.");
-     } finally {
-       setUploadingPhoto(false);
-     }
-   };
-   ```
+### 4.2 Logika Paginasi Galeri
+Filter data tamu hadir yang memiliki foto, lalu potong array sesuai halaman aktif:
+```typescript
+const ITEMS_PER_PAGE = 8;
+const guestsWithPhotos = arrivedGuests.filter(g => g.photo_url);
+const totalPages = Math.max(1, Math.ceil(guestsWithPhotos.length / ITEMS_PER_PAGE));
+const paginatedGuests = guestsWithPhotos.slice(
+  (galleryPage - 1) * ITEMS_PER_PAGE,
+  galleryPage * ITEMS_PER_PAGE
+);
+```
 
 ---
 
-## 5. Penanganan Error & Skenario Alternatif
+## 5. Implementasi UI Code (Sketsa Sintaks)
 
-1. **Izin Kamera Ditolak**:
-   Jika pengguna menolak izin kamera, sistem akan menampilkan pesan peringatan yang ramah dan memandu admin untuk mengizinkan kamera di browser mereka.
-2. **Kamera Tidak Ditemukan**:
-   Pada perangkat desktop yang tidak memiliki webcam, tombol "Buka Kamera" akan diblokir dengan penjelasan yang sesuai agar admin mengetahui perangkat tersebut tidak mendukung kamera.
-3. **Koneksi Terputus Saat Upload**:
-   Jika proses unggah gagal karena masalah jaringan, tombol "Simpan" tetap aktif sehingga admin bisa mencoba menyimpan ulang tanpa kehilangan foto yang sudah diambil.
-4. **Pembersihan Resource**:
-   Setiap kali halaman dibongkar (*unmounted*) atau tamu lain dipilih, semua aliran kamera dipastikan mati lewat *cleanup hook* `useEffect`.
+### 5.1 Modal Lightbox JSX
+```tsx
+{lightboxGuest && (
+  <div 
+    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md p-4 transition-all duration-300"
+    onClick={() => setLightboxGuest(null)}
+  >
+    <button 
+      className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all"
+      onClick={() => setLightboxGuest(null)}
+    >
+      <X size={24} />
+    </button>
+    <div 
+      className="relative max-w-lg w-full bg-[#FDFBF7] rounded-2xl overflow-hidden border border-[#E5E1DA] shadow-2xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="aspect-square w-full">
+        <img 
+          src={lightboxGuest.photo_url} 
+          alt={lightboxGuest.name} 
+          className="w-full h-full object-cover" 
+        />
+      </div>
+      <div className="p-6 bg-white border-t border-[#F3F1ED]">
+        <div className="flex items-center gap-3 mb-2">
+          <h3 className="text-xl font-serif text-[#4A5D4E] font-medium">{lightboxGuest.name}</h3>
+          {lightboxGuest.is_vip && (
+            <span className="bg-amber-400 text-amber-950 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">
+              VIP
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-[#8C9A8E] flex items-center gap-1.5">
+          <Clock size={14} /> Tiba pukul {new Date(lightboxGuest.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+```
+
+### 5.2 Galeri Tamu JSX
+```tsx
+<div className="mt-12 pt-12 border-t border-[#E5E1DA] space-y-6">
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-2 text-[#4A5D4E]">
+      <Camera size={22} />
+      <h2 className="text-xl font-medium">Galeri Kehadiran Tamu</h2>
+    </div>
+    <span className="bg-[#F0F4F1] text-[#4A5D4E] px-3 py-1 rounded-full text-xs font-bold">
+      {guestsWithPhotos.length} Foto
+    </span>
+  </div>
+
+  {paginatedGuests.length > 0 ? (
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        {paginatedGuests.map((g) => (
+          <div 
+            key={g.id} 
+            className="bg-white rounded-xl overflow-hidden border border-[#E5E1DA] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col"
+          >
+            <div 
+              className="aspect-square w-full overflow-hidden bg-gray-50 relative group cursor-zoom-in"
+              onClick={() => setLightboxGuest(g)}
+            >
+              <img src={g.photo_url} alt={g.name} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                <span className="bg-white/90 text-[#4A5D4E] text-xs px-3 py-1.5 rounded-lg font-medium shadow flex items-center gap-1">
+                  <Eye size={14} /> Lihat Foto
+                </span>
+              </div>
+            </div>
+            <div className="p-3 flex flex-col flex-1 border-t border-[#F3F1ED]">
+              <div className="flex items-center justify-between gap-1 mb-1">
+                <span className="font-serif text-sm font-medium text-[#4A5D4E] truncate flex-1">{g.name}</span>
+                {g.is_vip && <span className="text-[8px] bg-amber-100 text-amber-800 px-1 py-0.2 rounded font-bold">VIP</span>}
+              </div>
+              <span className="text-[10px] text-[#8C9A8E] flex items-center gap-1">
+                <Clock size={10} /> {new Date(g.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Navigasi Paginasi */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 pt-4">
+          <button
+            onClick={() => setGalleryPage(p => Math.max(1, p - 1))}
+            disabled={galleryPage === 1}
+            className="flex items-center gap-1 text-xs text-[#4A5D4E] hover:text-[#3D4C40] disabled:text-gray-300 font-medium transition-all"
+          >
+            <ChevronLeft size={16} /> Sebelumnya
+          </button>
+          <span className="text-xs text-[#8C9A8E] font-medium">
+            Halaman {galleryPage} dari {totalPages}
+          </span>
+          <button
+            onClick={() => setGalleryPage(p => Math.min(totalPages, p + 1))}
+            disabled={galleryPage === totalPages}
+            className="flex items-center gap-1 text-xs text-[#4A5D4E] hover:text-[#3D4C40] disabled:text-gray-300 font-medium transition-all"
+          >
+            Selanjutnya <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+    </>
+  ) : (
+    <div className="text-center py-12 text-[#8C9A8E] bg-gray-50/50 rounded-2xl border border-dashed border-[#E5E1DA]">
+      <Camera size={32} className="mx-auto mb-2 opacity-50" />
+      <p className="text-sm">Belum ada foto tamu terkumpul</p>
+    </div>
+  )}
+</div>
+```

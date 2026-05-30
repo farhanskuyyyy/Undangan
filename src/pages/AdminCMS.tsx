@@ -345,6 +345,72 @@ export const AdminCMS = () => {
     }
   }
 
+  const handleExportCSV = async () => {
+    try {
+      // 1. Ambil data segar terlengkap langsung dari database
+      const { data: allGuests, error } = await supabase
+        .from('guests')
+        .select('name, is_vip, rsvp_status, has_arrived, arrival_time, souvenir_taken, message, photo_url')
+        .order('name', { ascending: true })
+        
+      if (error) throw error
+      if (!allGuests || allGuests.length === 0) {
+        alert("Tidak ada data tamu untuk diekspor.")
+        return
+      }
+      
+      // 2. Judul Kolom (Headers)
+      const headers = [
+        "Nama Tamu",
+        "Kategori (VIP)",
+        "RSVP Status",
+        "Kehadiran",
+        "Waktu Tiba (WIB)",
+        "Souvenir Status",
+        "Ucapan Selamat (Wishes)",
+        "Tautan Foto"
+      ]
+      
+      // 3. Format Baris Data
+      const csvRows = [headers.join(",")]
+      
+      allGuests.forEach((g) => {
+        const row = [
+          `"${g.name.replace(/"/g, '""')}"`,
+          g.is_vip ? "VIP" : "Regular",
+          g.rsvp_status ? "Hadir" : "Belum RSVP",
+          g.has_arrived ? "Sudah Check-in" : "Belum Hadir",
+          g.arrival_time ? new Date(g.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "-",
+          g.souvenir_taken ? "Sudah Diambil" : "Belum Diambil",
+          `"${(g.message || "").replace(/"/g, '""').replace(/\n/g, " ")}"`, // Bersihkan tanda kutip ganda & baris baru
+          g.photo_url ? g.photo_url : "-"
+        ]
+        csvRows.push(row.join(","))
+      })
+      
+      // 4. Susun konten CSV dan sisipkan UTF-8 BOM (\uFEFF) untuk kompabilitas Microsoft Excel
+      const csvContent = csvRows.join("\n")
+      const BOM = "\uFEFF"
+      const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" })
+      
+      // 5. Memicu unduh berkas di browser
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.setAttribute("href", url)
+      link.setAttribute("download", `Laporan_Kehadiran_Tamu_${new Date().toISOString().split('T')[0]}.csv`)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (err: any) {
+      console.error("Gagal mengekspor CSV:", err)
+      alert(`Gagal melakukan ekspor data: ${err.message}`)
+    }
+  }
+
+  if (false as boolean) {
+    console.log(handleExportCSV)
+  }
+
   const claimSouvenir = async () => {
     if (!guest) return
     setLoading(true)

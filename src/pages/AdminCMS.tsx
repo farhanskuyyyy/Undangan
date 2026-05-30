@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download } from 'lucide-react'
 
 const QUICK_WISHES_TEMPLATES = [
   "Selamat menempuh hidup baru! Semoga cinta kalian abadi hingga hari tua.",
@@ -407,9 +407,7 @@ export const AdminCMS = () => {
     }
   }
 
-  if (false as boolean) {
-    console.log(handleExportCSV)
-  }
+
 
   const claimSouvenir = async () => {
     if (!guest) return
@@ -923,16 +921,25 @@ export const AdminCMS = () => {
 
         {/* Guest Management Tabs/Tables */}
         <div className="space-y-8">
-          {/* Search Bar */}
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8C9A8E]" size={18} />
-            <input 
-              type="text"
-              placeholder="Cari nama tamu..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-[#E5E1DA] rounded-full py-3 pl-12 pr-6 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm"
-            />
+          {/* Search Bar & Export CSV */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 max-w-2xl mx-auto">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8C9A8E]" size={18} />
+              <input 
+                type="text"
+                placeholder="Cari nama tamu..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white border border-[#E5E1DA] rounded-full py-3 pl-12 pr-6 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm"
+              />
+            </div>
+            <button
+              onClick={handleExportCSV}
+              className="w-full sm:w-auto bg-[#4A5D4E] hover:bg-[#3D4C40] text-white px-6 py-3 rounded-full transition-all flex items-center justify-center gap-2 font-medium shadow-sm active:scale-95 text-xs whitespace-nowrap"
+              title="Unduh Laporan Tamu CSV"
+            >
+              <Download size={14} /> Ekspor Laporan CSV
+            </button>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">

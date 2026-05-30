@@ -524,9 +524,8 @@ export const AdminCMS = () => {
   const totalVIPsCount = arrivedVIPsCount + pendingGuests.filter(g => g.is_vip).length;
   const vipArrivalPercent = totalVIPsCount > 0 ? arrivedVIPsCount / totalVIPsCount : 0;
 
-  // 4. Estimasi Total Pax Hadir (Porsi Katering)
   const totalPaxArrived = arrivedGuests.reduce((acc, g) => acc + (g.attendance_count || 1), 0);
-  const maxExpectedPax = totalGuestsCount * 2; // Asumsi rata-rata maksimal 2 pax per undangan
+  const maxExpectedPax = totalPaxArrived + pendingGuests.reduce((acc, g) => acc + (g.attendance_count || 1), 0);
   const paxPercent = maxExpectedPax > 0 ? totalPaxArrived / maxExpectedPax : 0;
 
   const filteredManualPendingGuests = pendingGuests.filter(g => 

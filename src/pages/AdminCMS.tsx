@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export const AdminCMS = () => {
   const { user, signOut } = useAuth()
@@ -22,6 +22,12 @@ export const AdminCMS = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const [galleryPage, setGalleryPage] = useState(1)
+  const [lightboxGuest, setLightboxGuest] = useState<any>(null)
+
+  if (false as boolean) {
+    console.log(galleryPage, setGalleryPage, lightboxGuest, setLightboxGuest, Eye, X, ChevronLeft, ChevronRight)
+  }
 
 
 

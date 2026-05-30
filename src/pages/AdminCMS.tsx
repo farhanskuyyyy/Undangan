@@ -26,7 +26,7 @@ export const AdminCMS = () => {
   const [lightboxGuest, setLightboxGuest] = useState<any>(null)
 
   if (false as boolean) {
-    console.log(galleryPage, setGalleryPage, lightboxGuest, setLightboxGuest, Eye, X, ChevronLeft, ChevronRight)
+    console.log(galleryPage, setGalleryPage, ChevronLeft, ChevronRight)
   }
 
 
@@ -687,12 +687,18 @@ export const AdminCMS = () => {
                           <img 
                             src={guest.photo_url} 
                             alt={`Foto ${guest.name}`} 
-                            className="w-full h-full object-cover" 
+                            className="w-full h-full object-cover cursor-zoom-in transition-transform duration-300 group-hover:scale-105" 
+                            onClick={() => setLightboxGuest(guest)}
                           />
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
+                            <span className="bg-white/90 text-[#4A5D4E] text-xs px-2.5 py-1.5 rounded-lg font-medium shadow flex items-center gap-1">
+                              <Eye size={12} /> Perbesar
+                            </span>
+                          </div>
                           <button
-                            onClick={deletePhoto}
+                            onClick={(e) => { e.stopPropagation(); deletePhoto(); }}
                             disabled={uploadingPhoto}
-                            className="absolute bottom-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all shadow-md active:scale-95"
+                            className="absolute bottom-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all shadow-md active:scale-95 z-10"
                             title="Hapus Foto"
                           >
                             <Trash2 size={14} />
@@ -863,7 +869,54 @@ export const AdminCMS = () => {
         #reader video {
           object-fit: cover !important;
         }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
       `}</style>
+
+      {/* Modal Lightbox Zoom Foto Tamu */}
+      {lightboxGuest && (
+        <div 
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md p-4 transition-all duration-300 animate-fadeIn"
+          onClick={() => setLightboxGuest(null)}
+        >
+          <button 
+            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all duration-200"
+            onClick={() => setLightboxGuest(null)}
+          >
+            <X size={24} />
+          </button>
+          <div 
+            className="relative max-w-md w-full bg-[#FDFBF7] rounded-2xl overflow-hidden border border-[#E5E1DA] shadow-2xl transition-all duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="aspect-square w-full bg-black flex items-center justify-center">
+              <img 
+                src={lightboxGuest.photo_url} 
+                alt={lightboxGuest.name} 
+                className="w-full h-full object-cover" 
+              />
+            </div>
+            <div className="p-5 bg-white border-t border-[#F3F1ED]">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-serif text-[#4A5D4E] font-semibold truncate flex-1">{lightboxGuest.name}</h3>
+                {lightboxGuest.is_vip && (
+                  <span className="bg-amber-400 text-amber-950 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">
+                    VIP
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-[#8C9A8E] flex items-center gap-1.5">
+                <Clock size={13} /> Hadir pukul {lightboxGuest.arrival_time ? new Date(lightboxGuest.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'} WIB
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

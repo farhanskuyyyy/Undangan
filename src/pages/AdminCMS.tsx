@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
@@ -489,9 +490,6 @@ export const AdminCMS = () => {
     }
   }, [])
 
-  if (false as boolean) {
-    console.log(toasts, setToasts)
-  }
 
   const filteredArrivedGuests = arrivedGuests.filter(g => 
     g.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -1359,6 +1357,45 @@ export const AdminCMS = () => {
           </div>
         </div>
       )}
+
+      {/* Toast Real-time Check-In Notifications Feed */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+        <AnimatePresence>
+          {toasts.map((t) => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+              className="bg-white/95 backdrop-blur-md border border-[#E5E1DA] p-4 rounded-xl shadow-lg flex items-start gap-3 pointer-events-auto w-full select-none"
+            >
+              <div className={`p-2 rounded-lg ${t.is_vip ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-[#F0F4F1] text-[#4A5D4E]'}`}>
+                <Sparkles size={16} className={t.is_vip ? 'animate-pulse' : ''} />
+              </div>
+              <div className="flex-1 space-y-0.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-xs font-serif font-bold text-gray-800">{t.name}</span>
+                  {t.is_vip && (
+                    <span className="bg-amber-400 text-amber-950 text-[8px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider">
+                      VIP
+                    </span>
+                  )}
+                </div>
+                <p className="text-[10px] text-gray-500">Baru saja check-in di pintu gerbang.</p>
+                <span className="text-[9px] text-gray-400 flex items-center gap-1 font-medium">
+                  <Clock size={10} /> Tiba pukul {t.arrival_time ? new Date(t.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                </span>
+              </div>
+              <button
+                onClick={() => setToasts((prev) => prev.filter(toast => toast.id !== t.id))}
+                className="text-gray-400 hover:text-gray-600 p-0.5 rounded-full transition-all"
+              >
+                <X size={12} />
+              </button>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }

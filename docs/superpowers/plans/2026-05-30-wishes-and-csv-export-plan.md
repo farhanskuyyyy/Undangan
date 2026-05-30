@@ -190,7 +190,7 @@
 **Files:**
 - Modify: `src/pages/AdminCMS.tsx`
 
-- [ ] **Step 1: Tambahkan fungsi handleExportCSV**
+- [x] **Step 1: Tambahkan fungsi handleExportCSV**
   Tambahkan logika penyusunan teks CSV dan trigger unduh berkas di dalam komponen `AdminCMS` (misalnya di bawah fungsi `saveGuestWishes` sekitar baris 295).
 
   ```typescript
@@ -257,11 +257,11 @@
     }
   ```
 
-- [ ] **Step 2: Uji kompilasi**
+- [x] **Step 2: Uji kompilasi**
   Run: `npm run build`
   Expected: PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
   ```bash
   git add src/pages/AdminCMS.tsx
   git commit -m "feat: implement client-side UTF-8 BOM CSV export logic"
@@ -274,7 +274,7 @@
 **Files:**
 - Modify: `src/pages/AdminCMS.tsx`
 
-- [ ] **Step 1: Modifikasi kontainer pencarian untuk menyisipkan tombol ekspor**
+- [x] **Step 1: Modifikasi kontainer pencarian untuk menyisipkan tombol ekspor**
   Temukan bar pencarian tamu di sekitar baris 751 (di bawah tag `{/* Search Bar */}`).
   Aslinya bar pencarian ditulis seperti ini:
   ```tsx
@@ -315,14 +315,14 @@
           </div>
   ```
 
-- [ ] **Step 2: Tambahkan Download ke impor lucide-react**
+- [x] **Step 2: Tambahkan Download ke impor lucide-react**
   Tambahkan properti `Download` di baris import lucide-react paling atas.
 
-- [ ] **Step 3: Uji produksi kompilasi proyek akhir**
+- [x] **Step 3: Uji produksi kompilasi proyek akhir**
   Run: `npm run build`
   Expected: PASS build produksi Vite 100% sukses tanpa ada peringatan atau error.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   ```bash
   git add src/pages/AdminCMS.tsx
   git commit -m "feat: insert responsive Export CSV button next to the search bar"

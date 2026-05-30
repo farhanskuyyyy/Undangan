@@ -34,6 +34,7 @@ export const AdminCMS = () => {
   const [lightboxGuest, setLightboxGuest] = useState<any>(null)
   const [wishesText, setWishesText] = useState('')
   const [savingWishes, setSavingWishes] = useState(false)
+  const [toasts, setToasts] = useState<any[]>([])
 
 
 
@@ -443,6 +444,54 @@ export const AdminCMS = () => {
       }
     }
   }, [guest])
+
+  useEffect(() => {
+    // Jalur WebSocket untuk mendengarkan check-in gerbang lain
+    const channel = supabase
+      .channel('dashboard-realtime-sync')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'guests' },
+        (payload: any) => {
+          const oldGuest = payload.old
+          const newGuest = payload.new
+          
+          // Gerbang lain menandai tamu hadir
+          if ((!oldGuest || !oldGuest.has_arrived) && newGuest.has_arrived) {
+            // 1. Tarik ulang data segar agar tabel daftar tamu sinkron instan
+            fetchGuests()
+            
+            // 2. Tambahkan ke antrean notifikasi melayang
+            const newToast = {
+              id: newGuest.id,
+              name: newGuest.name,
+              is_vip: newGuest.is_vip,
+              arrival_time: newGuest.arrival_time
+            }
+            
+            setToasts((prev) => {
+              // Batasi maksimal 4 notifikasi pop-up bertumpuk agar tidak menutupi layar
+              const truncated = prev.slice(0, 3)
+              return [newToast, ...truncated]
+            })
+            
+            // 3. Bersihkan notifikasi otomatis setelah 4 detik
+            setTimeout(() => {
+              setToasts((prev) => prev.filter(t => t.id !== newGuest.id))
+            }, 4000)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  if (false as boolean) {
+    console.log(toasts, setToasts)
+  }
 
   const filteredArrivedGuests = arrivedGuests.filter(g => 
     g.name.toLowerCase().includes(searchQuery.toLowerCase())

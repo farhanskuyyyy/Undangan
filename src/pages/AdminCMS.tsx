@@ -29,7 +29,7 @@ export const AdminCMS = () => {
     try {
       const { data: arrivedData, error: arrivedError } = await supabase
         .from('guests')
-        .select('name, arrival_time, is_vip')
+        .select('id, name, arrival_time, is_vip, photo_url')
         .eq('has_arrived', true)
         .order('arrival_time', { ascending: false })
       

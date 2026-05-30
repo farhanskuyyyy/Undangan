@@ -24,7 +24,7 @@
 **Files:**
 - Create: `src/pages/ProjectorSlideshow.tsx`
 
-- [ ] **Step 1: Tulis kode lengkap berkas ProjectorSlideshow.tsx**
+- [x] **Step 1: Tulis kode lengkap berkas ProjectorSlideshow.tsx**
   Buat berkas baru di `src/pages/ProjectorSlideshow.tsx` dengan implementasi lengkap, tanpa ada TBD/TODO, terintegrasi penuh dengan `FloatingPetals`, `FloralDecor`, dan animasi `framer-motion`:
 
   ```tsx
@@ -294,11 +294,11 @@
   };
   ```
 
-- [ ] **Step 2: Uji kompilasi mandiri**
+- [x] **Step 2: Uji kompilasi mandiri**
   Run: `npm run build`
   Expected: PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
   ```bash
   git add src/pages/ProjectorSlideshow.tsx
   git commit -m "feat: create ProjectorSlideshow component with Polaroid layouts and Websocket welcome sync"
@@ -311,7 +311,7 @@
 **Files:**
 - Modify: `src/App.tsx`
 
-- [ ] **Step 1: Impor komponen halaman baru ProjectorSlideshow**
+- [x] **Step 1: Impor komponen halaman baru ProjectorSlideshow**
   Tambahkan impor `ProjectorSlideshow` di bagian atas berkas `src/App.tsx`.
 
   Cari:
@@ -324,7 +324,7 @@
   import { ProjectorSlideshow } from './pages/ProjectorSlideshow'
   ```
 
-- [ ] **Step 2: Daftarkan rute baru /projector**
+- [x] **Step 2: Daftarkan rute baru /projector**
   Temukan blok `<Routes>` di dalam `App.tsx` dan tambahkan rute `/projector` di dalamnya.
 
   Cari:
@@ -341,11 +341,11 @@
           <Route path="/projector" element={<ProjectorSlideshow />} />
   ```
 
-- [ ] **Step 3: Verifikasi build kompilasi proyek terintegrasi**
+- [x] **Step 3: Verifikasi build kompilasi proyek terintegrasi**
   Run: `npm run build`
   Expected: PASS build produksi Vite 100% sukses tanpa ada error.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   ```bash
   git add src/App.tsx
   git commit -m "feat: register projector slideshow page route in App.tsx"

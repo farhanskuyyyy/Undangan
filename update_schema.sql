@@ -82,3 +82,6 @@ CREATE POLICY "Allow public select on love_stories" ON love_stories FOR SELECT U
 CREATE POLICY "Allow public select on galleries" ON galleries FOR SELECT USING (true);
 CREATE POLICY "Allow public select on rundowns" ON rundowns FOR SELECT USING (true);
 
+-- Add photo_url to guests table
+ALTER TABLE guests ADD COLUMN photo_url TEXT;
+

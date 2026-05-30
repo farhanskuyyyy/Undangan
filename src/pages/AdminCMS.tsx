@@ -514,9 +514,9 @@ export const AdminCMS = () => {
   // 1. Rasio Kedatangan Tamu (Undangan Check-in)
   const arrivalPercent = totalGuestsCount > 0 ? arrivedGuests.length / totalGuestsCount : 0;
 
-  // 2. Rasio Souvenir Terbagi (dibanding tamu hadir)
-  const souvenirPercent = arrivedGuests.length > 0 
-    ? arrivedGuests.filter(g => g.souvenir_taken).length / arrivedGuests.length 
+  // 2. Rasio Souvenir Terbagi (dibanding total undangan)
+  const souvenirPercent = totalGuestsCount > 0 
+    ? arrivedGuests.filter(g => g.souvenir_taken).length / totalGuestsCount 
     : 0;
 
   // 3. Rasio Kehadiran VIP (VIP Hadir dibanding total VIP)
@@ -588,7 +588,7 @@ export const AdminCMS = () => {
                 <Gift size={12} /> Souvenir Terbagi
               </span>
               <p className="text-xl font-bold text-[#4A5D4E] font-serif">
-                {arrivedGuests.filter(g => g.souvenir_taken).length} <span className="text-xs text-gray-400 font-sans font-normal">/ {arrivedGuests.length}</span>
+                {arrivedGuests.filter(g => g.souvenir_taken).length} <span className="text-xs text-gray-400 font-sans font-normal">/ {totalGuestsCount}</span>
               </p>
               <p className="text-[10px] text-[#8C9A8E]">Rasio: {(souvenirPercent * 100).toFixed(1)}%</p>
             </div>

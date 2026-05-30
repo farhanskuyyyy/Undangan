@@ -23,7 +23,7 @@
 **Files:**
 - Modify: `src/pages/AdminCMS.tsx`
 
-- [ ] **Step 1: Tambahkan state variables baru**
+- [x] **Step 1: Tambahkan state variables baru**
   Letakkan state `wishesText` dan `savingWishes` di bagian atas komponen `AdminCMS` (sekitar baris 25-30, di bawah state `lightboxGuest`).
 
   ```typescript
@@ -31,7 +31,7 @@
     const [savingWishes, setSavingWishes] = useState(false)
   ```
 
-- [ ] **Step 2: Sinkronisasikan state ucapan saat guest baru dimuat**
+- [x] **Step 2: Sinkronisasikan state ucapan saat guest baru dimuat**
   Di dalam `onScanSuccess` (sekitar baris 132), `handleManualCheckIn` (sekitar baris 154), dan kueri pemuatan data tamu lainnya, pastikan kita meng-update state `wishesText` dengan ucapan tamu yang sudah tersimpan sebelumnya.
 
   Cari:
@@ -47,7 +47,7 @@
 
   *Lakukan hal yang sama di dalam `handleManualCheckIn` (sekitar baris 154) dan fungsi kueri detail lainnya.*
 
-- [ ] **Step 3: Implementasikan fungsi saveGuestWishes**
+- [x] **Step 3: Implementasikan fungsi saveGuestWishes**
   Tambahkan fungsi penyimpanan ucapan tamu ke Supabase Database di dalam komponen `AdminCMS` (misalnya di bawah fungsi `deletePhoto` sekitar baris 275).
 
   ```typescript
@@ -76,11 +76,11 @@
     }
   ```
 
-- [ ] **Step 4: Verifikasi kompilasi**
+- [x] **Step 4: Verifikasi kompilasi**
   Run: `npm run build`
   Expected: PASS (Abaikan atau bungkus referensi `wishesText` / `saveGuestWishes` jika ada error linter unused variables sebelum UI diintegrasikan pada Task berikutnya).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   ```bash
   git add src/pages/AdminCMS.tsx
   git commit -m "feat: setup state and saveGuestWishes logic for guest wishes"

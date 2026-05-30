@@ -23,7 +23,7 @@
 **Files:**
 - Modify: `src/pages/AdminCMS.tsx`
 
-- [ ] **Step 1: Sisipkan kalkulasi ringkasan data di dalam komponen AdminCMS**
+- [x] **Step 1: Sisipkan kalkulasi ringkasan data di dalam komponen AdminCMS**
   Temukan bagian komputasi filter daftar tamu di dalam komponen `AdminCMS` (sekitar baris 350-360, tepat di bawah perhitungan paginasi galeri tamu).
 
   Sisipkan baris logika kalkulasi persentase dan pax reaktif berikut:
@@ -51,11 +51,11 @@
     const paxPercent = maxExpectedPax > 0 ? totalPaxArrived / maxExpectedPax : 0;
   ```
 
-- [ ] **Step 2: Uji build kompilasi TypeScript**
+- [x] **Step 2: Uji build kompilasi TypeScript**
   Run: `npm run build`
   Expected: PASS (Pastikan tidak ada error kompilasi terkait unused variables).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
   ```bash
   git add src/pages/AdminCMS.tsx
   git commit -m "feat: implement reactive analytics computed state logic for dashboard metrics"
@@ -68,10 +68,10 @@
 **Files:**
 - Modify: `src/pages/AdminCMS.tsx`
 
-- [ ] **Step 1: Impor ikon Lucide baru untuk dasbor**
+- [x] **Step 1: Impor ikon Lucide baru untuk dasbor**
   Tambahkan ikon `TrendingUp`, `Award`, `Sparkles` ke bagian impor `lucide-react` di bagian atas berkas `src/pages/AdminCMS.tsx`.
 
-- [ ] **Step 2: Pasang kartu dasbor visual di bagian paling atas konten CMS**
+- [x] **Step 2: Pasang kartu dasbor visual di bagian paling atas konten CMS**
   Temukan baris pembuka tag kontainer konten utama di dalam `return (...)` setelah penutup navbar / judul dasbor (sekitar baris 440-450).
   Cari baris kontainer grid asli:
   ```tsx
@@ -203,11 +203,11 @@
         </div>
   ```
 
-- [ ] **Step 3: Uji build kompilasi proyek terintegrasi**
+- [x] **Step 3: Uji build kompilasi proyek terintegrasi**
   Run: `npm run build`
   Expected: PASS
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   ```bash
   git add src/pages/AdminCMS.tsx
   git commit -m "feat: render 4 interactive SVG progress ring analytics cards at the top of CMS"

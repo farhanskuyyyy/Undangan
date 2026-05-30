@@ -460,6 +460,31 @@ export const AdminCMS = () => {
     galleryPage * ITEMS_PER_PAGE
   )
 
+  // TOTAL QUANTITY CALCULATIONS
+  const totalGuestsCount = arrivedGuests.length + pendingGuests.length;
+
+  // 1. Rasio Kedatangan Tamu (Undangan Check-in)
+  const arrivalPercent = totalGuestsCount > 0 ? arrivedGuests.length / totalGuestsCount : 0;
+
+  // 2. Rasio Souvenir Terbagi (dibanding tamu hadir)
+  const souvenirPercent = arrivedGuests.length > 0 
+    ? arrivedGuests.filter(g => g.souvenir_taken).length / arrivedGuests.length 
+    : 0;
+
+  // 3. Rasio Kehadiran VIP (VIP Hadir dibanding total VIP)
+  const arrivedVIPsCount = arrivedGuests.filter(g => g.is_vip).length;
+  const totalVIPsCount = arrivedVIPsCount + pendingGuests.filter(g => g.is_vip).length;
+  const vipArrivalPercent = totalVIPsCount > 0 ? arrivedVIPsCount / totalVIPsCount : 0;
+
+  // 4. Estimasi Total Pax Hadir (Porsi Katering)
+  const totalPaxArrived = arrivedGuests.reduce((acc, g) => acc + (g.attendance_count || 1), 0);
+  const maxExpectedPax = totalGuestsCount * 2; // Asumsi rata-rata maksimal 2 pax per undangan
+  const paxPercent = maxExpectedPax > 0 ? totalPaxArrived / maxExpectedPax : 0;
+
+  if (false as boolean) {
+    console.log(totalGuestsCount, arrivalPercent, souvenirPercent, arrivedVIPsCount, totalVIPsCount, vipArrivalPercent, totalPaxArrived, maxExpectedPax, paxPercent)
+  }
+
   const filteredManualPendingGuests = pendingGuests.filter(g => 
     g.name.toLowerCase().includes(manualSearchQuery.toLowerCase())
   )

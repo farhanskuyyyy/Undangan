@@ -257,7 +257,7 @@ export const AdminCMS = () => {
     try {
       const { data: arrivedData, error: arrivedError } = await supabase
         .from('guests')
-        .select('id, name, arrival_time, is_vip, photo_url, souvenir_taken, attendance_count, invited_pax, description')
+        .select('id, name, qr_code, arrival_time, is_vip, photo_url, souvenir_taken, attendance_count, invited_pax, description')
         .eq('has_arrived', true)
         .order('arrival_time', { ascending: false })
       
@@ -266,7 +266,7 @@ export const AdminCMS = () => {
 
       const { data: pendingData, error: pendingError } = await supabase
         .from('guests')
-        .select('id, name, is_vip, attendance_count, invited_pax, description')
+        .select('id, name, qr_code, is_vip, attendance_count, invited_pax, description')
         .eq('has_arrived', false)
         .order('name', { ascending: true })
       

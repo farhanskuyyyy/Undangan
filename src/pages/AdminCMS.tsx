@@ -690,9 +690,9 @@ export const AdminCMS = () => {
                 <TrendingUp size={12} /> Total Pax (Tamu)
               </span>
               <p className="text-xl font-bold text-[#4A5D4E] font-serif">
-                {totalPaxArrived} <span className="text-xs text-gray-400 font-sans font-normal">pax</span>
+                {totalPaxArrived} <span className="text-xs text-gray-400 font-sans font-normal">/ {maxExpectedPax}</span>
               </p>
-              <p className="text-[10px] text-[#8C9A8E]">Estimasi Porsi Hadir</p>
+              <p className="text-[10px] text-[#8C9A8E]">Rasio: {(paxPercent * 100).toFixed(1)}%</p>
             </div>
             <div className="relative w-14 h-14 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90">
@@ -709,7 +709,7 @@ export const AdminCMS = () => {
                   className="transition-all duration-1000 ease-out"
                 />
               </svg>
-              <span className="absolute text-[10px] font-bold text-blue-600">{totalPaxArrived}</span>
+              <span className="absolute text-[10px] font-bold text-blue-600">{(paxPercent * 100).toFixed(0)}%</span>
             </div>
           </div>
         </div>

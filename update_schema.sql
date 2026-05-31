@@ -85,3 +85,6 @@ CREATE POLICY "Allow public select on rundowns" ON rundowns FOR SELECT USING (tr
 -- Add photo_url to guests table
 ALTER TABLE guests ADD COLUMN photo_url TEXT;
 
+-- Add wishes column to guests table (filled at check-in, shown on projector)
+ALTER TABLE guests ADD COLUMN wishes TEXT;
+

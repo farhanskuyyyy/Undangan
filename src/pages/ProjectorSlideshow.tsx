@@ -11,7 +11,7 @@ interface Guest {
   arrival_time: string;
   is_vip: boolean;
   photo_url: string;
-  message: string;
+  wishes: string;
 }
 
 export const ProjectorSlideshow = () => {
@@ -28,7 +28,7 @@ export const ProjectorSlideshow = () => {
     try {
       const { data, error } = await supabase
         .from('guests')
-        .select('id, name, arrival_time, is_vip, photo_url, message')
+        .select('id, name, arrival_time, is_vip, photo_url, wishes')
         .eq('has_arrived', true)
         .not('photo_url', 'is', null)
         .order('arrival_time', { ascending: false });
@@ -167,7 +167,7 @@ export const ProjectorSlideshow = () => {
               <div className="md:col-span-6 text-center md:text-left space-y-6 flex flex-col justify-center px-4 relative">
                 <span className="absolute -top-16 -left-4 font-serif text-[180px] text-[#4A5D4E]/10 select-none pointer-events-none font-bold leading-none">“</span>
                 <p className="font-serif italic text-2xl md:text-4xl text-[#F3F1ED] leading-relaxed max-w-xl z-10 font-medium">
-                  {currentGuest.message || "Terima kasih banyak atas kehadiran dan doa restu Anda di hari bahagia kami."}
+                  {currentGuest.wishes || "Terima kasih banyak atas kehadiran dan doa restu Anda di hari bahagia kami."}
                 </p>
                 <div className="flex items-center gap-2 text-[#C17E61] justify-center md:justify-start mt-2">
                   <Heart size={16} fill="currentColor" />
@@ -247,7 +247,7 @@ export const ProjectorSlideshow = () => {
                     className="md:col-span-6 text-center md:text-left space-y-4 px-4 flex flex-col justify-center"
                   >
                     <p className="font-serif italic text-xl md:text-3xl text-[#F3F1ED]/95 leading-relaxed max-w-md font-medium">
-                      "{interruptedGuest.message || "Terima kasih banyak atas kehadiran dan doa restu Anda di hari bahagia kami."}"
+                      "{interruptedGuest.wishes || "Terima kasih banyak atas kehadiran dan doa restu Anda di hari bahagia kami."}"
                     </p>
                     <span className="text-xs font-sans tracking-[0.2em] text-[#C17E61] uppercase font-bold flex items-center gap-1 justify-center md:justify-start">
                       <Heart size={12} fill="currentColor" /> Doa & Harapan Tamu

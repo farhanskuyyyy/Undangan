@@ -409,7 +409,7 @@ export const AdminCMS = () => {
       if (error) throw error
       
       setGuest(data)
-      setWishesText(data?.message || '')
+      setWishesText(data?.wishes || '')
       fetchGuests()
     } catch (error) {
       console.error('Error fetching guest:', error)
@@ -432,7 +432,7 @@ export const AdminCMS = () => {
       if (error) throw error
       
       setGuest(data)
-      setWishesText(data?.message || '')
+      setWishesText(data?.wishes || '')
       fetchGuests()
       setManualSearchQuery('') // Clear search after successful check-in
       showAlert(`Berhasil check-in: ${data.name}${data.description ? ` (${data.description})` : ''}`, 'success', 'Check-in Berhasil')
@@ -457,7 +457,7 @@ export const AdminCMS = () => {
       
       // Pasang ke state detail tamu aktif
       setGuest(data)
-      setWishesText(data?.message || '')
+      setWishesText(data?.wishes || '')
     } catch (err: any) {
       console.error("Gagal memuat detail tamu:", err)
       showAlert(`Gagal memuat detail tamu: ${err.message || 'Error tidak diketahui'}`, 'error')
@@ -618,13 +618,13 @@ export const AdminCMS = () => {
     try {
       const { error } = await supabase
         .from('guests')
-        .update({ message: wishesText })
+        .update({ wishes: wishesText })
         .eq('id', guest.id)
         
       if (error) throw error
       
       // Perbarui data guest lokal
-      setGuest({ ...guest, message: wishesText })
+      setGuest({ ...guest, wishes: wishesText })
       fetchGuests() // Segarkan daftar tamu hadir/belum hadir
       showAlert("Ucapan tamu berhasil disimpan!", "success")
     } catch (err: any) {
@@ -640,7 +640,7 @@ export const AdminCMS = () => {
       // 1. Ambil data segar terlengkap langsung dari database
       const { data: allGuests, error } = await supabase
         .from('guests')
-        .select('name, is_vip, rsvp_status, attendance_count, invited_pax, description, has_arrived, arrival_time, souvenir_taken, message, photo_url')
+        .select('name, is_vip, rsvp_status, attendance_count, invited_pax, description, has_arrived, arrival_time, souvenir_taken, message, wishes, photo_url')
         .order('name', { ascending: true })
         
       if (error) throw error
@@ -660,7 +660,8 @@ export const AdminCMS = () => {
         "Kehadiran",
         "Waktu Tiba (WIB)",
         "Souvenir Status",
-        "Ucapan Selamat (Wishes)",
+        "Pesan RSVP (Message)",
+        "Ucapan Check-in (Wishes)",
         "Tautan Foto"
       ]
       
@@ -679,6 +680,7 @@ export const AdminCMS = () => {
           g.arrival_time ? new Date(g.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "-",
           g.souvenir_taken ? "Sudah Diambil" : "Belum Diambil",
           `"${(g.message || "").replace(/"/g, '""').replace(/\n/g, " ")}"`, // Bersihkan tanda kutip ganda & baris baru
+          `"${(g.wishes || "").replace(/"/g, '""').replace(/\n/g, " ")}"`, // Bersihkan tanda kutip ganda & baris baru
           g.photo_url ? g.photo_url : "-"
         ]
         csvRows.push(row.join(","))

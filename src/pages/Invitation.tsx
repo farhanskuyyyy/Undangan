@@ -279,7 +279,12 @@ export const Invitation = () => {
               </div>
             </motion.div>
 
-            <GuestQR guestId={guestId} guestName={guestName} />
+            <GuestQR 
+              guestId={guestId} 
+              guestName={guestName} 
+              groomName={settings?.groom_name} 
+              brideName={settings?.bride_name} 
+            />
 
             <RSVPForm 
               guestId={guestId} 

@@ -5,9 +5,11 @@ import { motion } from 'framer-motion';
 interface GuestQRProps {
   guestId?: string;
   guestName?: string;
+  groomName?: string;
+  brideName?: string;
 }
 
-const GuestQR = ({ guestId, guestName }: GuestQRProps) => {
+const GuestQR = ({ guestId, guestName, groomName, brideName }: GuestQRProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const downloadQR = () => {
@@ -24,6 +26,21 @@ const GuestQR = ({ guestId, guestName }: GuestQRProps) => {
   };
 
   const isInvalid = !guestId || !guestName;
+
+  const gLetter = groomName ? groomName.trim().charAt(0).toUpperCase() : '';
+  const bLetter = brideName ? brideName.trim().charAt(0).toUpperCase() : '';
+  
+  // Generate a premium SVG data URI featuring the wedding initials
+  const qrCenterImage = gLetter && bLetter
+    ? `data:image/svg+xml;utf8,${encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+          <circle cx="50" cy="50" r="48" fill="#FFFFFF" stroke="#C17E61" stroke-width="4" />
+          <text x="50" y="53" font-family="'Georgia', 'Times New Roman', serif" font-size="34" font-weight="bold" fill="#4A5D4E" text-anchor="middle" dominant-baseline="middle">
+            ${gLetter}&amp;${bLetter}
+          </text>
+        </svg>
+      `.trim())}`
+    : '/favicon.svg';
 
   return (
     <motion.div 
@@ -61,11 +78,11 @@ const GuestQR = ({ guestId, guestName }: GuestQRProps) => {
               level={"H"}
               includeMargin={false}
               imageSettings={{
-                src: "/favicon.svg",
+                src: qrCenterImage,
                 x: undefined,
                 y: undefined,
-                height: 24,
-                width: 24,
+                height: 34,
+                width: 34,
                 excavate: true,
               }}
             />

@@ -54,6 +54,8 @@ export const Invitation = () => {
   const [galleries, setGalleries] = useState<GalleryData[]>([])
   const [rundowns, setRundowns] = useState<RundownData[]>([])
   const [guestName, setGuestName] = useState<string | undefined>(undefined)
+  const [invitedPax, setInvitedPax] = useState<number>(2)
+  const [guestDescription, setGuestDescription] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -102,11 +104,15 @@ export const Invitation = () => {
         if (guestId) {
           const { data: guestData } = await supabase
             .from('guests')
-            .select('name')
+            .select('name, invited_pax, description')
             .eq('qr_code', guestId)
             .single()
           
-          if (guestData) setGuestName(guestData.name)
+          if (guestData) {
+            setGuestName(guestData.name)
+            setInvitedPax(guestData.invited_pax || 2)
+            setGuestDescription(guestData.description)
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error)
@@ -275,7 +281,12 @@ export const Invitation = () => {
 
             <GuestQR guestId={guestId} />
 
-            <RSVPForm guestId={guestId} guestName={guestName} />
+            <RSVPForm 
+              guestId={guestId} 
+              guestName={guestName} 
+              invitedPax={invitedPax} 
+              guestDescription={guestDescription} 
+            />
           </div>
         </section>
 

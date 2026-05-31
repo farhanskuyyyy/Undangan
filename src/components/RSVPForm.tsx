@@ -20,8 +20,18 @@ interface GuestMessage {
   created_at: string
 }
 
-export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?: string }) => {
-  const { register, handleSubmit, reset, setValue } = useForm<RSVPData>()
+export const RSVPForm = ({ 
+  guestId, 
+  guestName, 
+  invitedPax = 2, 
+  guestDescription 
+}: { 
+  guestId?: string; 
+  guestName?: string; 
+  invitedPax?: number; 
+  guestDescription?: string; 
+}) => {
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<RSVPData>()
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [messages, setMessages] = useState<GuestMessage[]>([])
@@ -146,6 +156,16 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
               </h3>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
+                {guestName && (
+                  <div className="mb-6 p-4 bg-primary/5 border border-primary/10 rounded-2xl text-burgundy text-xs space-y-1">
+                    <p className="font-semibold text-sm">Selamat datang, {guestName}!</p>
+                    {guestDescription && (
+                      <p className="text-gray-500 italic">Grup Undangan: {guestDescription}</p>
+                    )}
+                    <p className="text-gray-400 font-sans">Anda diundang dengan batas kapasitas maksimal: <strong>{invitedPax} pax</strong>.</p>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5" /> Nama Lengkap
@@ -182,10 +202,19 @@ export const RSVPForm = ({ guestId, guestName }: { guestId?: string; guestName?:
                   </label>
                   <input
                     type="number"
-                    {...register('attendance_count', { min: 1, max: 10 })}
+                    {...register('attendance_count', { min: 1, max: invitedPax })}
                     defaultValue={1}
                     className="w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy"
                   />
+                  <span className="text-[10px] text-gray-400 italic mt-1 block font-sans">Maksimal porsi kehadiran: {invitedPax} pax</span>
+                  {errors.attendance_count && (
+                    <span className="text-[10px] text-red-500 font-medium mt-1 block font-sans">
+                      {errors.attendance_count.type === 'max' 
+                        ? `Jumlah hadir melebihi alokasi porsi undangan Anda (${invitedPax} pax).` 
+                        : 'Jumlah hadir minimal 1 pax.'
+                      }
+                    </span>
+                  )}
                 </div>
 
                 <div>

@@ -53,7 +53,7 @@ export const AdminCMS = () => {
     try {
       const { data: arrivedData, error: arrivedError } = await supabase
         .from('guests')
-        .select('id, name, arrival_time, is_vip, photo_url, souvenir_taken, attendance_count')
+        .select('id, name, arrival_time, is_vip, photo_url, souvenir_taken, attendance_count, invited_pax, description')
         .eq('has_arrived', true)
         .order('arrival_time', { ascending: false })
       
@@ -62,7 +62,7 @@ export const AdminCMS = () => {
 
       const { data: pendingData, error: pendingError } = await supabase
         .from('guests')
-        .select('id, name, is_vip, attendance_count')
+        .select('id, name, is_vip, attendance_count, invited_pax, description')
         .eq('has_arrived', false)
         .order('name', { ascending: true })
       
@@ -180,7 +180,7 @@ export const AdminCMS = () => {
         .from('guests')
         .update({ has_arrived: true, arrival_time: new Date().toISOString() })
         .eq('id', guestId)
-        .select()
+        .select('*')
         .single()
       
       if (error) throw error
@@ -189,7 +189,7 @@ export const AdminCMS = () => {
       setWishesText(data?.message || '')
       fetchGuests()
       setManualSearchQuery('') // Clear search after successful check-in
-      alert(`Berhasil check-in: ${data.name}`)
+      alert(`Berhasil check-in: ${data.name}${data.description ? ` (${data.description})` : ''}`)
     } catch (error) {
       console.error('Error manual check-in:', error)
       alert('Gagal melakukan check-in manual.')
@@ -383,7 +383,7 @@ export const AdminCMS = () => {
       // 1. Ambil data segar terlengkap langsung dari database
       const { data: allGuests, error } = await supabase
         .from('guests')
-        .select('name, is_vip, rsvp_status, has_arrived, arrival_time, souvenir_taken, message, photo_url')
+        .select('name, is_vip, rsvp_status, attendance_count, invited_pax, description, has_arrived, arrival_time, souvenir_taken, message, photo_url')
         .order('name', { ascending: true })
         
       if (error) throw error
@@ -395,8 +395,11 @@ export const AdminCMS = () => {
       // 2. Judul Kolom (Headers)
       const headers = [
         "Nama Tamu",
+        "Keterangan (Description)",
         "Kategori (VIP)",
         "RSVP Status",
+        "Jumlah Kehadiran (Pax)",
+        "Kapasitas Undangan (Pax)",
         "Kehadiran",
         "Waktu Tiba (WIB)",
         "Souvenir Status",
@@ -410,8 +413,11 @@ export const AdminCMS = () => {
       allGuests.forEach((g) => {
         const row = [
           `"${g.name.replace(/"/g, '""')}"`,
+          `"${(g.description || "").replace(/"/g, '""')}"`,
           g.is_vip ? "VIP" : "Regular",
           g.rsvp_status ? "Hadir" : "Belum RSVP",
+          g.rsvp_status ? g.attendance_count : 0,
+          g.invited_pax || 2,
           g.has_arrived ? "Sudah Check-in" : "Belum Hadir",
           g.arrival_time ? new Date(g.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "-",
           g.souvenir_taken ? "Sudah Diambil" : "Belum Diambil",
@@ -499,7 +505,8 @@ export const AdminCMS = () => {
               id: newGuest.id,
               name: newGuest.name,
               is_vip: newGuest.is_vip,
-              arrival_time: newGuest.arrival_time
+              arrival_time: newGuest.arrival_time,
+              description: newGuest.description
             }
             
             setToasts((prev) => {
@@ -556,7 +563,7 @@ export const AdminCMS = () => {
   const vipArrivalPercent = totalVIPsCount > 0 ? arrivedVIPsCount / totalVIPsCount : 0;
 
   const totalPaxArrived = arrivedGuests.reduce((acc, g) => acc + (g.attendance_count || 1), 0);
-  const maxExpectedPax = totalPaxArrived + pendingGuests.reduce((acc, g) => acc + (g.attendance_count || 1), 0);
+  const maxExpectedPax = arrivedGuests.reduce((acc, g) => acc + (g.invited_pax || 2), 0) + pendingGuests.reduce((acc, g) => acc + (g.invited_pax || 2), 0);
   const paxPercent = maxExpectedPax > 0 ? totalPaxArrived / maxExpectedPax : 0;
 
   // Slice 15 kedatangan tamu terbaru secara kronologis untuk timeline
@@ -824,6 +831,17 @@ export const AdminCMS = () => {
                                 {guest.name}
                                 {guest.is_vip && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">VIP</span>}
                               </span>
+                              {guest.description && (
+                                <span className="text-[10px] text-gray-500 italic mt-0.5">
+                                  {guest.description}
+                                </span>
+                              )}
+                              <span className="text-[10px] text-gray-400 mt-0.5 font-sans">
+                                {guest.has_arrived 
+                                  ? `Hadir: ${guest.attendance_count || 1} / ${guest.invited_pax || 2} Pax` 
+                                  : `Ekspektasi: ${guest.invited_pax || 2} Pax`
+                                }
+                              </span>
                               {guest.has_arrived && (
                                 <span className="text-[9px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-semibold inline-block w-fit mt-1 border border-green-100">
                                   Sudah Check-in
@@ -885,17 +903,20 @@ export const AdminCMS = () => {
                       )}
                     </div>
                     <p className="text-2xl font-serif">{guest.name}</p>
+                    {guest.description && (
+                      <p className="text-xs text-[#8C9A8E] mt-1 font-sans italic">Keterangan: {guest.description}</p>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between py-2 border-b border-[#F3F1ED]">
                     <span className="text-sm text-[#8C9A8E]">Status RSVP</span>
                     {guest.rsvp_status ? (
                       <span className="flex items-center gap-1.5 text-[#4A5D4E] text-sm font-medium bg-[#F0F4F1] px-3 py-1 rounded-full">
-                        <CheckCircle size={14} /> Hadir ({guest.attendance_count})
+                        <CheckCircle size={14} /> Hadir ({guest.attendance_count} dari {guest.invited_pax || 2} Pax)
                       </span>
                     ) : (
                       <span className="flex items-center gap-1.5 text-[#C17E61] text-sm font-medium bg-[#FEF5F1] px-3 py-1 rounded-full">
-                        <XCircle size={14} /> Belum RSVP
+                        <XCircle size={14} /> Belum RSVP (Kapasitas: {guest.invited_pax || 2} Pax)
                       </span>
                     )}
                   </div>
@@ -1206,9 +1227,16 @@ export const AdminCMS = () => {
                               <p className="text-[#4A5D4E] font-serif">{guest.name}</p>
                               {guest.is_vip && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">VIP</span>}
                             </div>
-                            <div className="flex items-center gap-1.5 text-[11px] text-[#8C9A8E] mt-0.5">
+                            {guest.description && (
+                              <p className="text-[10px] text-amber-900/60 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100/50 w-fit mt-0.5 font-sans">
+                                {guest.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-1.5 text-[11px] text-[#8C9A8E] mt-0.5 font-sans">
                               <Clock size={12} />
-                              {guest.arrival_time ? new Date(guest.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                              <span>{guest.arrival_time ? new Date(guest.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}</span>
+                              <span className="mx-1 text-gray-300">•</span>
+                              <span className="font-medium text-[#4A5D4E]/80">{guest.attendance_count || 1}/{guest.invited_pax || 2} Pax</span>
                             </div>
                           </td>
                         </tr>
@@ -1241,9 +1269,19 @@ export const AdminCMS = () => {
                     <tbody className="divide-y divide-[#F3F1ED]">
                       {filteredPendingGuests.map((guest, index) => (
                         <tr key={index}>
-                          <td className="py-4 text-[#8C9A8E] font-serif flex items-center gap-2">
-                            {guest.name}
-                            {guest.is_vip && <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-bold border border-amber-100">VIP</span>}
+                          <td className="py-4 text-[#8C9A8E] font-serif">
+                            <div className="flex items-center gap-2">
+                              {guest.name}
+                              {guest.is_vip && <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-bold border border-amber-100">VIP</span>}
+                            </div>
+                            {guest.description && (
+                              <p className="text-[10px] text-[#8C9A8E]/80 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100/50 w-fit mt-0.5 font-sans">
+                                {guest.description}
+                              </p>
+                            )}
+                            <div className="text-[11px] text-[#8C9A8E] mt-1 font-sans flex items-center gap-1">
+                              <span>Ekspektasi: {guest.invited_pax || 2} Pax</span>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1500,6 +1538,9 @@ export const AdminCMS = () => {
                     </span>
                   )}
                 </div>
+                {t.description && (
+                  <p className="text-[9px] text-[#C17E61] italic font-sans">{t.description}</p>
+                )}
                 <p className="text-[10px] text-gray-500">Baru saja check-in di pintu gerbang.</p>
                 <span className="text-[9px] text-gray-400 flex items-center gap-1 font-medium">
                   <Clock size={10} /> Tiba pukul {t.arrival_time ? new Date(t.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}

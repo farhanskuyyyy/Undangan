@@ -88,6 +88,7 @@ export const AdminCMS = () => {
   const [crudIsVip, setCrudIsVip] = useState(false)
   const [crudSearch, setCrudSearch] = useState('')
   const [crudVipFilter, setCrudVipFilter] = useState<'all' | 'vip' | 'non-vip'>('all')
+  const [crudRsvpFilter, setCrudRsvpFilter] = useState<'all' | 'confirmed' | 'unconfirmed'>('all')
   const [crudPage, setCrudPage] = useState(1)
   const [copiedGuestId, setCopiedGuestId] = useState<string | null>(null)
   const fileImportRef = useRef<HTMLInputElement>(null)
@@ -865,6 +866,11 @@ export const AdminCMS = () => {
     .filter(g => {
       if (crudVipFilter === 'vip') return g.is_vip
       if (crudVipFilter === 'non-vip') return !g.is_vip
+      return true
+    })
+    .filter(g => {
+      if (crudRsvpFilter === 'confirmed') return g.rsvp_status === true
+      if (crudRsvpFilter === 'unconfirmed') return !g.rsvp_status
       return true
     })
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -1823,8 +1829,8 @@ export const AdminCMS = () => {
 
         {/* Actions Bar */}
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 border-b border-[#F3F1ED] pb-6">
-          {/* Search bar & VIP Filter */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:max-w-2xl">
+          {/* Search bar & VIP/RSVP Filters */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:max-w-3xl">
             <div className="relative flex-1 w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8C9A8E]" size={18} />
               <input
@@ -1840,7 +1846,7 @@ export const AdminCMS = () => {
             </div>
             
             {/* VIP Status Filter Select */}
-            <div className="w-full sm:w-48">
+            <div className="w-full sm:w-40">
               <select
                 value={crudVipFilter}
                 onChange={(e) => {
@@ -1849,9 +1855,25 @@ export const AdminCMS = () => {
                 }}
                 className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2.5 px-4 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm text-[#4A5D4E]"
               >
-                <option value="all">Semua Status</option>
+                <option value="all">Semua VIP/Reg</option>
                 <option value="vip">Hanya VIP ⭐</option>
                 <option value="non-vip">Reguler</option>
+              </select>
+            </div>
+
+            {/* RSVP Status Filter Select */}
+            <div className="w-full sm:w-40">
+              <select
+                value={crudRsvpFilter}
+                onChange={(e) => {
+                  setCrudRsvpFilter(e.target.value as 'all' | 'confirmed' | 'unconfirmed')
+                  setCrudPage(1)
+                }}
+                className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2.5 px-4 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm text-[#4A5D4E]"
+              >
+                <option value="all">Semua RSVP</option>
+                <option value="confirmed">RSVP Hadir</option>
+                <option value="unconfirmed">Belum RSVP</option>
               </select>
             </div>
           </div>
@@ -1903,6 +1925,7 @@ export const AdminCMS = () => {
                 <th className="p-4 font-semibold">Grup/Ket.</th>
                 <th className="p-4 font-semibold">VIP Status</th>
                 <th className="p-4 font-semibold text-center">Kapasitas Pax</th>
+                <th className="p-4 font-semibold text-center">Pax Hadir (RSVP)</th>
                 <th className="p-4 font-semibold">Status RSVP</th>
                 <th className="p-4 font-semibold">Kehadiran</th>
                 <th className="p-4 font-semibold">QR Code & Link</th>
@@ -1932,6 +1955,15 @@ export const AdminCMS = () => {
                     </td>
                     <td className="p-4 text-center font-semibold">
                       {g.invited_pax || 2} Pax
+                    </td>
+                    <td className="p-4 text-center">
+                      {g.rsvp_status ? (
+                        <span className="bg-green-50 text-green-700 text-xs font-semibold px-2 py-0.5 rounded border border-green-100">
+                          {g.attendance_count || 1} Pax
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 font-sans">-</span>
+                      )}
                     </td>
                     <td className="p-4">
                       {g.rsvp_status ? (

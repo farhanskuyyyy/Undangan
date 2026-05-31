@@ -120,7 +120,12 @@ export const RSVPForm = ({
         if (error) throw error
       }
       setSubmitted(true)
-      reset()
+      reset({
+        name: data.name || guestName || '',
+        rsvp_status: parsedStatus,
+        attendance_count: parsedCount || 1,
+        message: data.message
+      })
       fetchMessages() // Refresh messages after submission
     } catch (error) {
       console.error('Error submitting RSVP:', error)

@@ -310,7 +310,7 @@ export const AdminCMS = () => {
     try {
       const { data: arrivedData, error: arrivedError } = await supabase
         .from('guests')
-        .select('id, name, qr_code, arrival_time, is_vip, photo_url, souvenir_taken, attendance_count, invited_pax, description')
+        .select('id, name, qr_code, arrival_time, is_vip, photo_url, souvenir_taken, attendance_count, invited_pax, description, rsvp_status')
         .eq('has_arrived', true)
         .order('arrival_time', { ascending: false })
       
@@ -319,7 +319,7 @@ export const AdminCMS = () => {
 
       const { data: pendingData, error: pendingError } = await supabase
         .from('guests')
-        .select('id, name, qr_code, is_vip, attendance_count, invited_pax, description')
+        .select('id, name, qr_code, is_vip, attendance_count, invited_pax, description, rsvp_status')
         .eq('has_arrived', false)
         .order('name', { ascending: true })
       
@@ -367,6 +367,22 @@ export const AdminCMS = () => {
       setIsScanning(false)
       showAlert('Gagal mengakses kamera. Pastikan izin kamera telah diberikan.', 'error', 'Kamera Gagal')
     }
+  }
+
+  const handleScanOtherGuest = async () => {
+    setCheckInMode('scan')
+    setGuest(null)
+    setTimeout(() => {
+      startScanner()
+    }, 150)
+  }
+
+  const handleUploadOtherGuest = () => {
+    setCheckInMode('scan')
+    setGuest(null)
+    setTimeout(() => {
+      fileInputRef.current?.click()
+    }, 150)
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -822,6 +838,12 @@ export const AdminCMS = () => {
   const totalPaxArrived = arrivedGuests.reduce((acc, g) => acc + (g.attendance_count || 1), 0);
   const maxExpectedPax = arrivedGuests.reduce((acc, g) => acc + (g.invited_pax || 2), 0) + pendingGuests.reduce((acc, g) => acc + (g.invited_pax || 2), 0);
   const paxPercent = maxExpectedPax > 0 ? totalPaxArrived / maxExpectedPax : 0;
+
+  // RSVP statistics computations
+  const rsvpGuests = [...arrivedGuests, ...pendingGuests].filter(g => g.rsvp_status);
+  const totalRsvpedCount = rsvpGuests.length;
+  const rsvpPercent = totalGuestsCount > 0 ? (totalRsvpedCount / totalGuestsCount) * 100 : 0;
+  const rsvpPaxCount = rsvpGuests.reduce((acc, g) => acc + (g.attendance_count || 1), 0);
 
   // Slice 15 kedatangan tamu terbaru secara kronologis untuk timeline
   const timelineEvents = arrivedGuests.slice(0, 15);
@@ -1472,14 +1494,14 @@ export const AdminCMS = () => {
                   
                   <div className="flex flex-col gap-2">
                     <button 
-                      onClick={startScanner}
+                      onClick={handleScanOtherGuest}
                       className="w-full text-[#4A5D4E] bg-[#F0F4F1] hover:bg-[#E2EAE4] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm cursor-pointer"
                     >
                       <Camera size={18} />
                       Scan Tamu Lain
                     </button>
                     <button 
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={handleUploadOtherGuest}
                       className="w-full text-[#4A5D4E] bg-white border border-[#E5E1DA] hover:bg-[#FDFBF7] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm cursor-pointer"
                     >
                       <Image size={18} />
@@ -1766,7 +1788,7 @@ export const AdminCMS = () => {
       /* Area Manajemen Undangan */
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E5E1DA] space-y-6 animate-fadeIn">
         {/* Stat Cards for Management */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
             <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
               <Users size={12} /> Total Tamu
@@ -1780,6 +1802,15 @@ export const AdminCMS = () => {
             </span>
             <p className="text-2xl font-bold text-amber-600 font-serif mt-1">{totalVIPsCount}</p>
             <p className="text-[10px] text-[#8C9A8E] mt-0.5">Prioritas pelayanan</p>
+          </div>
+          <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
+            <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+              <CheckCircle size={12} className="text-green-600" /> Tamu RSVP
+            </span>
+            <p className="text-2xl font-bold text-green-700 font-serif mt-1">
+              {totalRsvpedCount} <span className="text-xs text-gray-400 font-sans font-normal">/ {totalGuestsCount} ({rsvpPercent.toFixed(0)}%)</span>
+            </p>
+            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Hadir: {rsvpPaxCount} Pax dari RSVP</p>
           </div>
           <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
             <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">

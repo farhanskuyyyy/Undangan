@@ -86,13 +86,15 @@ export const AdminCMS = () => {
         alert("Data tamu berhasil diperbarui!")
       } else {
         const qrCode = `GUEST-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
+        const invitedPax = Number(crudInvitedPax) || 2
         const { error } = await supabase
           .from('guests')
           .insert({
             name: crudName.trim(),
             qr_code: qrCode,
             description: crudDescription.trim() || null,
-            invited_pax: Number(crudInvitedPax) || 2,
+            invited_pax: invitedPax,
+            attendance_count: invitedPax, // Default to match invited_pax
             is_vip: crudIsVip,
             has_arrived: false,
             souvenir_taken: false
@@ -222,6 +224,7 @@ export const AdminCMS = () => {
           qr_code: qrCode,
           description,
           invited_pax,
+          attendance_count: invited_pax, // Default to match invited_pax
           is_vip,
           has_arrived: false,
           souvenir_taken: false

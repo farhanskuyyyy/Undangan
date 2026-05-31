@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles, Plus, Copy, FileSpreadsheet } from 'lucide-react'
 
 const QUICK_WISHES_TEMPLATES = [
   "Selamat menempuh hidup baru! Semoga cinta kalian abadi hingga hari tua.",
@@ -48,6 +48,210 @@ export const AdminCMS = () => {
 
 
 
+
+  const [activeTab, setActiveTab] = useState<'presence' | 'management'>('presence')
+  const [showCrudModal, setShowCrudModal] = useState(false)
+  const [editingGuest, setEditingGuest] = useState<any>(null)
+  const [crudName, setCrudName] = useState('')
+  const [crudDescription, setCrudDescription] = useState('')
+  const [crudInvitedPax, setCrudInvitedPax] = useState(2)
+  const [crudIsVip, setCrudIsVip] = useState(false)
+  const [crudSearch, setCrudSearch] = useState('')
+  const [crudPage, setCrudPage] = useState(1)
+  const [copiedGuestId, setCopiedGuestId] = useState<string | null>(null)
+  const fileImportRef = useRef<HTMLInputElement>(null)
+  const [importingCSV, setImportingCSV] = useState(false)
+
+  const handleSaveGuest = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!crudName.trim()) {
+      alert("Nama tamu tidak boleh kosong.")
+      return
+    }
+    
+    setLoading(true)
+    try {
+      if (editingGuest) {
+        const { error } = await supabase
+          .from('guests')
+          .update({
+            name: crudName.trim(),
+            description: crudDescription.trim() || null,
+            invited_pax: Number(crudInvitedPax) || 2,
+            is_vip: crudIsVip
+          })
+          .eq('id', editingGuest.id)
+        
+        if (error) throw error
+        alert("Data tamu berhasil diperbarui!")
+      } else {
+        const qrCode = `GUEST-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
+        const { error } = await supabase
+          .from('guests')
+          .insert({
+            name: crudName.trim(),
+            qr_code: qrCode,
+            description: crudDescription.trim() || null,
+            invited_pax: Number(crudInvitedPax) || 2,
+            is_vip: crudIsVip,
+            has_arrived: false,
+            souvenir_taken: false
+          })
+        
+        if (error) throw error
+        alert("Tamu baru berhasil ditambahkan!")
+      }
+      
+      setShowCrudModal(false)
+      setEditingGuest(null)
+      setCrudName('')
+      setCrudDescription('')
+      setCrudInvitedPax(2)
+      setCrudIsVip(false)
+      fetchGuests()
+    } catch (err: any) {
+      console.error("Gagal menyimpan data tamu:", err)
+      alert(`Gagal menyimpan data tamu: ${err.message || 'Error tidak diketahui'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteGuest = async (guestId: string, guestName: string) => {
+    if (!window.confirm(`Apakah Anda yakin ingin menghapus tamu "${guestName}"? Tindakan ini tidak dapat dibatalkan.`)) {
+      return
+    }
+    
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('guests')
+        .delete()
+        .eq('id', guestId)
+      
+      if (error) throw error
+      alert(`Tamu "${guestName}" berhasil dihapus.`)
+      fetchGuests()
+      if (guest && guest.id === guestId) {
+        setGuest(null)
+      }
+    } catch (err: any) {
+      console.error("Gagal menghapus tamu:", err)
+      alert(`Gagal menghapus tamu: ${err.message || 'Error tidak diketahui'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCopyInvitationLink = async (qrCode: string, guestId: string) => {
+    const url = `${window.location.origin}/?to=${qrCode}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedGuestId(guestId)
+      
+      const newToast = {
+        id: `copy-${guestId}`,
+        name: "Tautan Undangan",
+        is_vip: false,
+        arrival_time: new Date().toISOString(),
+        description: "Berhasil disalin ke clipboard!"
+      }
+      setToasts((prev) => [newToast, ...prev.slice(0, 3)])
+      setTimeout(() => {
+        setToasts((prev) => prev.filter(t => t.id !== `copy-${guestId}`))
+      }, 3000)
+
+      setTimeout(() => {
+        setCopiedGuestId(null)
+      }, 2000)
+    } catch (err) {
+      console.error("Gagal menyalin tautan:", err)
+      alert("Gagal menyalin tautan ke clipboard.")
+    }
+  }
+
+  const handleDownloadCSVTemplate = () => {
+    const headers = ["Nama", "Keterangan", "Kapasitas_Pax", "VIP_Ya_Tidak"]
+    const exampleRow = ["Ahmad Fauzi", "Tamu CPW", "2", "Ya"]
+    
+    const csvContent = [headers.join(","), exampleRow.join(",")].join("\n")
+    const BOM = "\uFEFF"
+    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" })
+    
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.setAttribute("href", url)
+    link.setAttribute("download", "template_import_tamu.csv")
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    setImportingCSV(true)
+    try {
+      const text = await file.text()
+      const lines = text.split(/\r?\n/)
+      if (lines.length <= 1) {
+        alert("Berkas CSV kosong atau hanya berisi baris header.")
+        setImportingCSV(false)
+        return
+      }
+      
+      const bulkGuests: any[] = []
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim()
+        if (!line) continue
+        
+        const cells = line.split(",").map(cell => cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"'))
+        const name = cells[0]
+        if (!name) continue
+        
+        const description = cells[1] || null
+        const invited_pax = Number(cells[2]) || 2
+        const vipText = (cells[3] || "").toLowerCase()
+        const is_vip = vipText === "ya" || vipText === "yes" || vipText === "1" || vipText === "true"
+        
+        const qrCode = `GUEST-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
+        
+        bulkGuests.push({
+          name,
+          qr_code: qrCode,
+          description,
+          invited_pax,
+          is_vip,
+          has_arrived: false,
+          souvenir_taken: false
+        })
+      }
+      
+      if (bulkGuests.length === 0) {
+        alert("Tidak ada baris data tamu yang valid ditemukan di dalam CSV.")
+        setImportingCSV(false)
+        return
+      }
+      
+      const { error } = await supabase
+        .from('guests')
+        .insert(bulkGuests)
+        
+      if (error) throw error
+      
+      alert(`Berhasil mengimpor massal ${bulkGuests.length} tamu baru!`)
+      fetchGuests()
+    } catch (err: any) {
+      console.error("Gagal mengimpor CSV:", err)
+      alert(`Gagal mengimpor CSV: ${err.message || 'Error tidak diketahui'}`)
+    } finally {
+      setImportingCSV(false)
+      if (fileImportRef.current) {
+        fileImportRef.current.value = ""
+      }
+    }
+  }
 
   const fetchGuests = async () => {
     try {
@@ -151,17 +355,6 @@ export const AdminCMS = () => {
       
       if (error) throw error
       
-      // Auto-mark arrival
-      if (data && !data.has_arrived) {
-        const { error: updateError } = await supabase
-          .from('guests')
-          .update({ has_arrived: true, arrival_time: new Date().toISOString() })
-          .eq('id', data.id)
-        
-        if (updateError) console.error('Error marking arrival:', updateError)
-        data.has_arrived = true
-      }
-
       setGuest(data)
       setWishesText(data?.message || '')
       fetchGuests()
@@ -575,6 +768,20 @@ export const AdminCMS = () => {
   ].filter(g => g.name.toLowerCase().includes(manualSearchQuery.toLowerCase()))
 
 
+  const filteredAllGuests = [
+    ...arrivedGuests.map(g => ({ ...g, has_arrived: true })),
+    ...pendingGuests.map(g => ({ ...g, has_arrived: false }))
+  ]
+    .filter(g => 
+      g.name.toLowerCase().includes(crudSearch.toLowerCase()) || 
+      (g.description || "").toLowerCase().includes(crudSearch.toLowerCase())
+    )
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  const CRUD_ITEMS_PER_PAGE = 10
+  const totalCrudPages = Math.ceil(filteredAllGuests.length / CRUD_ITEMS_PER_PAGE)
+  const paginatedCrudGuests = filteredAllGuests.slice((crudPage - 1) * CRUD_ITEMS_PER_PAGE, crudPage * CRUD_ITEMS_PER_PAGE)
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] p-6 md:p-12 text-[#4A5D4E]">
       <div className="max-w-5xl mx-auto">
@@ -592,8 +799,30 @@ export const AdminCMS = () => {
           </button>
         </header>
 
-        {/* Dashboard Analytics Section */}
-        {false && <Sparkles />}
+        <div className="flex bg-[#FDFBF7] p-1.5 rounded-2xl mb-8 border border-[#E5E1DA] max-w-sm shadow-sm">
+          <button
+            onClick={() => {
+              setActiveTab('presence')
+              setCrudSearch('')
+            }}
+            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === 'presence' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
+          >
+            Dashboard Kehadiran
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('management')
+              setCrudPage(1)
+            }}
+            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === 'management' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
+          >
+            Manajemen Undangan
+          </button>
+        </div>
+
+        {activeTab === 'presence' ? (
+          <>
+            {/* Dashboard Analytics Section */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Card 1: Rasio Kehadiran */}
           <div className="bg-white p-4 rounded-2xl border border-[#E5E1DA] shadow-sm flex items-center justify-between group hover:shadow transition-all duration-300">
@@ -831,17 +1060,17 @@ export const AdminCMS = () => {
                                 {guest.name}
                                 {guest.is_vip && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">VIP</span>}
                               </span>
-                              {guest.description && (
-                                <span className="text-[10px] text-gray-500 italic mt-0.5">
-                                  {guest.description}
-                                </span>
-                              )}
                               <span className="text-[10px] text-gray-400 mt-0.5 font-sans">
                                 {guest.has_arrived 
                                   ? `Hadir: ${guest.attendance_count || 1} / ${guest.invited_pax || 2} Pax` 
                                   : `Ekspektasi: ${guest.invited_pax || 2} Pax`
                                 }
                               </span>
+                              {guest.description && (
+                                <span className="text-[10px] text-gray-500 italic mt-0.5">
+                                  {guest.description}
+                                </span>
+                              )}
                               {guest.has_arrived && (
                                 <span className="text-[9px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-semibold inline-block w-fit mt-1 border border-green-100">
                                   Sudah Check-in
@@ -852,17 +1081,17 @@ export const AdminCMS = () => {
                               <button
                                 onClick={() => handleSelectGuest(guest.id)}
                                 disabled={loading}
-                                className="text-[10px] bg-[#C17E61] text-white px-3 py-1.5 rounded-lg hover:bg-[#A96B51] transition-all font-medium disabled:opacity-50 shadow-sm"
+                                className="text-[10px] bg-[#C17E61] text-white px-3 py-1.5 rounded-lg hover:bg-[#A96B51] transition-all font-medium disabled:opacity-50 shadow-sm cursor-pointer"
                               >
                                 Edit / Detail
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleManualCheckIn(guest.id)}
+                                onClick={() => handleSelectGuest(guest.id)}
                                 disabled={loading}
-                                className="text-[10px] bg-[#4A5D4E] text-white px-3 py-1.5 rounded-lg hover:bg-[#3d4d41] transition-all font-medium disabled:opacity-50 shadow-sm"
+                                className="text-[10px] bg-[#4A5D4E] text-white px-3 py-1.5 rounded-lg hover:bg-[#3d4d41] transition-all font-medium disabled:opacity-50 shadow-sm cursor-pointer"
                               >
-                                Check In
+                                Pilih Tamu
                               </button>
                             )}
                           </div>
@@ -936,234 +1165,253 @@ export const AdminCMS = () => {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA]">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm font-medium">Status Souvenir</span>
-                      {guest.souvenir_taken ? (
-                        <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">Sudah Diambil</span>
+                  {/* Action 1: Check In (jika belum hadir) */}
+                  {!guest.has_arrived && (
+                    <button
+                      onClick={() => handleManualCheckIn(guest.id)}
+                      disabled={loading}
+                      className="w-full bg-[#4A5D4E] text-white py-3.5 rounded-xl hover:bg-[#3d4d41] transition-all flex items-center justify-center gap-2 font-semibold shadow-sm active:scale-[0.98] text-sm cursor-pointer"
+                    >
+                      <CheckCircle size={18} />
+                      Konfirmasi & Check In Tamu
+                    </button>
+                  )}
+
+                  {/* Status & Action 2: Souvenir (hanya jika sudah hadir) */}
+                  {guest.has_arrived && (
+                    <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA]">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium">Status Souvenir</span>
+                        {guest.souvenir_taken ? (
+                          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">Sudah Diambil</span>
+                        ) : (
+                          <span className="text-xs text-[#8C9A8E] bg-gray-100 px-2 py-0.5 rounded-full font-medium">Belum Diambil</span>
+                        )}
+                      </div>
+
+                      {!guest.souvenir_taken ? (
+                        <button
+                          onClick={claimSouvenir}
+                          disabled={loading}
+                          className="w-full bg-[#C17E61] text-white py-3 rounded-xl hover:bg-[#A96B51] transition-all flex items-center justify-center gap-2 font-medium shadow-sm active:scale-[0.98] cursor-pointer"
+                        >
+                          <Gift size={18} />
+                          Berikan Souvenir
+                        </button>
                       ) : (
-                        <span className="text-xs text-[#8C9A8E] bg-gray-100 px-2 py-0.5 rounded-full font-medium">Belum Diambil</span>
+                        <div className="flex flex-col items-center justify-center py-2 text-[#4A5D4E]">
+                          <div className="w-10 h-10 bg-[#F0F4F1] rounded-full flex items-center justify-center mb-2">
+                            <CheckCircle size={20} />
+                          </div>
+                          <p className="text-sm font-medium">Souvenir telah diserahkan</p>
+                        </div>
                       )}
                     </div>
-
-                    {!guest.souvenir_taken ? (
-                      <button
-                        onClick={claimSouvenir}
-                        disabled={loading}
-                        className="w-full bg-[#C17E61] text-white py-3 rounded-xl hover:bg-[#A96B51] transition-all flex items-center justify-center gap-2 font-medium shadow-sm active:scale-[0.98]"
-                      >
-                        <Gift size={18} />
-                        Berikan Souvenir
-                      </button>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-2 text-[#4A5D4E]">
-                        <div className="w-10 h-10 bg-[#F0F4F1] rounded-full flex items-center justify-center mb-2">
-                          <CheckCircle size={20} />
-                        </div>
-                        <p className="text-sm font-medium">Souvenir telah diserahkan</p>
-                      </div>
-                    )}
-                  </div>
+                  )}
 
                   {/* Blok Kamera & Foto Tamu */}
-                  <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] space-y-4">
-                    <div className="flex items-center justify-between border-b border-[#F3F1ED] pb-2">
-                      <span className="text-sm font-semibold text-[#4A5D4E] flex items-center gap-1.5">
-                        <Camera size={16} /> Foto Kehadiran Tamu
-                      </span>
-                      {guest.photo_url && (
-                        <span className="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-                          <Check size={10} /> Tersimpan
+                  {guest.has_arrived && (
+                    <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] space-y-4">
+                      <div className="flex items-center justify-between border-b border-[#F3F1ED] pb-2">
+                        <span className="text-sm font-semibold text-[#4A5D4E] flex items-center gap-1.5">
+                          <Camera size={16} /> Foto Kehadiran Tamu
                         </span>
-                      )}
-                    </div>
+                        {guest.photo_url && (
+                          <span className="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                            <Check size={10} /> Tersimpan
+                          </span>
+                        )}
+                      </div>
 
-                    {/* STATE 1: Kamera Aktif (Live Streaming) */}
-                    {cameraActive && !capturedImage && (
-                      <div className="space-y-3">
-                        <div className="relative aspect-square w-full max-w-[280px] mx-auto overflow-hidden rounded-xl bg-black border border-[#E5E1DA] shadow-inner">
-                          <video 
-                            ref={videoRef} 
-                            autoPlay 
-                            playsInline 
-                            className="w-full h-full object-cover transform scale-x-[-1]"
-                          />
-                          <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm animate-pulse">
-                            Kamera Aktif
+                      {/* STATE 1: Kamera Aktif (Live Streaming) */}
+                      {cameraActive && !capturedImage && (
+                        <div className="space-y-3">
+                          <div className="relative aspect-square w-full max-w-[280px] mx-auto overflow-hidden rounded-xl bg-black border border-[#E5E1DA] shadow-inner">
+                            <video 
+                              ref={videoRef} 
+                              autoPlay 
+                              playsInline 
+                              className="w-full h-full object-cover transform scale-x-[-1]"
+                            />
+                            <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm animate-pulse">
+                              Kamera Aktif
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={captureSnapshot}
+                              className="flex-1 bg-[#C17E61] hover:bg-[#A96B51] text-white py-2 rounded-xl transition-all font-medium text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                            >
+                              <Camera size={16} /> Tangkap Foto
+                            </button>
+                            <button
+                              onClick={stopCameraStream}
+                              className="bg-white hover:bg-gray-50 border border-[#E5E1DA] text-gray-500 px-3 py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center"
+                            >
+                              Batal
+                            </button>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={captureSnapshot}
-                            className="flex-1 bg-[#C17E61] hover:bg-[#A96B51] text-white py-2 rounded-xl transition-all font-medium text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
-                          >
-                            <Camera size={16} /> Tangkap Foto
-                          </button>
-                          <button
-                            onClick={stopCameraStream}
-                            className="bg-white hover:bg-gray-50 border border-[#E5E1DA] text-gray-500 px-3 py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center"
-                          >
-                            Batal
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* STATE 2: Preview Hasil Foto (Menunggu Konfirmasi Simpan) */}
-                    {capturedImage && (
-                      <div className="space-y-3">
-                        <div className="aspect-square w-full max-w-[280px] mx-auto overflow-hidden rounded-xl bg-gray-100 border border-[#E5E1DA] shadow-sm">
-                          <img 
-                            src={capturedImage} 
-                            alt="Preview Tamu" 
-                            className="w-full h-full object-cover transform scale-x-[-1]" 
-                          />
+                      {/* STATE 2: Preview Hasil Foto (Menunggu Konfirmasi Simpan) */}
+                      {capturedImage && (
+                        <div className="space-y-3">
+                          <div className="aspect-square w-full max-w-[280px] mx-auto overflow-hidden rounded-xl bg-gray-100 border border-[#E5E1DA] shadow-sm">
+                            <img 
+                              src={capturedImage} 
+                              alt="Preview Tamu" 
+                              className="w-full h-full object-cover transform scale-x-[-1]" 
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={savePhoto}
+                              disabled={uploadingPhoto}
+                              className="flex-1 bg-[#4A5D4E] hover:bg-[#3D4C40] disabled:bg-gray-400 text-white py-2 rounded-xl transition-all font-medium text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                            >
+                              {uploadingPhoto ? (
+                                <>
+                                  <RefreshCw size={14} className="animate-spin" /> Menyimpan...
+                                </>
+                              ) : (
+                                <>
+                                  <Check size={16} /> Simpan Foto
+                                </>
+                              )}
+                            </button>
+                            <button
+                              onClick={startCamera}
+                              disabled={uploadingPhoto}
+                              className="bg-white hover:bg-gray-50 disabled:opacity-50 border border-[#E5E1DA] text-gray-600 px-3 py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center gap-1"
+                            >
+                              <RefreshCw size={14} /> Ulang
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={savePhoto}
-                            disabled={uploadingPhoto}
-                            className="flex-1 bg-[#4A5D4E] hover:bg-[#3D4C40] disabled:bg-gray-400 text-white py-2 rounded-xl transition-all font-medium text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
-                          >
-                            {uploadingPhoto ? (
-                              <>
-                                <RefreshCw size={14} className="animate-spin" /> Menyimpan...
-                              </>
-                            ) : (
-                              <>
-                                <Check size={16} /> Simpan Foto
-                              </>
-                            )}
-                          </button>
+                      )}
+
+                      {/* STATE 3: Foto Sudah Tersimpan & Ditampilkan */}
+                      {!cameraActive && !capturedImage && guest.photo_url && (
+                        <div className="space-y-3 text-center">
+                          <div className="relative aspect-square w-full max-w-[240px] mx-auto overflow-hidden rounded-xl border-2 border-[#E5E1DA] shadow-md group">
+                            <img 
+                              src={guest.photo_url} 
+                              alt={`Foto ${guest.name}`} 
+                              className="w-full h-full object-cover cursor-zoom-in transition-transform duration-300 group-hover:scale-105" 
+                              onClick={() => setLightboxGuest(guest)}
+                            />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
+                              <span className="bg-white/90 text-[#4A5D4E] text-xs px-2.5 py-1.5 rounded-lg font-medium shadow flex items-center gap-1">
+                                <Eye size={12} /> Perbesar
+                              </span>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); deletePhoto(); }}
+                              disabled={uploadingPhoto}
+                              className="absolute bottom-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all shadow-md active:scale-95 z-10"
+                              title="Hapus Foto"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                           <button
                             onClick={startCamera}
-                            disabled={uploadingPhoto}
-                            className="bg-white hover:bg-gray-50 disabled:opacity-50 border border-[#E5E1DA] text-gray-600 px-3 py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center gap-1"
+                            className="text-xs text-[#C17E61] hover:text-[#A96B51] font-semibold border-b border-[#C17E61] hover:border-[#A96B51] transition-all inline-flex items-center gap-1"
                           >
-                            <RefreshCw size={14} /> Ulang
+                            <RefreshCw size={12} /> Ambil Ulang Foto Tamu
                           </button>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* STATE 3: Foto Sudah Tersimpan & Ditampilkan */}
-                    {!cameraActive && !capturedImage && guest.photo_url && (
-                      <div className="space-y-3 text-center">
-                        <div className="relative aspect-square w-full max-w-[240px] mx-auto overflow-hidden rounded-xl border-2 border-[#E5E1DA] shadow-md group">
-                          <img 
-                            src={guest.photo_url} 
-                            alt={`Foto ${guest.name}`} 
-                            className="w-full h-full object-cover cursor-zoom-in transition-transform duration-300 group-hover:scale-105" 
-                            onClick={() => setLightboxGuest(guest)}
-                          />
-                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
-                            <span className="bg-white/90 text-[#4A5D4E] text-xs px-2.5 py-1.5 rounded-lg font-medium shadow flex items-center gap-1">
-                              <Eye size={12} /> Perbesar
-                            </span>
+                      {/* STATE 4: Kosong / Belum Ada Foto */}
+                      {!cameraActive && !capturedImage && !guest.photo_url && (
+                        <div className="flex flex-col items-center justify-center py-6 text-center bg-gray-50/50 rounded-xl border border-dashed border-[#E5E1DA]">
+                          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
+                            <Camera size={22} />
                           </div>
+                          <p className="text-xs font-medium text-[#8C9A8E] mb-3">Belum ada foto kehadiran tamu</p>
                           <button
-                            onClick={(e) => { e.stopPropagation(); deletePhoto(); }}
-                            disabled={uploadingPhoto}
-                            className="absolute bottom-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all shadow-md active:scale-95 z-10"
-                            title="Hapus Foto"
+                            onClick={startCamera}
+                            className="bg-[#4A5D4E] hover:bg-[#3D4C40] text-white text-xs px-4 py-2 rounded-xl transition-all font-medium flex items-center gap-1.5 shadow-sm active:scale-[0.98]"
                           >
-                            <Trash2 size={14} />
+                            <Camera size={14} /> Ambil Foto Tamu
                           </button>
                         </div>
-                        <button
-                          onClick={startCamera}
-                          className="text-xs text-[#C17E61] hover:text-[#A96B51] font-semibold border-b border-[#C17E61] hover:border-[#A96B51] transition-all inline-flex items-center gap-1"
-                        >
-                          <RefreshCw size={12} /> Ambil Ulang Foto Tamu
-                        </button>
-                      </div>
-                    )}
-
-                    {/* STATE 4: Kosong / Belum Ada Foto */}
-                    {!cameraActive && !capturedImage && !guest.photo_url && (
-                      <div className="flex flex-col items-center justify-center py-6 text-center bg-gray-50/50 rounded-xl border border-dashed border-[#E5E1DA]">
-                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
-                          <Camera size={22} />
-                        </div>
-                        <p className="text-xs font-medium text-[#8C9A8E] mb-3">Belum ada foto kehadiran tamu</p>
-                        <button
-                          onClick={startCamera}
-                          className="bg-[#4A5D4E] hover:bg-[#3D4C40] text-white text-xs px-4 py-2 rounded-xl transition-all font-medium flex items-center gap-1.5 shadow-sm active:scale-[0.98]"
-                        >
-                          <Camera size={14} /> Ambil Foto Tamu
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Blok Ucapan & Doa Tamu */}
-                  <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] space-y-4">
-                    <div className="flex items-center justify-between border-b border-[#F3F1ED] pb-2">
-                      <span className="text-sm font-semibold text-[#4A5D4E] flex items-center gap-1.5">
-                        <Heart size={16} className="text-[#C17E61]" /> Ucapan & Doa Tamu
-                      </span>
-                    </div>
+                  {guest.has_arrived && (
+                    <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] space-y-4">
+                      <div className="flex items-center justify-between border-b border-[#F3F1ED] pb-2">
+                        <span className="text-sm font-semibold text-[#4A5D4E] flex items-center gap-1.5">
+                          <Heart size={16} className="text-[#C17E61]" /> Ucapan & Doa Tamu
+                        </span>
+                      </div>
 
-                    {/* Quick Wishes Recommendations */}
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] text-[#8C9A8E] font-medium">Rekomendasi ucapan cepat (Klik untuk memilih):</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {QUICK_WISHES_TEMPLATES.map((tmpl, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => {
-                              setWishesText(tmpl);
-                              document.getElementById('wishes-textarea')?.focus();
-                            }}
-                            className="text-[9px] bg-[#F0F4F1] hover:bg-[#E2EAE4] text-[#4A5D4E] px-2 py-1 rounded-full transition-all font-medium border border-transparent hover:border-[#4A5D4E]/20 text-left truncate max-w-[180px]"
-                            title={tmpl}
-                          >
-                            {idx + 1}. {tmpl.substring(0, 18)}...
-                          </button>
-                        ))}
+                      {/* Quick Wishes Recommendations */}
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] text-[#8C9A8E] font-medium">Rekomendasi ucapan cepat (Klik untuk memilih):</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {QUICK_WISHES_TEMPLATES.map((tmpl, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setWishesText(tmpl);
+                                document.getElementById('wishes-textarea')?.focus();
+                              }}
+                              className="text-[9px] bg-[#F0F4F1] hover:bg-[#E2EAE4] text-[#4A5D4E] px-2 py-1 rounded-full transition-all font-medium border border-transparent hover:border-[#4A5D4E]/20 text-left truncate max-w-[180px]"
+                              title={tmpl}
+                            >
+                              {idx + 1}. {tmpl.substring(0, 18)}...
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Textarea Input & Save Button */}
+                      <div className="space-y-2">
+                        <textarea
+                          id="wishes-textarea"
+                          rows={3}
+                          value={wishesText}
+                          onChange={(e) => setWishesText(e.target.value)}
+                          placeholder="Tuliskan ucapan selamat atau harapan dari tamu di sini..."
+                          className="w-full bg-white border border-[#E5E1DA] rounded-xl p-3 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all text-xs resize-none"
+                        />
+                        <button
+                          onClick={saveGuestWishes}
+                          disabled={savingWishes || !wishesText.trim()}
+                          className="w-full bg-[#4A5D4E] hover:bg-[#3D4C40] disabled:bg-gray-200 disabled:text-gray-400 text-white py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                        >
+                          {savingWishes ? (
+                            <>
+                              <RefreshCw size={12} className="animate-spin" /> Menyimpan...
+                            </>
+                          ) : (
+                            <>
+                              <Check size={14} /> Simpan Ucapan
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
-
-                    {/* Textarea Input & Save Button */}
-                    <div className="space-y-2">
-                      <textarea
-                        id="wishes-textarea"
-                        rows={3}
-                        value={wishesText}
-                        onChange={(e) => setWishesText(e.target.value)}
-                        placeholder="Tuliskan ucapan selamat atau harapan dari tamu di sini..."
-                        className="w-full bg-white border border-[#E5E1DA] rounded-xl p-3 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all text-xs resize-none"
-                      />
-                      <button
-                        onClick={saveGuestWishes}
-                        disabled={savingWishes || !wishesText.trim()}
-                        className="w-full bg-[#4A5D4E] hover:bg-[#3D4C40] disabled:bg-gray-200 disabled:text-gray-400 text-white py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
-                      >
-                        {savingWishes ? (
-                          <>
-                            <RefreshCw size={12} className="animate-spin" /> Menyimpan...
-                          </>
-                        ) : (
-                          <>
-                            <Check size={14} /> Simpan Ucapan
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                  )}
                   
                   <div className="flex flex-col gap-2">
                     <button 
                       onClick={startScanner}
-                      className="w-full text-[#4A5D4E] bg-[#F0F4F1] hover:bg-[#E2EAE4] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm"
+                      className="w-full text-[#4A5D4E] bg-[#F0F4F1] hover:bg-[#E2EAE4] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm cursor-pointer"
                     >
                       <Camera size={18} />
                       Scan Tamu Lain
                     </button>
                     <button 
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full text-[#4A5D4E] bg-white border border-[#E5E1DA] hover:bg-[#FDFBF7] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm"
+                      className="w-full text-[#4A5D4E] bg-white border border-[#E5E1DA] hover:bg-[#FDFBF7] py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-medium shadow-sm cursor-pointer"
                     >
                       <Image size={18} />
                       Upload QR Tamu Lain
@@ -1442,8 +1690,243 @@ export const AdminCMS = () => {
                 <p className="text-xs font-medium text-[#8C9A8E]">Belum ada foto tamu yang terdokumentasi.</p>
               </div>
             )}
+        </div>
+      </div>
+    </>
+    ) : (
+      /* Area Manajemen Undangan */
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E5E1DA] space-y-6 animate-fadeIn">
+        {/* Stat Cards for Management */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
+            <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+              <Users size={12} /> Total Tamu
+            </span>
+            <p className="text-2xl font-bold text-[#4A5D4E] font-serif mt-1">{totalGuestsCount}</p>
+            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Tamu terdaftar di sistem</p>
+          </div>
+          <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
+            <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+              <Award size={12} /> Tamu VIP
+            </span>
+            <p className="text-2xl font-bold text-amber-600 font-serif mt-1">{totalVIPsCount}</p>
+            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Prioritas pelayanan</p>
+          </div>
+          <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
+            <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+              <TrendingUp size={12} /> Kapasitas Pax
+            </span>
+            <p className="text-2xl font-bold text-blue-600 font-serif mt-1">{maxExpectedPax}</p>
+            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Maksimal porsi katering</p>
           </div>
         </div>
+
+        {/* Actions Bar */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#F3F1ED] pb-6">
+          {/* Search bar */}
+          <div className="relative flex-1 w-full max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8C9A8E]" size={18} />
+            <input
+              type="text"
+              placeholder="Cari nama atau keterangan tamu..."
+              value={crudSearch}
+              onChange={(e) => {
+                setCrudSearch(e.target.value)
+                setCrudPage(1)
+              }}
+              className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-3 pl-12 pr-6 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm"
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <button
+              onClick={() => {
+                setEditingGuest(null)
+                setCrudName('')
+                setCrudDescription('')
+                setCrudInvitedPax(2)
+                setCrudIsVip(false)
+                setShowCrudModal(true)
+              }}
+              className="flex-1 md:flex-initial bg-[#4A5D4E] hover:bg-[#3D4C40] text-white px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer"
+            >
+              <Plus size={14} /> Tambah Tamu
+            </button>
+            <button
+              onClick={handleDownloadCSVTemplate}
+              className="flex-1 md:flex-initial bg-white border border-[#E5E1DA] hover:bg-[#FDFBF7] text-[#4A5D4E] px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer"
+            >
+              <Download size={14} /> Unduh Template CSV
+            </button>
+            <button
+              onClick={() => fileImportRef.current?.click()}
+              disabled={importingCSV}
+              className="flex-1 md:flex-initial bg-[#C17E61] hover:bg-[#A96B51] disabled:bg-gray-300 text-white px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer"
+            >
+              <FileSpreadsheet size={14} /> {importingCSV ? 'Mengimpor...' : 'Impor Tamu (CSV)'}
+            </button>
+            <input
+              type="file"
+              ref={fileImportRef}
+              className="hidden"
+              accept=".csv"
+              onChange={handleImportCSV}
+            />
+          </div>
+        </div>
+
+        {/* Table Area */}
+        <div className="overflow-x-auto rounded-xl border border-[#E5E1DA]">
+          <table className="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr className="bg-[#FDFBF7] text-[#4A5D4E] font-serif border-b border-[#E5E1DA]">
+                <th className="p-4 font-semibold">Nama Tamu</th>
+                <th className="p-4 font-semibold">Grup/Ket.</th>
+                <th className="p-4 font-semibold">VIP Status</th>
+                <th className="p-4 font-semibold text-center">Kapasitas Pax</th>
+                <th className="p-4 font-semibold">Status RSVP</th>
+                <th className="p-4 font-semibold">Kehadiran</th>
+                <th className="p-4 font-semibold">QR Code & Link</th>
+                <th className="p-4 font-semibold text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#F3F1ED]">
+              {paginatedCrudGuests.length > 0 ? (
+                paginatedCrudGuests.map((g) => (
+                  <tr key={g.id} className="hover:bg-[#FDFBF7]/50 transition-colors">
+                    <td className="p-4 font-serif font-medium text-[#4A5D4E]">
+                      {g.name}
+                    </td>
+                    <td className="p-4 text-[#8C9A8E] text-xs">
+                      {g.description || '-'}
+                    </td>
+                    <td className="p-4">
+                      {g.is_vip ? (
+                        <span className="bg-amber-100 text-amber-800 text-[10px] px-2.5 py-0.5 rounded-full font-bold border border-amber-200">
+                          VIP
+                        </span>
+                      ) : (
+                        <span className="bg-gray-100 text-gray-600 text-[10px] px-2.5 py-0.5 rounded-full font-medium">
+                          Regular
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 text-center font-semibold">
+                      {g.invited_pax || 2} Pax
+                    </td>
+                    <td className="p-4">
+                      {g.rsvp_status ? (
+                        <span className="bg-green-50 text-green-700 text-[10px] px-2.5 py-0.5 rounded-full font-semibold border border-green-100">
+                          Hadir
+                        </span>
+                      ) : (
+                        <span className="bg-gray-50 text-gray-500 text-[10px] px-2.5 py-0.5 rounded-full font-medium">
+                          Belum RSVP
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      {g.has_arrived ? (
+                        <span className="inline-flex flex-col text-[10px] text-green-700 bg-green-50 border border-green-100 px-2 py-0.5 rounded">
+                          <span className="font-semibold">Sudah Hadir</span>
+                          {g.arrival_time && (
+                            <span className="text-[8px] text-gray-400 font-sans mt-0.5">
+                              {new Date(g.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="bg-red-50 text-red-700 text-[10px] px-2.5 py-0.5 rounded font-medium border border-red-100">
+                          Belum Hadir
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 space-y-1">
+                      <code className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded block w-fit font-mono">
+                        {g.qr_code}
+                      </code>
+                      <button
+                        onClick={() => handleCopyInvitationLink(g.qr_code, g.id)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all border cursor-pointer ${
+                          copiedGuestId === g.id
+                            ? 'bg-green-50 border-green-200 text-green-700'
+                            : 'bg-white border-[#E5E1DA] hover:border-[#4A5D4E] text-[#4A5D4E]'
+                        }`}
+                      >
+                        {copiedGuestId === g.id ? (
+                          <>
+                            <Check size={10} />
+                            <span>Tersalin</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={10} />
+                            <span>Salin Link</span>
+                          </>
+                        )}
+                      </button>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingGuest(g)
+                            setCrudName(g.name)
+                            setCrudDescription(g.description || '')
+                            setCrudInvitedPax(g.invited_pax || 2)
+                            setCrudIsVip(g.is_vip || false)
+                            setShowCrudModal(true)
+                          }}
+                          className="text-xs text-[#4A5D4E] hover:text-[#3D4C40] bg-[#F0F4F1] hover:bg-[#E2EAE4] px-2.5 py-1.5 rounded-lg transition-all font-semibold cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGuest(g.id, g.name)}
+                          className="text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg transition-all font-semibold cursor-pointer"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-[#8C9A8E]">
+                    Tidak ada data tamu ditemukan.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination Controls */}
+        {totalCrudPages > 1 && (
+          <div className="flex items-center justify-center gap-4 pt-4 border-t border-[#F3F1ED]">
+            <button
+              onClick={() => setCrudPage((p) => Math.max(1, p - 1))}
+              disabled={crudPage === 1}
+              className="flex items-center gap-1 text-xs text-[#4A5D4E] hover:text-[#3D4C40] disabled:text-gray-300 font-semibold transition-all disabled:pointer-events-none cursor-pointer"
+            >
+              <ChevronLeft size={16} /> Sebelumnya
+            </button>
+            <span className="text-xs text-[#8C9A8E] font-medium">
+              Halaman {crudPage} dari {totalCrudPages}
+            </span>
+            <button
+              onClick={() => setCrudPage((p) => Math.min(totalCrudPages, p + 1))}
+              disabled={crudPage === totalCrudPages}
+              className="flex items-center gap-1 text-xs text-[#4A5D4E] hover:text-[#3D4C40] disabled:text-gray-300 font-semibold transition-all disabled:pointer-events-none cursor-pointer"
+            >
+              Selanjutnya <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+      </div>
+    )}
       </div>
 
       <style>{`
@@ -1515,6 +1998,110 @@ export const AdminCMS = () => {
         </div>
       )}
 
+      {/* Modal CRUD Tamu */}
+      {showCrudModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all duration-300 animate-fadeIn"
+          onClick={() => setShowCrudModal(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl border border-[#E5E1DA] shadow-2xl max-w-md w-full overflow-hidden transition-all duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b border-[#F3F1ED] bg-[#FDFBF7]">
+              <h3 className="text-lg font-serif font-semibold text-[#4A5D4E]">
+                {editingGuest ? 'Edit Data Tamu' : 'Tambah Tamu Baru'}
+              </h3>
+              <button 
+                onClick={() => setShowCrudModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-full transition-all cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveGuest} className="p-5 space-y-4">
+              {/* Nama Tamu */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#4A5D4E] block">Nama Tamu *</label>
+                <input 
+                  type="text"
+                  required
+                  placeholder="Contoh: Budi Santoso"
+                  value={crudName}
+                  onChange={(e) => setCrudName(e.target.value)}
+                  className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl px-4 py-2.5 outline-none focus:ring-1 focus:ring-[#4A5D4E] text-sm transition-all"
+                />
+              </div>
+
+              {/* Keterangan / Grup */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#4A5D4E] block">Keterangan / Grup Undangan</label>
+                <input 
+                  type="text"
+                  placeholder="Contoh: Tamu CPW, Teman Kuliah, dll."
+                  value={crudDescription}
+                  onChange={(e) => setCrudDescription(e.target.value)}
+                  className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl px-4 py-2.5 outline-none focus:ring-1 focus:ring-[#4A5D4E] text-sm transition-all"
+                />
+              </div>
+
+              {/* Kapasitas Pax & VIP Checkbox */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#4A5D4E] block">Kapasitas Pax (Undangan)</label>
+                  <input 
+                    type="number"
+                    min="1"
+                    max="10"
+                    required
+                    value={crudInvitedPax}
+                    onChange={(e) => setCrudInvitedPax(Number(e.target.value))}
+                    className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl px-4 py-2.5 outline-none focus:ring-1 focus:ring-[#4A5D4E] text-sm transition-all"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2 pt-6 pl-2">
+                  <input 
+                    type="checkbox"
+                    id="vip-checkbox"
+                    checked={crudIsVip}
+                    onChange={(e) => setCrudIsVip(e.target.checked)}
+                    className="w-4 h-4 rounded text-[#4A5D4E] focus:ring-[#4A5D4E] border-[#E5E1DA] cursor-pointer"
+                  />
+                  <label htmlFor="vip-checkbox" className="text-xs font-semibold text-[#4A5D4E] cursor-pointer select-none">
+                    Tamu VIP
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-[#F3F1ED]">
+                <button
+                  type="button"
+                  onClick={() => setShowCrudModal(false)}
+                  className="flex-1 bg-white hover:bg-gray-50 border border-[#E5E1DA] text-gray-600 py-2.5 rounded-xl transition-all font-semibold text-xs text-center cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-[#4A5D4E] hover:bg-[#3D4C40] text-white py-2.5 rounded-xl transition-all font-semibold text-xs text-center shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw size={12} className="animate-spin" /> Menyimpan...
+                    </>
+                  ) : (
+                    'Simpan Tamu'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Toast Real-time Check-In Notifications Feed */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
         <AnimatePresence>
@@ -1526,25 +2113,35 @@ export const AdminCMS = () => {
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
               className="bg-white/95 backdrop-blur-md border border-[#E5E1DA] p-4 rounded-xl shadow-lg flex items-start gap-3 pointer-events-auto w-full select-none"
             >
-              <div className={`p-2 rounded-lg ${t.is_vip ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-[#F0F4F1] text-[#4A5D4E]'}`}>
-                <Sparkles size={16} className={t.is_vip ? 'animate-pulse' : ''} />
+              <div className={`p-2 rounded-lg ${t.id.startsWith('copy-') ? 'bg-green-50 text-green-600 border border-green-200' : t.is_vip ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-[#F0F4F1] text-[#4A5D4E]'}`}>
+                {t.id.startsWith('copy-') ? (
+                  <CheckCircle size={16} />
+                ) : (
+                  <Sparkles size={16} className={t.is_vip ? 'animate-pulse' : ''} />
+                )}
               </div>
               <div className="flex-1 space-y-0.5">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-serif font-bold text-gray-800">{t.name}</span>
-                  {t.is_vip && (
+                  {!t.id.startsWith('copy-') && t.is_vip && (
                     <span className="bg-amber-400 text-amber-950 text-[8px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider">
                       VIP
                     </span>
                   )}
                 </div>
-                {t.description && (
-                  <p className="text-[9px] text-[#C17E61] italic font-sans">{t.description}</p>
+                {t.id.startsWith('copy-') ? (
+                  <p className="text-[10px] text-gray-600 font-sans font-medium">{t.description}</p>
+                ) : (
+                  <>
+                    {t.description && (
+                      <p className="text-[9px] text-[#C17E61] italic font-sans">{t.description}</p>
+                    )}
+                    <p className="text-[10px] text-gray-500">Baru saja check-in di pintu gerbang.</p>
+                    <span className="text-[9px] text-gray-400 flex items-center gap-1 font-medium">
+                      <Clock size={10} /> Tiba pukul {t.arrival_time ? new Date(t.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                    </span>
+                  </>
                 )}
-                <p className="text-[10px] text-gray-500">Baru saja check-in di pintu gerbang.</p>
-                <span className="text-[9px] text-gray-400 flex items-center gap-1 font-medium">
-                  <Clock size={10} /> Tiba pukul {t.arrival_time ? new Date(t.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
-                </span>
               </div>
               <button
                 onClick={() => setToasts((prev) => prev.filter(toast => toast.id !== t.id))}

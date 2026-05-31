@@ -4,6 +4,7 @@ import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
 import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles, Plus, Copy, FileSpreadsheet } from 'lucide-react'
+import Swal from 'sweetalert2'
 
 const QUICK_WISHES_TEMPLATES = [
   "Selamat menempuh hidup baru! Semoga cinta kalian abadi hingga hari tua.",
@@ -20,6 +21,35 @@ const getInitials = (name: string) => {
   }
   return parts[0].substring(0, 2).toUpperCase();
 };
+
+const toastTheme = Swal.mixin({
+  background: '#FDFBF7',
+  color: '#4A5D4E',
+  confirmButtonColor: '#4A5D4E',
+  cancelButtonColor: '#C17E61',
+  customClass: {
+    popup: 'rounded-2xl border border-[#E5E1DA] font-serif shadow-xl',
+    title: 'text-[#4A5D4E] font-serif font-semibold text-lg',
+    htmlContainer: 'text-sm text-[#8C9A8E] font-sans mt-2',
+    confirmButton: 'rounded-xl px-5 py-2.5 text-xs font-semibold shadow-sm cursor-pointer mx-1 focus:ring-2 focus:ring-[#4A5D4E] text-white bg-[#4A5D4E] border border-transparent hover:bg-[#3D4C40] transition-colors',
+    cancelButton: 'rounded-xl px-5 py-2.5 text-xs font-semibold shadow-sm cursor-pointer mx-1 focus:ring-2 focus:ring-[#C17E61] text-white bg-[#C17E61] border border-transparent hover:bg-[#A96B51] transition-colors'
+  },
+  buttonsStyling: false
+})
+
+const showAlert = (text: string, icon: 'success' | 'error' | 'warning' | 'info' = 'info', title?: string) => {
+  let defaultTitle = 'Informasi'
+  if (icon === 'success') defaultTitle = 'Berhasil'
+  if (icon === 'error') defaultTitle = 'Gagal'
+  if (icon === 'warning') defaultTitle = 'Peringatan'
+  
+  return toastTheme.fire({
+    title: title || defaultTitle,
+    text,
+    icon,
+    iconColor: icon === 'success' ? '#4A5D4E' : icon === 'error' || icon === 'warning' ? '#C17E61' : '#8C9A8E'
+  })
+}
 
 export const AdminCMS = () => {
   const { user, signOut } = useAuth()
@@ -57,6 +87,7 @@ export const AdminCMS = () => {
   const [crudInvitedPax, setCrudInvitedPax] = useState(2)
   const [crudIsVip, setCrudIsVip] = useState(false)
   const [crudSearch, setCrudSearch] = useState('')
+  const [crudVipFilter, setCrudVipFilter] = useState<'all' | 'vip' | 'non-vip'>('all')
   const [crudPage, setCrudPage] = useState(1)
   const [copiedGuestId, setCopiedGuestId] = useState<string | null>(null)
   const fileImportRef = useRef<HTMLInputElement>(null)
@@ -65,17 +96,22 @@ export const AdminCMS = () => {
   const handleSaveGuest = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!crudName.trim()) {
-      alert("Nama tamu tidak boleh kosong.")
+      showAlert("Nama tamu tidak boleh kosong.", "warning")
       return
     }
     
     setLoading(true)
     try {
       if (editingGuest) {
+        const cleanedName = crudName.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000)
+        const qrCode = `${cleanedName}${randomSuffix}`
+
         const { error } = await supabase
           .from('guests')
           .update({
             name: crudName.trim(),
+            qr_code: qrCode, // Regenerate/update QR code based on new name format
             description: crudDescription.trim() || null,
             invited_pax: Number(crudInvitedPax) || 2,
             is_vip: crudIsVip
@@ -83,9 +119,11 @@ export const AdminCMS = () => {
           .eq('id', editingGuest.id)
         
         if (error) throw error
-        alert("Data tamu berhasil diperbarui!")
+        showAlert("Data tamu berhasil diperbarui!", "success")
       } else {
-        const qrCode = `GUEST-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
+        const cleanedName = crudName.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000)
+        const qrCode = `${cleanedName}${randomSuffix}`
         const invitedPax = Number(crudInvitedPax) || 2
         const { error } = await supabase
           .from('guests')
@@ -101,7 +139,7 @@ export const AdminCMS = () => {
           })
         
         if (error) throw error
-        alert("Tamu baru berhasil ditambahkan!")
+        showAlert("Tamu baru berhasil ditambahkan!", "success")
       }
       
       setShowCrudModal(false)
@@ -113,14 +151,24 @@ export const AdminCMS = () => {
       fetchGuests()
     } catch (err: any) {
       console.error("Gagal menyimpan data tamu:", err)
-      alert(`Gagal menyimpan data tamu: ${err.message || 'Error tidak diketahui'}`)
+      showAlert(`Gagal menyimpan data tamu: ${err.message || 'Error tidak diketahui'}`, "error")
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeleteGuest = async (guestId: string, guestName: string) => {
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus tamu "${guestName}"? Tindakan ini tidak dapat dibatalkan.`)) {
+    const result = await toastTheme.fire({
+      title: 'Hapus Tamu',
+      text: `Apakah Anda yakin ingin menghapus tamu "${guestName}"? Tindakan ini tidak dapat dibatalkan.`,
+      icon: 'warning',
+      iconColor: '#C17E61',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
+    })
+    
+    if (!result.isConfirmed) {
       return
     }
     
@@ -132,14 +180,14 @@ export const AdminCMS = () => {
         .eq('id', guestId)
       
       if (error) throw error
-      alert(`Tamu "${guestName}" berhasil dihapus.`)
+      showAlert(`Tamu "${guestName}" berhasil dihapus.`, "success")
       fetchGuests()
       if (guest && guest.id === guestId) {
         setGuest(null)
       }
     } catch (err: any) {
       console.error("Gagal menghapus tamu:", err)
-      alert(`Gagal menghapus tamu: ${err.message || 'Error tidak diketahui'}`)
+      showAlert(`Gagal menghapus tamu: ${err.message || 'Error tidak diketahui'}`, "error")
     } finally {
       setLoading(false)
     }
@@ -168,7 +216,7 @@ export const AdminCMS = () => {
       }, 2000)
     } catch (err) {
       console.error("Gagal menyalin tautan:", err)
-      alert("Gagal menyalin tautan ke clipboard.")
+      showAlert("Gagal menyalin tautan ke clipboard.", "error")
     }
   }
 
@@ -198,7 +246,7 @@ export const AdminCMS = () => {
       const text = await file.text()
       const lines = text.split(/\r?\n/)
       if (lines.length <= 1) {
-        alert("Berkas CSV kosong atau hanya berisi baris header.")
+        showAlert("Berkas CSV kosong atau hanya berisi baris header.", "warning")
         setImportingCSV(false)
         return
       }
@@ -217,7 +265,9 @@ export const AdminCMS = () => {
         const vipText = (cells[3] || "").toLowerCase()
         const is_vip = vipText === "ya" || vipText === "yes" || vipText === "1" || vipText === "true"
         
-        const qrCode = `GUEST-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
+        const cleanedName = name.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000)
+        const qrCode = `${cleanedName}${randomSuffix}`
         
         bulkGuests.push({
           name,
@@ -232,7 +282,7 @@ export const AdminCMS = () => {
       }
       
       if (bulkGuests.length === 0) {
-        alert("Tidak ada baris data tamu yang valid ditemukan di dalam CSV.")
+        showAlert("Tidak ada baris data tamu yang valid ditemukan di dalam CSV.", "warning")
         setImportingCSV(false)
         return
       }
@@ -243,11 +293,11 @@ export const AdminCMS = () => {
         
       if (error) throw error
       
-      alert(`Berhasil mengimpor massal ${bulkGuests.length} tamu baru!`)
+      showAlert(`Berhasil mengimpor massal ${bulkGuests.length} tamu baru!`, "success")
       fetchGuests()
     } catch (err: any) {
       console.error("Gagal mengimpor CSV:", err)
-      alert(`Gagal mengimpor CSV: ${err.message || 'Error tidak diketahui'}`)
+      showAlert(`Gagal mengimpor CSV: ${err.message || 'Error tidak diketahui'}`, "error")
     } finally {
       setImportingCSV(false)
       if (fileImportRef.current) {
@@ -315,7 +365,7 @@ export const AdminCMS = () => {
     } catch (err) {
       console.error('Failed to start scanner:', err)
       setIsScanning(false)
-      alert('Gagal mengakses kamera. Pastikan izin kamera telah diberikan.')
+      showAlert('Gagal mengakses kamera. Pastikan izin kamera telah diberikan.', 'error', 'Kamera Gagal')
     }
   }
 
@@ -337,7 +387,7 @@ export const AdminCMS = () => {
       await onScanSuccess(decodedText)
     } catch (err) {
       console.error('Failed to scan file:', err)
-      alert('Tidak ada QR Code ditemukan dalam gambar. Pastikan gambar jelas dan berisi QR Code.')
+      showAlert('Tidak ada QR Code ditemukan dalam gambar. Pastikan gambar jelas dan berisi QR Code.', 'warning', 'QR Code Tidak Ditemukan')
     } finally {
       setLoading(false)
       if (e.target) e.target.value = '' // Reset input
@@ -363,7 +413,7 @@ export const AdminCMS = () => {
       fetchGuests()
     } catch (error) {
       console.error('Error fetching guest:', error)
-      alert('Tamu tidak ditemukan atau QR Code salah.')
+      showAlert('Tamu tidak ditemukan atau QR Code salah.', 'error', 'Tidak Ditemukan')
     } finally {
       setLoading(false)
     }
@@ -385,10 +435,10 @@ export const AdminCMS = () => {
       setWishesText(data?.message || '')
       fetchGuests()
       setManualSearchQuery('') // Clear search after successful check-in
-      alert(`Berhasil check-in: ${data.name}${data.description ? ` (${data.description})` : ''}`)
+      showAlert(`Berhasil check-in: ${data.name}${data.description ? ` (${data.description})` : ''}`, 'success', 'Check-in Berhasil')
     } catch (error) {
       console.error('Error manual check-in:', error)
-      alert('Gagal melakukan check-in manual.')
+      showAlert('Gagal melakukan check-in manual.', 'error')
     } finally {
       setLoading(false)
     }
@@ -410,7 +460,7 @@ export const AdminCMS = () => {
       setWishesText(data?.message || '')
     } catch (err: any) {
       console.error("Gagal memuat detail tamu:", err)
-      alert(`Gagal memuat detail tamu: ${err.message || 'Error tidak diketahui'}`)
+      showAlert(`Gagal memuat detail tamu: ${err.message || 'Error tidak diketahui'}`, 'error')
     } finally {
       setLoading(false)
     }
@@ -437,7 +487,7 @@ export const AdminCMS = () => {
       }, 100)
     } catch (err) {
       console.error("Gagal membuka kamera:", err)
-      alert("Gagal mengakses kamera. Mohon pastikan izin akses kamera telah diberikan.")
+      showAlert("Gagal mengakses kamera. Mohon pastikan izin akses kamera telah diberikan.", "error", "Kamera Gagal")
     }
   }
 
@@ -511,10 +561,10 @@ export const AdminCMS = () => {
       setCapturedImage(null)
       setImageBlob(null)
       fetchGuests() // Refresh daftar tamu
-      alert("Foto tamu berhasil disimpan!")
+      showAlert("Foto tamu berhasil disimpan!", "success")
     } catch (err: any) {
       console.error("Gagal menyimpan foto:", err)
-      alert(`Gagal menyimpan foto: ${err.message || 'Error tidak diketahui'}`)
+      showAlert(`Gagal menyimpan foto: ${err.message || 'Error tidak diketahui'}`, "error")
     } finally {
       setUploadingPhoto(false)
     }
@@ -522,7 +572,18 @@ export const AdminCMS = () => {
 
   const deletePhoto = async () => {
     if (!guest || !guest.photo_url) return
-    if (!confirm("Apakah Anda yakin ingin menghapus foto tamu ini?")) return
+    
+    const confirmResult = await toastTheme.fire({
+      title: 'Hapus Foto',
+      text: 'Apakah Anda yakin ingin menghapus foto tamu ini?',
+      icon: 'warning',
+      iconColor: '#C17E61',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
+    })
+    
+    if (!confirmResult.isConfirmed) return
     
     setUploadingPhoto(true)
     const filePath = `photos/${guest.id}.jpg`
@@ -541,10 +602,10 @@ export const AdminCMS = () => {
       
       setGuest({ ...guest, photo_url: null })
       fetchGuests()
-      alert("Foto tamu berhasil dihapus!")
+      showAlert("Foto tamu berhasil dihapus!", "success")
     } catch (err: any) {
       console.error("Gagal menghapus foto:", err)
-      alert(`Gagal menghapus foto: ${err.message}`)
+      showAlert(`Gagal menghapus foto: ${err.message}`, "error")
     } finally {
       setUploadingPhoto(false)
     }
@@ -565,10 +626,10 @@ export const AdminCMS = () => {
       // Perbarui data guest lokal
       setGuest({ ...guest, message: wishesText })
       fetchGuests() // Segarkan daftar tamu hadir/belum hadir
-      alert("Ucapan tamu berhasil disimpan!")
+      showAlert("Ucapan tamu berhasil disimpan!", "success")
     } catch (err: any) {
       console.error("Gagal menyimpan ucapan:", err)
-      alert(`Gagal menyimpan ucapan: ${err.message || 'Error tidak diketahui'}`)
+      showAlert(`Gagal menyimpan ucapan: ${err.message || 'Error tidak diketahui'}`, "error")
     } finally {
       setSavingWishes(false)
     }
@@ -584,7 +645,7 @@ export const AdminCMS = () => {
         
       if (error) throw error
       if (!allGuests || allGuests.length === 0) {
-        alert("Tidak ada data tamu untuk diekspor.")
+        showAlert("Tidak ada data tamu untuk diekspor.", "warning", "Ekspor Gagal")
         return
       }
       
@@ -638,11 +699,9 @@ export const AdminCMS = () => {
       document.body.removeChild(link)
     } catch (err: any) {
       console.error("Gagal mengekspor CSV:", err)
-      alert(`Gagal melakukan ekspor data: ${err.message}`)
+      showAlert(`Gagal melakukan ekspor data: ${err.message}`, "error", "Ekspor Gagal")
     }
   }
-
-
 
   const claimSouvenir = async () => {
     if (!guest) return
@@ -656,10 +715,10 @@ export const AdminCMS = () => {
       if (error) throw error
       setGuest({ ...guest, souvenir_taken: true })
       fetchGuests() // Segarkan statistik dan dasbor analitik secara real-time!
-      alert('Souvenir berhasil diberikan!')
+      showAlert('Souvenir berhasil diberikan!', 'success')
     } catch (error) {
       console.error('Error updating souvenir status:', error)
-      alert('Gagal update status souvenir.')
+      showAlert('Gagal update status souvenir.', 'error')
     } finally {
       setLoading(false)
     }
@@ -779,6 +838,11 @@ export const AdminCMS = () => {
       g.name.toLowerCase().includes(crudSearch.toLowerCase()) || 
       (g.description || "").toLowerCase().includes(crudSearch.toLowerCase())
     )
+    .filter(g => {
+      if (crudVipFilter === 'vip') return g.is_vip
+      if (crudVipFilter === 'non-vip') return !g.is_vip
+      return true
+    })
     .sort((a, b) => a.name.localeCompare(b.name))
 
   const CRUD_ITEMS_PER_PAGE = 10
@@ -1725,20 +1789,38 @@ export const AdminCMS = () => {
         </div>
 
         {/* Actions Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#F3F1ED] pb-6">
-          {/* Search bar */}
-          <div className="relative flex-1 w-full max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8C9A8E]" size={18} />
-            <input
-              type="text"
-              placeholder="Cari nama atau keterangan tamu..."
-              value={crudSearch}
-              onChange={(e) => {
-                setCrudSearch(e.target.value)
-                setCrudPage(1)
-              }}
-              className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-3 pl-12 pr-6 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm"
-            />
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 border-b border-[#F3F1ED] pb-6">
+          {/* Search bar & VIP Filter */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:max-w-2xl">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8C9A8E]" size={18} />
+              <input
+                type="text"
+                placeholder="Cari nama atau keterangan tamu..."
+                value={crudSearch}
+                onChange={(e) => {
+                  setCrudSearch(e.target.value)
+                  setCrudPage(1)
+                }}
+                className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2.5 pl-12 pr-6 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm"
+              />
+            </div>
+            
+            {/* VIP Status Filter Select */}
+            <div className="w-full sm:w-48">
+              <select
+                value={crudVipFilter}
+                onChange={(e) => {
+                  setCrudVipFilter(e.target.value as 'all' | 'vip' | 'non-vip')
+                  setCrudPage(1)
+                }}
+                className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2.5 px-4 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm text-[#4A5D4E]"
+              >
+                <option value="all">Semua Status</option>
+                <option value="vip">Hanya VIP ⭐</option>
+                <option value="non-vip">Reguler</option>
+              </select>
+            </div>
           </div>
 
           {/* Action Buttons */}

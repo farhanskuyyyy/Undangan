@@ -152,100 +152,113 @@ export const RSVPForm = ({
         {/* RSVP Form Column */}
         {!submitted && (
           <div className="lg:col-span-5">
-            <div className="bg-white/80 backdrop-blur-md p-5 sm:p-8 md:p-10 rounded-[1.75rem] sm:rounded-[2.5rem] shadow-xl border border-primary/10 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gold/5 rounded-full -ml-12 -mb-12 pointer-events-none" />
-              
-              <h3 className="text-2xl font-serif text-burgundy italic mb-8 border-b border-primary/10 pb-4 flex items-center gap-2.5">
-                <Calendar className="w-5 h-5 text-primary" /> RSVP Form
-              </h3>
+            {!guestName ? (
+              <div className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[1.75rem] sm:rounded-[2.5rem] shadow-xl border border-[#E5E1DA] text-center space-y-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
+                <div className="w-16 h-16 bg-[#C17E61]/10 rounded-full flex items-center justify-center mx-auto text-[#C17E61] mb-2 shadow-inner">
+                  <ShieldCheck className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-serif text-burgundy italic font-semibold">RSVP Khusus Undangan</h3>
+                <p className="text-gray-500 text-xs leading-relaxed font-sans">
+                  Konfirmasi kehadiran ini hanya dapat diisi melalui tautan undangan resmi yang dikirimkan oleh calon mempelai. Terima kasih atas pengertian Anda.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-white/80 backdrop-blur-md p-5 sm:p-8 md:p-10 rounded-[1.75rem] sm:rounded-[2.5rem] shadow-xl border border-primary/10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gold/5 rounded-full -ml-12 -mb-12 pointer-events-none" />
+                
+                <h3 className="text-2xl font-serif text-burgundy italic mb-8 border-b border-primary/10 pb-4 flex items-center gap-2.5">
+                  <Calendar className="w-5 h-5 text-primary" /> RSVP Form
+                </h3>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
-                {guestName && (
-                  <div className="mb-6 p-4 bg-primary/5 border border-primary/10 rounded-2xl text-burgundy text-xs space-y-1">
-                    <p className="font-semibold text-sm">Selamat datang, {guestName}!</p>
-                    {guestDescription && (
-                      <p className="text-gray-500 italic">Grup Undangan: {guestDescription}</p>
-                    )}
-                    <p className="text-gray-400 font-sans">Anda diundang dengan batas kapasitas maksimal: <strong>{invitedPax} pax</strong>.</p>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5" /> Nama Lengkap
-                  </label>
-                  <input
-                    {...register('name', { required: true })}
-                    disabled={!!guestName}
-                    className={`w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy ${
-                      guestName ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''
-                    }`}
-                    placeholder="Masukkan Nama Lengkap Anda"
-                  />
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
                   {guestName && (
-                    <span className="text-[10px] text-gray-400 italic mt-1 block">Nama dikunci berdasarkan tautan undangan</span>
+                    <div className="mb-6 p-4 bg-primary/5 border border-primary/10 rounded-2xl text-burgundy text-xs space-y-1">
+                      <p className="font-semibold text-sm">Selamat datang, {guestName}!</p>
+                      {guestDescription && (
+                        <p className="text-gray-500 italic">Grup Undangan: {guestDescription}</p>
+                      )}
+                      <p className="text-gray-400 font-sans">Anda diundang dengan batas kapasitas maksimal: <strong>{invitedPax} pax</strong>.</p>
+                    </div>
                   )}
-                </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5" /> Konfirmasi Kehadiran
-                  </label>
-                  <select
-                    {...register('rsvp_status', { required: true })}
-                    className="w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy cursor-pointer appearance-none"
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5" /> Nama Lengkap
+                    </label>
+                    <input
+                      {...register('name', { required: true })}
+                      disabled={!!guestName}
+                      className={`w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy ${
+                        guestName ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''
+                      }`}
+                      placeholder="Masukkan Nama Lengkap Anda"
+                    />
+                    {guestName && (
+                      <span className="text-[10px] text-gray-400 italic mt-1 block">Nama dikunci berdasarkan tautan undangan</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5" /> Konfirmasi Kehadiran
+                    </label>
+                    <select
+                      {...register('rsvp_status', { required: true })}
+                      className="w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy cursor-pointer appearance-none"
+                    >
+                      <option value="true">Akan Hadir</option>
+                      <option value="false">Tidak Bisa Hadir</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" /> Jumlah Hadir
+                    </label>
+                    <input
+                      type="number"
+                      {...register('attendance_count', { min: 1, max: invitedPax })}
+                      defaultValue={1}
+                      className="w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy"
+                    />
+                    <span className="text-[10px] text-gray-400 italic mt-1 block font-sans">Maksimal porsi kehadiran: {invitedPax} pax</span>
+                    {errors.attendance_count && (
+                      <span className="text-[10px] text-red-500 font-medium mt-1 block font-sans">
+                        {errors.attendance_count.type === 'max' 
+                          ? `Jumlah hadir melebihi alokasi porsi undangan Anda (${invitedPax} pax).` 
+                          : 'Jumlah hadir minimal 1 pax.'
+                        }
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5" /> Pesan & Doa Restu
+                    </label>
+                    <textarea
+                      {...register('message')}
+                      rows={4}
+                      className="w-full bg-white/50 border border-primary/20 rounded-2xl p-5 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy"
+                      placeholder="Tulis ucapan selamat & doa restu tulus Anda di sini..."
+                    />
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-burgundy hover:bg-primary text-white py-4.5 rounded-2xl font-bold tracking-widest uppercase text-xs shadow-lg transition-all duration-300 cursor-pointer disabled:bg-gray-300 flex items-center justify-center gap-2.5"
                   >
-                    <option value="true">Akan Hadir</option>
-                    <option value="false">Tidak Bisa Hadir</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5" /> Jumlah Hadir
-                  </label>
-                  <input
-                    type="number"
-                    {...register('attendance_count', { min: 1, max: invitedPax })}
-                    defaultValue={1}
-                    className="w-full bg-white/50 border border-primary/20 rounded-2xl px-5 py-4 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy"
-                  />
-                  <span className="text-[10px] text-gray-400 italic mt-1 block font-sans">Maksimal porsi kehadiran: {invitedPax} pax</span>
-                  {errors.attendance_count && (
-                    <span className="text-[10px] text-red-500 font-medium mt-1 block font-sans">
-                      {errors.attendance_count.type === 'max' 
-                        ? `Jumlah hadir melebihi alokasi porsi undangan Anda (${invitedPax} pax).` 
-                        : 'Jumlah hadir minimal 1 pax.'
-                      }
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
-                    <MessageSquare className="w-3.5 h-3.5" /> Pesan & Doa Restu
-                  </label>
-                  <textarea
-                    {...register('message')}
-                    rows={4}
-                    className="w-full bg-white/50 border border-primary/20 rounded-2xl p-5 focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all duration-300 font-sans text-burgundy"
-                    placeholder="Tulis ucapan selamat & doa restu tulus Anda di sini..."
-                  />
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-burgundy hover:bg-primary text-white py-4.5 rounded-2xl font-bold tracking-widest uppercase text-xs shadow-lg transition-all duration-300 cursor-pointer disabled:bg-gray-300 flex items-center justify-center gap-2.5"
-                >
-                  <Send className="w-4 h-4" />
-                  {loading ? 'Mengirim...' : 'Kirim Konfirmasi'}
-                </motion.button>
-              </form>
-            </div>
+                    <Send className="w-4 h-4" />
+                    {loading ? 'Mengirim...' : 'Kirim Konfirmasi'}
+                  </motion.button>
+                </form>
+              </div>
+            )}
           </div>
         )}
 

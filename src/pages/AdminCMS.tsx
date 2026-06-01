@@ -810,16 +810,24 @@ export const AdminCMS = () => {
             <p>Terima kasih telah berbagi kebahagiaan bersama kami. <br><strong>— Farhan & Tazkiah</strong></p>
           </div>
           <script>
-            const img = document.getElementById('print-image');
-            img.onload = function() {
-              setTimeout(function() {
-                window.focus();
-                window.print();
-              }, 300);
-            };
-            img.onerror = function() {
-              console.error("Gagal memuat gambar untuk dicetak.");
-            };
+            (function() {
+              const img = document.getElementById('print-image');
+              if (img) {
+                img.onload = function() {
+                  setTimeout(function() {
+                    window.focus();
+                    window.print();
+                  }, 300);
+                };
+                img.onerror = function() {
+                  console.error("Gagal memuat gambar untuk dicetak.");
+                };
+                // Jika gambar sudah selesai dimuat dari cache
+                if (img.complete) {
+                  img.onload();
+                }
+              }
+            })();
           </script>
         </body>
       </html>

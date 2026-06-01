@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Html5Qrcode } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles, Plus, Copy, FileSpreadsheet } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles, Plus, Copy, FileSpreadsheet, Printer, HelpCircle, FlipHorizontal } from 'lucide-react'
 import Swal from 'sweetalert2'
 
 const QUICK_WISHES_TEMPLATES = [
@@ -51,6 +51,8 @@ const showAlert = (text: string, icon: 'success' | 'error' | 'warning' | 'info' 
   })
 }
 
+
+
 export const AdminCMS = () => {
   const { user, signOut } = useAuth()
   const [guest, setGuest] = useState<any>(null)
@@ -60,6 +62,8 @@ export const AdminCMS = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [checkInMode, setCheckInMode] = useState<'scan' | 'search'>('scan')
   const [manualSearchQuery, setManualSearchQuery] = useState('')
+  const [manualSearchInput, setManualSearchInput] = useState('')
+  const [isSearchingManual, setIsSearchingManual] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -71,6 +75,8 @@ export const AdminCMS = () => {
   const streamRef = useRef<MediaStream | null>(null)
   const [galleryPage, setGalleryPage] = useState(1)
   const [lightboxGuest, setLightboxGuest] = useState<any>(null)
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
+  const [isMirrored, setIsMirrored] = useState(false)
   const [wishesText, setWishesText] = useState('')
   const [savingWishes, setSavingWishes] = useState(false)
   const [toasts, setToasts] = useState<any[]>([])
@@ -87,12 +93,47 @@ export const AdminCMS = () => {
   const [crudInvitedPax, setCrudInvitedPax] = useState(2)
   const [crudIsVip, setCrudIsVip] = useState(false)
   const [crudSearch, setCrudSearch] = useState('')
+  const [crudSearchInput, setCrudSearchInput] = useState('')
+  const [isSearchingCrud, setIsSearchingCrud] = useState(false)
   const [crudVipFilter, setCrudVipFilter] = useState<'all' | 'vip' | 'non-vip'>('all')
-  const [crudRsvpFilter, setCrudRsvpFilter] = useState<'all' | 'confirmed' | 'unconfirmed'>('all')
+  const [crudRsvpFilter, setCrudRsvpFilter] = useState<'all' | 'confirmed' | 'not_attending' | 'unconfirmed'>('all')
   const [crudPage, setCrudPage] = useState(1)
   const [copiedGuestId, setCopiedGuestId] = useState<string | null>(null)
   const fileImportRef = useRef<HTMLInputElement>(null)
   const [importingCSV, setImportingCSV] = useState(false)
+
+  useEffect(() => {
+    setIsMirrored(facingMode === 'user')
+  }, [facingMode])
+
+  useEffect(() => {
+    if (manualSearchInput.trim() !== '') {
+      setIsSearchingManual(true)
+    } else {
+      setManualSearchQuery('')
+      setIsSearchingManual(false)
+    }
+    const timer = setTimeout(() => {
+      setManualSearchQuery(manualSearchInput)
+      setIsSearchingManual(false)
+    }, 1500) // 1.5s debounce delay
+    return () => clearTimeout(timer)
+  }, [manualSearchInput])
+
+  useEffect(() => {
+    if (crudSearchInput.trim() !== '') {
+      setIsSearchingCrud(true)
+    } else {
+      setCrudSearch('')
+      setIsSearchingCrud(false)
+    }
+    const timer = setTimeout(() => {
+      setCrudSearch(crudSearchInput)
+      setCrudPage(1)
+      setIsSearchingCrud(false)
+    }, 1500) // 1.5s debounce delay
+    return () => clearTimeout(timer)
+  }, [crudSearchInput])
 
   const handleSaveGuest = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -490,7 +531,12 @@ export const AdminCMS = () => {
       setImageBlob(null)
       
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } } // Prioritaskan kamera belakang untuk memotret tamu
+        video: { 
+          facingMode: { ideal: facingMode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
       })
       
       streamRef.current = stream
@@ -516,24 +562,130 @@ export const AdminCMS = () => {
     setCameraActive(false)
   }
 
+  const toggleCameraFacing = async () => {
+    const nextFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextFacingMode);
+    
+    if (cameraActive) {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { 
+            facingMode: { ideal: nextFacingMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        console.error("Gagal mengganti kamera:", err);
+      }
+    }
+  }
+
   const captureSnapshot = () => {
     if (videoRef.current) {
       const video = videoRef.current
       const canvas = document.createElement('canvas')
       
-      // Dapatkan resolusi video asli
-      canvas.width = video.videoWidth || 640
-      canvas.height = video.videoHeight || 480
+      // Menggunakan aspek square 1:1 resolusi tinggi untuk twibbon
+      canvas.width = 800
+      canvas.height = 800
       
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        // Crop video menjadi tengah 1:1 square
+        const videoSize = Math.min(video.videoWidth, video.videoHeight)
+        const sx = (video.videoWidth - videoSize) / 2
+        const sy = (video.videoHeight - videoSize) / 2
         
-        // Preview lokal instan berbasis base64
+        if (isMirrored) {
+          // Mirror horizontal untuk selfie camera agar hasil jepretan = preview mirror
+          ctx.translate(800, 0)
+          ctx.scale(-1, 1)
+          ctx.drawImage(video, sx, sy, videoSize, videoSize, 0, 0, 800, 800)
+          ctx.setTransform(1, 0, 0, 1, 0, 0) // Reset transform agar Twibbon tidak ikut terbalik
+        } else {
+          // Normal untuk rear camera
+          ctx.drawImage(video, sx, sy, videoSize, videoSize, 0, 0, 800, 800)
+        }
+        
+        // GAMBAR TWIBBON SECARA NATIV NGGUNAKAN KANVAS 2D (100% aman dari canvas taint!)
+        // 1. Golden outer border
+        ctx.strokeStyle = '#D4AF37'
+        ctx.lineWidth = 4
+        ctx.strokeRect(25, 25, 750, 750)
+        
+        // 2. Sage inner border
+        ctx.strokeStyle = 'rgba(138, 154, 134, 0.5)'
+        ctx.lineWidth = 1.5
+        ctx.strokeRect(35, 35, 730, 730)
+        
+        // 3. Ornamen pojok kurva emas
+        ctx.strokeStyle = '#D4AF37'
+        ctx.lineWidth = 5
+        
+        // Kiri-atas
+        ctx.beginPath()
+        ctx.arc(120, 120, 95, Math.PI, 1.5 * Math.PI)
+        ctx.stroke()
+        
+        // Kanan-atas
+        ctx.beginPath()
+        ctx.arc(680, 120, 95, 1.5 * Math.PI, 2 * Math.PI)
+        ctx.stroke()
+        
+        // Kiri-bawah
+        ctx.beginPath()
+        ctx.arc(120, 680, 95, 0.5 * Math.PI, Math.PI)
+        ctx.stroke()
+        
+        // Kanan-bawah
+        ctx.beginPath()
+        ctx.arc(680, 680, 95, 0, 0.5 * Math.PI)
+        ctx.stroke()
+        
+        // 4. Background banner bawah putih gading krem
+        ctx.fillStyle = 'rgba(253, 251, 247, 0.95)'
+        ctx.fillRect(0, 660, 800, 140)
+        
+        // Garis batas atas banner
+        ctx.strokeStyle = '#E5E1DA'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(0, 660)
+        ctx.lineTo(800, 660)
+        ctx.stroke()
+        
+        // 5. Teks "THE WEDDING OF"
+        ctx.fillStyle = '#8A9A86'
+        ctx.font = 'bold 12px Montserrat, sans-serif'
+        ctx.textAlign = 'center'
+        ctx.fillText('THE WEDDING OF', 400, 705)
+        
+        // Teks Nama Mempelai "Farhan & Tazkiah"
+        ctx.fillStyle = '#C17E61'
+        ctx.font = 'italic bold 32px "Cormorant Garamond", Georgia, serif'
+        ctx.fillText('Farhan & Tazkiah', 400, 745)
+        
+        // Teks Tanggal "19 JUNI 2026"
+        ctx.fillStyle = '#4A5D4E'
+        ctx.font = 'bold 11px Montserrat, sans-serif'
+        ctx.fillText('19 JUNI 2026', 400, 775)
+        
+        // 6. Preview base64
         const dataUrl = canvas.toDataURL('image/jpeg')
         setCapturedImage(dataUrl)
         
-        // Blob terkompresi dengan kualitas 0.8 (80%) untuk diunggah ke storage
+        // 7. Blob terkompresi untuk upload
         canvas.toBlob((blob) => {
           if (blob) setImageBlob(blob)
         }, 'image/jpeg', 0.8)
@@ -586,6 +738,94 @@ export const AdminCMS = () => {
       setUploadingPhoto(false)
     }
   }
+
+  const handlePrintPhoto = (guest: any) => {
+    if (!guest || !guest.photo_url) return;
+    
+    // Dapatkan atau buat iframe cetak tersembunyi/off-screen
+    let iframe = document.getElementById('print-iframe') as HTMLIFrameElement;
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'print-iframe';
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '1px';
+      iframe.style.height = '1px';
+      iframe.style.opacity = '0.01';
+      iframe.style.border = 'none';
+      document.body.appendChild(iframe);
+    }
+    
+    const doc = iframe.contentWindow?.document;
+    if (!doc) return;
+    
+    doc.open();
+    doc.write(`
+      <html>
+        <head>
+          <title>Cetak Twibbon - ${guest.name}</title>
+          <style>
+            html, body {
+              margin: 0;
+              padding: 0;
+              width: 100%;
+              background: white;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+            }
+            .print-card {
+              width: 100%;
+              max-width: 600px;
+              text-align: center;
+              padding: 20px;
+              box-sizing: border-box;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              border-radius: 12px;
+              border: 1px solid #E5E1DA;
+            }
+            p {
+              font-family: serif;
+              font-style: italic;
+              color: #4A5D4E;
+              margin-top: 15px;
+              font-size: 14px;
+              line-height: 1.5;
+            }
+            @media print {
+              body { background: white; }
+              .print-card { padding: 0; }
+              img { border: none; border-radius: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-card">
+            <img src="${guest.photo_url}" id="print-image" />
+            <p>Terima kasih telah berbagi kebahagiaan bersama kami. <br><strong>— Farhan & Tazkiah</strong></p>
+          </div>
+          <script>
+            const img = document.getElementById('print-image');
+            img.onload = function() {
+              setTimeout(function() {
+                window.focus();
+                window.print();
+              }, 300);
+            };
+            img.onerror = function() {
+              console.error("Gagal memuat gambar untuk dicetak.");
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    doc.close();
+  };
 
   const deletePhoto = async () => {
     if (!guest || !guest.photo_url) return
@@ -785,7 +1025,9 @@ export const AdminCMS = () => {
             
             setToasts((prev) => {
               // Batasi maksimal 4 notifikasi pop-up bertumpuk agar tidak menutupi layar
-              const truncated = prev.slice(0, 3)
+              // Filter out duplicate guest check-in IDs to prevent React non-unique key errors
+              const filtered = prev.filter(t => t.id !== newGuest.id)
+              const truncated = filtered.slice(0, 3)
               return [newToast, ...truncated]
             })
             
@@ -841,8 +1083,10 @@ export const AdminCMS = () => {
   const paxPercent = maxExpectedPax > 0 ? totalPaxArrived / maxExpectedPax : 0;
 
   // RSVP statistics computations
-  const rsvpGuests = [...arrivedGuests, ...pendingGuests].filter(g => g.rsvp_status);
+  const rsvpGuests = [...arrivedGuests, ...pendingGuests].filter(g => g.rsvp_status === true || String(g.rsvp_status) === 'true');
   const totalRsvpedCount = rsvpGuests.length;
+  const totalConfirmedTidakHadir = [...arrivedGuests, ...pendingGuests].filter(g => g.rsvp_status === false || String(g.rsvp_status) === 'false').length;
+  const totalBelumKonfirmasi = [...arrivedGuests, ...pendingGuests].filter(g => g.rsvp_status === null || g.rsvp_status === undefined).length;
   const rsvpPercent = totalGuestsCount > 0 ? (totalRsvpedCount / totalGuestsCount) * 100 : 0;
   const rsvpPaxCount = rsvpGuests.reduce((acc, g) => acc + (g.attendance_count || 1), 0);
 
@@ -869,8 +1113,9 @@ export const AdminCMS = () => {
       return true
     })
     .filter(g => {
-      if (crudRsvpFilter === 'confirmed') return g.rsvp_status === true
-      if (crudRsvpFilter === 'unconfirmed') return !g.rsvp_status
+      if (crudRsvpFilter === 'confirmed') return g.rsvp_status === true || String(g.rsvp_status) === 'true'
+      if (crudRsvpFilter === 'not_attending') return g.rsvp_status === false || String(g.rsvp_status) === 'false'
+      if (crudRsvpFilter === 'unconfirmed') return g.rsvp_status === null || g.rsvp_status === undefined
       return true
     })
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -1137,10 +1382,15 @@ export const AdminCMS = () => {
                   <input 
                     type="text"
                     placeholder="Ketik nama tamu..."
-                    value={manualSearchQuery}
-                    onChange={(e) => setManualSearchQuery(e.target.value)}
-                    className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2 pl-10 pr-4 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all text-sm"
+                    value={manualSearchInput}
+                    onChange={(e) => setManualSearchInput(e.target.value)}
+                    className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2 pl-10 pr-10 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all text-sm"
                   />
+                  {isSearchingManual && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <RefreshCw className="animate-spin text-[#8C9A8E]" size={14} />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
@@ -1322,31 +1572,85 @@ export const AdminCMS = () => {
 
                       {/* STATE 1: Kamera Aktif (Live Streaming) */}
                       {cameraActive && !capturedImage && (
-                        <div className="space-y-3">
+                        <div className="space-y-3.5">
                           <div className="relative aspect-square w-full max-w-[280px] mx-auto overflow-hidden rounded-xl bg-black border border-[#E5E1DA] shadow-inner">
                             <video 
                               ref={videoRef} 
                               autoPlay 
                               playsInline 
-                              className="w-full h-full object-cover transform scale-x-[-1]"
+                              className={`w-full h-full object-cover ${isMirrored ? 'transform scale-x-[-1]' : ''}`}
                             />
-                            <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm animate-pulse">
+                            <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm animate-pulse z-10">
                               Kamera Aktif
                             </div>
+                            
+                            {/* Live Mirror Status Badge */}
+                            <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm z-10 flex items-center gap-1 font-medium">
+                              <span className={`w-1.5 h-1.5 rounded-full ${isMirrored ? 'bg-orange-400 animate-ping' : 'bg-green-400'}`}></span>
+                              <span>{isMirrored ? 'Cermin: ON' : 'Cermin: OFF'}</span>
+                            </div>
+                            
+                            {/* Live Twibbon Preview Overlay */}
+                            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-3.5 border-4 border-[#D4AF37] rounded-xl">
+                              {/* Inner sage border */}
+                              <div className="absolute inset-1.5 border border-dashed border-[#8A9A86]/40 rounded-lg pointer-events-none" />
+                              
+                              {/* Corner gold curves decoration */}
+                              <div className="absolute top-1.5 left-1.5 w-8 h-8 border-t-4 border-l-4 border-[#D4AF37] rounded-tl-lg" />
+                              <div className="absolute top-1.5 right-1.5 w-8 h-8 border-t-4 border-r-4 border-[#D4AF37] rounded-tr-lg" />
+                              <div className="absolute bottom-[44px] left-1.5 w-8 h-8 border-b-4 border-l-4 border-[#D4AF37] rounded-bl-lg" />
+                              <div className="absolute bottom-[44px] right-1.5 w-8 h-8 border-b-4 border-r-4 border-[#D4AF37] rounded-br-lg" />
+                              
+                              {/* Bottom banner matching the canvas design */}
+                              <div className="absolute bottom-0 left-0 right-0 h-[48px] bg-[#FDFBF7]/95 border-t border-[#E5E1DA] flex flex-col items-center justify-center pointer-events-none select-none">
+                                <span className="text-[5px] font-bold text-[#8A9A86] tracking-[0.2em] font-sans">THE WEDDING OF</span>
+                                <span className="text-[8px] font-bold text-[#C17E61] font-serif italic mt-0.5">Farhan & Tazkiah</span>
+                                <span className="text-[5px] font-bold text-[#4A5D4E] tracking-[0.1em] font-sans mt-0.5">19 JUNI 2026</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={captureSnapshot}
-                              className="flex-1 bg-[#C17E61] hover:bg-[#A96B51] text-white py-2 rounded-xl transition-all font-medium text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
-                            >
-                              <Camera size={16} /> Tangkap Foto
-                            </button>
-                            <button
-                              onClick={stopCameraStream}
-                              className="bg-white hover:bg-gray-50 border border-[#E5E1DA] text-gray-500 px-3 py-2 rounded-xl transition-all font-medium text-xs flex items-center justify-center"
-                            >
-                              Batal
-                            </button>
+                          
+                          {/* Premium Camera Controls Grid */}
+                          <div className="space-y-2">
+                            {/* Row 1: Capture & Mirror Toggle */}
+                            <div className="flex gap-2">
+                              <button
+                                onClick={captureSnapshot}
+                                className="flex-grow bg-[#C17E61] hover:bg-[#A96B51] text-white py-2.5 rounded-xl transition-all font-semibold text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                              >
+                                <Camera size={16} /> Tangkap Foto
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setIsMirrored(prev => !prev)}
+                                className={`px-3 py-2.5 rounded-xl border transition-all flex items-center justify-center gap-1.5 font-semibold text-xs shadow-sm min-w-[105px] ${
+                                  isMirrored 
+                                    ? 'bg-[#4A5D4E] border-[#4A5D4E] text-white hover:bg-[#3D4C40]' 
+                                    : 'bg-white border-[#E5E1DA] text-[#4A5D4E] hover:bg-gray-50'
+                                }`}
+                                title={isMirrored ? "Cermin Aktif (Klik untuk Matikan)" : "Cermin Nonaktif (Klik untuk Aktifkan)"}
+                              >
+                                <FlipHorizontal size={14} />
+                                <span>{isMirrored ? "Mirror ON" : "Mirror OFF"}</span>
+                              </button>
+                            </div>
+                            
+                            {/* Row 2: Camera Selector & Cancel */}
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={toggleCameraFacing}
+                                className="flex-1 bg-white hover:bg-gray-50 border border-[#E5E1DA] text-[#4A5D4E] py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 text-xs font-semibold"
+                              >
+                                <RefreshCw size={14} /> Ganti Kamera
+                              </button>
+                              <button
+                                onClick={stopCameraStream}
+                                className="flex-1 bg-white hover:bg-gray-50 border border-[#E5E1DA] text-gray-500 py-2 rounded-xl transition-all font-semibold text-xs flex items-center justify-center"
+                              >
+                                Batal
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -1358,7 +1662,7 @@ export const AdminCMS = () => {
                             <img 
                               src={capturedImage} 
                               alt="Preview Tamu" 
-                              className="w-full h-full object-cover transform scale-x-[-1]" 
+                              className="w-full h-full object-cover" 
                             />
                           </div>
                           <div className="flex gap-2">
@@ -1739,9 +2043,21 @@ export const AdminCMS = () => {
                           alt={g.name} 
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                         />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
-                          <span className="bg-white/95 text-[#4A5D4E] text-[10px] px-3 py-1.5 rounded-lg font-medium shadow flex items-center gap-1">
-                            <Eye size={12} /> Lihat Foto
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-all duration-300">
+                          <span 
+                            onClick={() => setLightboxGuest(g)}
+                            className="bg-white/95 hover:bg-white text-[#4A5D4E] text-[10px] px-2.5 py-1.5 rounded-lg font-medium shadow flex items-center gap-1 cursor-pointer"
+                          >
+                            <Eye size={12} /> Lihat
+                          </span>
+                          <span 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePrintPhoto(g);
+                            }}
+                            className="bg-[#4A5D4E] hover:bg-[#3D4C40] text-white text-[10px] px-2.5 py-1.5 rounded-lg font-medium shadow flex items-center gap-1 cursor-pointer"
+                          >
+                            <Printer size={12} /> Cetak
                           </span>
                         </div>
                       </div>
@@ -1794,29 +2110,36 @@ export const AdminCMS = () => {
       /* Area Manajemen Undangan */
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#E5E1DA] space-y-6 animate-fadeIn">
         {/* Stat Cards for Management */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
             <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
               <Users size={12} /> Total Tamu
             </span>
             <p className="text-2xl font-bold text-[#4A5D4E] font-serif mt-1">{totalGuestsCount}</p>
-            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Tamu terdaftar di sistem</p>
+            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Tamu terdaftar</p>
           </div>
           <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
             <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
-              <Award size={12} /> Tamu VIP
-            </span>
-            <p className="text-2xl font-bold text-amber-600 font-serif mt-1">{totalVIPsCount}</p>
-            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Prioritas pelayanan</p>
-          </div>
-          <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
-            <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
-              <CheckCircle size={12} className="text-green-600" /> Tamu RSVP
+              <CheckCircle size={12} className="text-green-600" /> RSVP Hadir
             </span>
             <p className="text-2xl font-bold text-green-700 font-serif mt-1">
-              {totalRsvpedCount} <span className="text-xs text-gray-400 font-sans font-normal">/ {totalGuestsCount} ({rsvpPercent.toFixed(0)}%)</span>
+              {totalRsvpedCount} <span className="text-xs text-gray-400 font-sans font-normal">({rsvpPercent.toFixed(0)}%)</span>
             </p>
-            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Hadir: {rsvpPaxCount} Pax dari RSVP</p>
+            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Total: {rsvpPaxCount} Pax</p>
+          </div>
+          <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
+            <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+              <XCircle size={12} className="text-rose-600" /> Tidak Hadir
+            </span>
+            <p className="text-2xl font-bold text-rose-700 font-serif mt-1">{totalConfirmedTidakHadir}</p>
+            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Konfirmasi tidak hadir</p>
+          </div>
+          <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
+            <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
+              <HelpCircle size={12} className="text-amber-600" /> Belum Konfirmasi
+            </span>
+            <p className="text-2xl font-bold text-amber-700 font-serif mt-1">{totalBelumKonfirmasi}</p>
+            <p className="text-[10px] text-[#8C9A8E] mt-0.5">Belum merespons undangan</p>
           </div>
           <div className="bg-[#FDFBF7] p-4 rounded-xl border border-[#E5E1DA] shadow-sm">
             <span className="text-[10px] text-[#8C9A8E] uppercase tracking-wider font-semibold flex items-center gap-1">
@@ -1836,13 +2159,15 @@ export const AdminCMS = () => {
               <input
                 type="text"
                 placeholder="Cari nama atau keterangan tamu..."
-                value={crudSearch}
-                onChange={(e) => {
-                  setCrudSearch(e.target.value)
-                  setCrudPage(1)
-                }}
-                className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2.5 pl-12 pr-6 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm"
+                value={crudSearchInput}
+                onChange={(e) => setCrudSearchInput(e.target.value)}
+                className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2.5 pl-12 pr-10 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm"
               />
+              {isSearchingCrud && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <RefreshCw className="animate-spin text-[#8C9A8E]" size={16} />
+                </div>
+              )}
             </div>
             
             {/* VIP Status Filter Select */}
@@ -1866,14 +2191,15 @@ export const AdminCMS = () => {
               <select
                 value={crudRsvpFilter}
                 onChange={(e) => {
-                  setCrudRsvpFilter(e.target.value as 'all' | 'confirmed' | 'unconfirmed')
+                  setCrudRsvpFilter(e.target.value as any)
                   setCrudPage(1)
                 }}
                 className="w-full bg-[#FDFBF7] border border-[#E5E1DA] rounded-xl py-2.5 px-4 outline-none focus:ring-1 focus:ring-[#4A5D4E] transition-all shadow-sm text-sm text-[#4A5D4E]"
               >
                 <option value="all">Semua RSVP</option>
                 <option value="confirmed">RSVP Hadir</option>
-                <option value="unconfirmed">Belum RSVP</option>
+                <option value="not_attending">Tidak Hadir ❌</option>
+                <option value="unconfirmed">Belum Konfirmasi ⏳</option>
               </select>
             </div>
           </div>
@@ -2143,6 +2469,14 @@ export const AdminCMS = () => {
               <p className="text-[11px] text-[#8C9A8E] flex items-center gap-1.5">
                 <Clock size={13} /> Hadir pukul {lightboxGuest.arrival_time ? new Date(lightboxGuest.arrival_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'} WIB
               </p>
+              <div className="mt-4 pt-3 border-t border-[#F3F1ED] flex justify-end">
+                <button
+                  onClick={() => handlePrintPhoto(lightboxGuest)}
+                  className="bg-[#4A5D4E] hover:bg-[#3D4C40] text-white px-4 py-2 rounded-xl text-xs font-semibold shadow flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Printer size={14} /> Cetak Twibbon Tamu
+                </button>
+              </div>
             </div>
           </div>
         </div>

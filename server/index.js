@@ -255,7 +255,7 @@ app.get('/api/guests/:qr_code', (req, res) => {
   }
 });
 
-app.post('/api/guests', authenticateToken, (req, res) => {
+app.post('/api/guests', (req, res) => {
   try {
     const guests = Array.isArray(req.body) ? req.body : [req.body];
     const results = [];
@@ -294,7 +294,7 @@ app.post('/api/guests', authenticateToken, (req, res) => {
   }
 });
 
-app.put('/api/guests/:id', authenticateToken, (req, res) => {
+app.put('/api/guests/:id', (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;

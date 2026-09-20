@@ -1,0 +1,19 @@
+[Unit]
+Description=Undangan Wedding API Server
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Undangan/server
+ExecStart=/usr/bin/node index.js
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=3456
+Environment=JWT_SECRET=undangan-wedding-secret-key-2026
+Environment=ADMIN_PASSWORD=password
+Environment=FRONTEND_URL=https://tazkiahfarhan.my.id
+
+[Install]
+WantedBy=multi-user.target

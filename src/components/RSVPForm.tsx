@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/api'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Check, Heart, User, Calendar, MessageSquare, ShieldCheck, Users } from 'lucide-react'
@@ -43,16 +43,8 @@ export const RSVPForm = ({
   }, [guestName, setValue])
 
   const fetchMessages = async () => {
-    const { data, error } = await supabase
-      .from('guests')
-      .select('id, name, message, rsvp_status, attendance_count, created_at')
-      .not('message', 'is', null)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching messages:', error)
-    } else if (data) {
-      // Parse RSVP status in case of type variations from db
+    try {
+      const data = await api.getGuests({ message_not_null: true })
       const formatted: GuestMessage[] = data.map((d: any) => ({
         id: d.id,
         name: d.name,
@@ -62,6 +54,8 @@ export const RSVPForm = ({
         created_at: d.created_at,
       }))
       setMessages(formatted)
+    } catch (error) {
+      console.error('Error fetching messages:', error)
     }
   }
 
@@ -96,28 +90,23 @@ export const RSVPForm = ({
 
       if (guestId) {
         // Update existing guest record if guestId provided (e.g. from URL)
-        const { error } = await supabase
-          .from('guests')
-          .update({
+        const guests = await api.getGuests({ qr_code: guestId })
+        if (guests.length > 0) {
+          await api.updateGuest(guests[0].id, {
             rsvp_status: parsedStatus,
             attendance_count: parsedCount,
             message: data.message,
           })
-          .eq('qr_code', guestId)
-
-        if (error) throw error
+        }
       } else {
         // Fallback or generic RSVP entry
-        const { error } = await supabase.from('guests').insert([
-          {
-            ...data,
-            rsvp_status: parsedStatus,
-            attendance_count: parsedCount,
-            qr_code: `manual-${Date.now()}`,
-          },
-        ])
-
-        if (error) throw error
+        await api.createGuest({
+          name: data.name,
+          rsvp_status: parsedStatus,
+          attendance_count: parsedCount,
+          message: data.message,
+          qr_code: `manual-${Date.now()}`,
+        })
       }
       setSubmitted(true)
       reset({

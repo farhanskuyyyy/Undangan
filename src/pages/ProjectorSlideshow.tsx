@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FloatingPetals } from '../components/FloatingPetals';
 import FloralDecor from '../components/FloralDecor';
@@ -24,17 +24,41 @@ export const ProjectorSlideshow = () => {
   const timerRef = useRef<any>(null);
   const welcomeTimeoutRef = useRef<any>(null);
 
+  const triggerNewArrivalWelcome = (newGuest: Guest) => {
+    setInterruptedGuest(newGuest);
+    setIsInterrupted(true);
+
+    if (welcomeTimeoutRef.current) clearTimeout(welcomeTimeoutRef.current);
+
+    // Add new guest to front of slideshow list
+    setGuests((prev) => {
+      const exists = prev.some((g) => g.id === newGuest.id);
+      return exists ? prev : [newGuest, ...prev];
+    });
+
+    // Auto-dismiss interruption after 15 seconds
+    welcomeTimeoutRef.current = setTimeout(() => {
+      setIsInterrupted(false);
+      setInterruptedGuest(null);
+    }, 15000);
+  };
+
   const fetchArrivedGuests = async () => {
     try {
-      const { data, error } = await supabase
-        .from('guests')
-        .select('id, name, arrival_time, is_vip, photo_url, wishes')
-        .eq('has_arrived', true)
-        .not('photo_url', 'is', null)
-        .order('arrival_time', { ascending: false });
-
-      if (error) throw error;
-      setGuests(data || []);
+      const data = await api.getGuests({ has_arrived: true })
+      const withPhotos = (data || []).filter((g: any) => g.photo_url)
+      
+      // Detect new arrivals for welcome interruption
+      if (guests.length > 0 && withPhotos.length > guests.length) {
+        const newArrivals = withPhotos.filter(
+          (g: any) => !guests.some((existing: Guest) => existing.id === g.id)
+        );
+        if (newArrivals.length > 0) {
+          triggerNewArrivalWelcome(newArrivals[0]);
+        }
+      }
+      
+      setGuests(withPhotos);
     } catch (err) {
       console.error("Gagal mengambil data tamu hadir:", err);
     } finally {
@@ -45,26 +69,13 @@ export const ProjectorSlideshow = () => {
   useEffect(() => {
     fetchArrivedGuests();
 
-    // Subscribe real-time ke tabel guests
-    const channel = supabase
-      .channel('projector-live-changes')
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'guests' },
-        (payload: any) => {
-          const oldGuest = payload.old;
-          const newGuest = payload.new;
-
-          // Pemicu interupsi: has_arrived berubah dari false ke true DAN memiliki photo_url
-          if ((!oldGuest || !oldGuest.has_arrived) && newGuest.has_arrived && newGuest.photo_url) {
-            triggerNewArrivalWelcome(newGuest);
-          }
-        }
-      )
-      .subscribe();
+    // Poll for updates every 10 seconds (replaces Supabase realtime)
+    const pollInterval = setInterval(() => {
+      fetchArrivedGuests();
+    }, 10000);
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
       if (timerRef.current) clearInterval(timerRef.current);
       if (welcomeTimeoutRef.current) clearTimeout(welcomeTimeoutRef.current);
     };
@@ -89,25 +100,7 @@ export const ProjectorSlideshow = () => {
     };
   }, [loading, isInterrupted, guests.length]);
 
-  const triggerNewArrivalWelcome = (newGuest: Guest) => {
-    setInterruptedGuest(newGuest);
-    setIsInterrupted(true);
 
-    if (welcomeTimeoutRef.current) clearTimeout(welcomeTimeoutRef.current);
-
-    // Masukkan tamu baru ke daftar paling depan slideshow agar langsung muncul berikutnya
-    setGuests((prev) => {
-      const filtered = prev.filter(g => g.id !== newGuest.id);
-      return [newGuest, ...filtered];
-    });
-    setCurrentIndex(0);
-
-    // Sambutan tampil selama 12 detik
-    welcomeTimeoutRef.current = setTimeout(() => {
-      setIsInterrupted(false);
-      setInterruptedGuest(null);
-    }, 12000);
-  };
 
   const currentGuest = guests[currentIndex];
 

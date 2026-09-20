@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "event_date": "August 2021",
+    "title": "First Meet",
+    "description": "Chance encounter in Jakarta.",
+    "image_url": "/contoh1.JPG",
+    "order_index": 1
+  },
+  {
+    "id": 2,
+    "event_date": "October 2021",
+    "title": "First Date",
+    "description": "Sunset dinner.",
+    "image_url": "/contoh1.JPG",
+    "order_index": 2
+  },
+  {
+    "id": 3,
+    "event_date": "December 2024",
+    "title": "The Proposal",
+    "description": "Under the starlit sky.",
+    "image_url": "/contoh1.JPG",
+    "order_index": 3
+  },
+  {
+    "id": 4,
+    "event_date": "May 19, 2026",
+    "title": "Wedding Day",
+    "description": "The beginning of our forever.",
+    "image_url": "/contoh1.JPG",
+    "order_index": 4
+  }
+]

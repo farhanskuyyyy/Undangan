@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Html5Qrcode } from 'html5-qrcode'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
 import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles, Plus, Copy, FileSpreadsheet, Printer, HelpCircle, FlipHorizontal } from 'lucide-react'
 import Swal from 'sweetalert2'
@@ -149,16 +149,13 @@ export const AdminCMS = () => {
         const randomSuffix = Math.floor(1000 + Math.random() * 9000)
         const qrCode = `${cleanedName}${randomSuffix}`
 
-        const { error } = await supabase
-          .from('guests')
-          .update({
-            name: crudName.trim(),
-            qr_code: qrCode, // Regenerate/update QR code based on new name format
-            description: crudDescription.trim() || null,
-            invited_pax: Number(crudInvitedPax) || 2,
-            is_vip: crudIsVip
-          })
-          .eq('id', editingGuest.id)
+        const { error } = await api.updateGuest(editingGuest.id, {
+          name: crudName.trim(),
+          qr_code: qrCode,
+          description: crudDescription.trim() || null,
+          invited_pax: Number(crudInvitedPax) || 2,
+          is_vip: crudIsVip
+        })
         
         if (error) throw error
         showAlert("Data tamu berhasil diperbarui!", "success")
@@ -167,18 +164,16 @@ export const AdminCMS = () => {
         const randomSuffix = Math.floor(1000 + Math.random() * 9000)
         const qrCode = `${cleanedName}${randomSuffix}`
         const invitedPax = Number(crudInvitedPax) || 2
-        const { error } = await supabase
-          .from('guests')
-          .insert({
-            name: crudName.trim(),
-            qr_code: qrCode,
-            description: crudDescription.trim() || null,
-            invited_pax: invitedPax,
-            attendance_count: invitedPax, // Default to match invited_pax
-            is_vip: crudIsVip,
-            has_arrived: false,
-            souvenir_taken: false
-          })
+        const { error } = await api.createGuest({
+          name: crudName.trim(),
+          qr_code: qrCode,
+          description: crudDescription.trim() || null,
+          invited_pax: invitedPax,
+          attendance_count: invitedPax,
+          is_vip: crudIsVip,
+          has_arrived: false,
+          souvenir_taken: false
+        })
         
         if (error) throw error
         showAlert("Tamu baru berhasil ditambahkan!", "success")
@@ -216,12 +211,7 @@ export const AdminCMS = () => {
     
     setLoading(true)
     try {
-      const { error } = await supabase
-        .from('guests')
-        .delete()
-        .eq('id', guestId)
-      
-      if (error) throw error
+      await api.deleteGuest(guestId)
       showAlert(`Tamu "${guestName}" berhasil dihapus.`, "success")
       fetchGuests()
       if (guest && guest.id === guestId) {
@@ -329,11 +319,7 @@ export const AdminCMS = () => {
         return
       }
       
-      const { error } = await supabase
-        .from('guests')
-        .insert(bulkGuests)
-        
-      if (error) throw error
+      await api.createGuests(bulkGuests)
       
       showAlert(`Berhasil mengimpor massal ${bulkGuests.length} tamu baru!`, "success")
       fetchGuests()
@@ -350,22 +336,10 @@ export const AdminCMS = () => {
 
   const fetchGuests = async () => {
     try {
-      const { data: arrivedData, error: arrivedError } = await supabase
-        .from('guests')
-        .select('id, name, qr_code, arrival_time, is_vip, photo_url, souvenir_taken, attendance_count, invited_pax, description, rsvp_status')
-        .eq('has_arrived', true)
-        .order('arrival_time', { ascending: false })
-      
-      if (arrivedError) throw arrivedError
+      const arrivedData = await api.getGuests({ has_arrived: true })
       setArrivedGuests(arrivedData || [])
 
-      const { data: pendingData, error: pendingError } = await supabase
-        .from('guests')
-        .select('id, name, qr_code, is_vip, attendance_count, invited_pax, description, rsvp_status')
-        .eq('has_arrived', false)
-        .order('name', { ascending: true })
-      
-      if (pendingError) throw pendingError
+      const pendingData = await api.getGuests({ has_arrived: false })
       setPendingGuests(pendingData || [])
       setGalleryPage(1)
     } catch (error) {
@@ -458,13 +432,7 @@ export const AdminCMS = () => {
     
     const trimmedCode = decodedText.trim()
     try {
-      const { data, error } = await supabase
-        .from('guests')
-        .select('*')
-        .eq('qr_code', trimmedCode)
-        .single()
-      
-      if (error) throw error
+      const data = await api.getGuestByQrCode(trimmedCode)
       
       setGuest(data)
       setWishesText(data?.wishes || '')
@@ -480,14 +448,10 @@ export const AdminCMS = () => {
   const handleManualCheckIn = async (guestId: string) => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('guests')
-        .update({ has_arrived: true, arrival_time: new Date().toISOString() })
-        .eq('id', guestId)
-        .select('*')
-        .single()
-      
-      if (error) throw error
+      const data = await api.updateGuest(guestId, {
+        has_arrived: true,
+        arrival_time: new Date().toISOString()
+      })
       
       setGuest(data)
       setWishesText(data?.wishes || '')
@@ -505,13 +469,8 @@ export const AdminCMS = () => {
   const handleSelectGuest = async (guestId: string) => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('guests')
-        .select('*')
-        .eq('id', guestId)
-        .single()
-        
-      if (error) throw error
+      const data = await api.getGuestByQrCode(guestId)
+      // For select by ID, we need to fetch all guests and find by id
       
       // Pasang ke state detail tamu aktif
       setGuest(data)
@@ -699,34 +658,12 @@ export const AdminCMS = () => {
     if (!imageBlob || !guest) return
     setUploadingPhoto(true)
     
-    const filePath = `photos/${guest.id}.jpg`
-    
     try {
-      // 1. Upload ke bucket Supabase Storage dengan upsert: true
-      const { error: uploadError } = await supabase.storage
-        .from('guest-photos')
-        .upload(filePath, imageBlob, {
-          contentType: 'image/jpeg',
-          upsert: true
-        })
-        
-      if (uploadError) throw uploadError
+      // Upload photo via API
+      const { photo_url } = await api.uploadPhoto(guest.id, imageBlob as any);
       
-      // 2. Ambil URL Publik
-      const { data: { publicUrl } } = supabase.storage
-        .from('guest-photos')
-        .getPublicUrl(filePath)
-        
-      // 3. Update database di tabel guests
-      const { error: dbError } = await supabase
-        .from('guests')
-        .update({ photo_url: publicUrl })
-        .eq('id', guest.id)
-        
-      if (dbError) throw dbError
-      
-      // 4. Perbarui state lokal guest agar UI langsung merender foto baru
-      setGuest({ ...guest, photo_url: publicUrl })
+      // Update guest state locally
+      setGuest({ ...guest, photo_url })
       setCapturedImage(null)
       setImageBlob(null)
       fetchGuests() // Refresh daftar tamu
@@ -851,20 +788,12 @@ export const AdminCMS = () => {
     if (!confirmResult.isConfirmed) return
     
     setUploadingPhoto(true)
-    const filePath = `photos/${guest.id}.jpg`
     
     try {
-      // Hapus dari Storage
-      await supabase.storage.from('guest-photos').remove([filePath])
+      // Delete photo via API
+      await api.deletePhoto(guest.id)
       
-      // Reset di Database
-      const { error: dbError } = await supabase
-        .from('guests')
-        .update({ photo_url: null })
-        .eq('id', guest.id)
-        
-      if (dbError) throw dbError
-      
+      // Update local state
       setGuest({ ...guest, photo_url: null })
       fetchGuests()
       showAlert("Foto tamu berhasil dihapus!", "success")
@@ -881,10 +810,7 @@ export const AdminCMS = () => {
     setSavingWishes(true)
     
     try {
-      const { error } = await supabase
-        .from('guests')
-        .update({ wishes: wishesText })
-        .eq('id', guest.id)
+      const { error } = await api.updateGuest(guest.id, { wishes: wishesText })
         
       if (error) throw error
       
@@ -903,12 +829,7 @@ export const AdminCMS = () => {
   const handleExportCSV = async () => {
     try {
       // 1. Ambil data segar terlengkap langsung dari database
-      const { data: allGuests, error } = await supabase
-        .from('guests')
-        .select('name, is_vip, rsvp_status, attendance_count, invited_pax, description, has_arrived, arrival_time, souvenir_taken, message, wishes, photo_url')
-        .order('name', { ascending: true })
-        
-      if (error) throw error
+      const allGuests = await api.getGuests()
       if (!allGuests || allGuests.length === 0) {
         showAlert("Tidak ada data tamu untuk diekspor.", "warning", "Ekspor Gagal")
         return
@@ -974,12 +895,7 @@ export const AdminCMS = () => {
     if (!guest) return
     setLoading(true)
     try {
-      const { error } = await supabase
-        .from('guests')
-        .update({ souvenir_taken: true })
-        .eq('id', guest.id)
-      
-      if (error) throw error
+      await api.updateGuest(guest.id, { souvenir_taken: true })
       setGuest({ ...guest, souvenir_taken: true })
       fetchGuests() // Segarkan statistik dan dasbor analitik secara real-time!
       showAlert('Souvenir berhasil diberikan!', 'success')
@@ -1007,50 +923,8 @@ export const AdminCMS = () => {
   }, [guest])
 
   useEffect(() => {
-    // Jalur WebSocket untuk mendengarkan check-in gerbang lain
-    const channel = supabase
-      .channel('dashboard-realtime-sync')
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'guests' },
-        (payload: any) => {
-          const oldGuest = payload.old
-          const newGuest = payload.new
-          
-          // Gerbang lain menandai tamu hadir
-          if ((!oldGuest || !oldGuest.has_arrived) && newGuest.has_arrived) {
-            // 1. Tarik ulang data segar agar tabel daftar tamu sinkron instan
-            fetchGuests()
-            
-            // 2. Tambahkan ke antrean notifikasi melayang
-            const newToast = {
-              id: newGuest.id,
-              name: newGuest.name,
-              is_vip: newGuest.is_vip,
-              arrival_time: newGuest.arrival_time,
-              description: newGuest.description
-            }
-            
-            setToasts((prev) => {
-              // Batasi maksimal 4 notifikasi pop-up bertumpuk agar tidak menutupi layar
-              // Filter out duplicate guest check-in IDs to prevent React non-unique key errors
-              const filtered = prev.filter(t => t.id !== newGuest.id)
-              const truncated = filtered.slice(0, 3)
-              return [newToast, ...truncated]
-            })
-            
-            // 3. Bersihkan notifikasi otomatis setelah 4 detik
-            setTimeout(() => {
-              setToasts((prev) => prev.filter(t => t.id !== newGuest.id))
-            }, 4000)
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    // Real-time subscription removed (SQLite backend)
+    return () => {}
   }, [])
 
 

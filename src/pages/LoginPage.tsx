@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/AuthContext'
 import { Lock, Mail, Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react'
 
 export const LoginPage = () => {
   const navigate = useNavigate()
+  const { signIn } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -17,17 +18,10 @@ export const LoginPage = () => {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
+      await signIn(email, password)
       navigate('/admin', { replace: true })
     } catch (err: any) {
-      if (err.message?.includes('Invalid login credentials')) {
-        setError('Email atau password salah.')
-      } else if (err.message?.includes('Email not confirmed')) {
-        setError('Email belum dikonfirmasi. Cek inbox email Anda.')
-      } else {
-        setError(err.message || 'Terjadi kesalahan. Coba lagi.')
-      }
+      setError(err.message || 'Email atau password salah.')
     } finally {
       setLoading(false)
     }

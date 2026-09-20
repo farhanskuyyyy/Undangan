@@ -10,7 +10,7 @@ import { RSVPForm } from '../components/RSVPForm'
 import { MusicPlayer } from '../components/MusicPlayer'
 import { GiftRegistry } from '../components/GiftRegistry'
 import { useSearchParams } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { api } from '../lib/api'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Envelope } from '../components/Envelope'
 import { ParallaxDecor } from '../components/ParallaxDecor'
@@ -66,48 +66,27 @@ export const Invitation = () => {
       setLoading(true)
       try {
         // Fetch wedding settings
-        const { data: settingsData } = await supabase
-          .from('wedding_settings')
-          .select('*')
-          .single()
-        
+        const settingsData = await api.getWeddingSettings()
         if (settingsData) {
           setSettings(settingsData)
           document.title = `The Wedding of ${settingsData.groom_name} & ${settingsData.bride_name}`
         }
 
         // Fetch love stories
-        const { data: storiesData } = await supabase
-          .from('love_stories')
-          .select('*')
-          .order('order_index', { ascending: true })
-        
+        const storiesData = await api.getLoveStories()
         if (storiesData) setLoveStories(storiesData)
 
         // Fetch galleries
-        const { data: galleryData } = await supabase
-          .from('galleries')
-          .select('*')
-          .order('order_index', { ascending: true })
-        
+        const galleryData = await api.getGalleries()
         if (galleryData) setGalleries(galleryData)
 
         // Fetch rundowns
-        const { data: rundownData } = await supabase
-          .from('rundowns')
-          .select('*')
-          .order('order_index', { ascending: true })
-        
+        const rundownData = await api.getRundowns()
         if (rundownData) setRundowns(rundownData)
 
         // Fetch guest name if guestId exists
         if (guestId) {
-          const { data: guestData } = await supabase
-            .from('guests')
-            .select('name, invited_pax, description')
-            .eq('qr_code', guestId)
-            .single()
-          
+          const guestData = await api.getGuestByQrCode(guestId)
           if (guestData) {
             setGuestName(guestData.name)
             setInvitedPax(guestData.invited_pax || 2)

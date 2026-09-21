@@ -85,6 +85,39 @@ interface Rundown {
   order_index?: number
 }
 
+// InputField defined OUTSIDE component to prevent re-render focus loss
+const InputField = ({
+  label, value, onChange, type = 'text', placeholder = '', required = false, rows
+}: {
+  label: string; value: string; onChange: (v: string) => void;
+  type?: string; placeholder?: string; required?: boolean; rows?: number
+}) => (
+  <div className="space-y-1.5">
+    <label className="block text-xs font-semibold text-[#8C9A8E] uppercase tracking-wider">{label}</label>
+    {rows ? (
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        required={required}
+        rows={rows}
+        className="w-full px-4 py-3 rounded-xl border border-[#E5E1DA] bg-white text-[#4A5D4E] text-sm font-sans
+          focus:outline-none focus:ring-2 focus:ring-[#4A5D4E]/30 focus:border-[#4A5D4E] transition-all placeholder:text-gray-300 resize-none"
+      />
+    ) : (
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        required={required}
+        className="w-full px-4 py-3 rounded-xl border border-[#E5E1DA] bg-white text-[#4A5D4E] text-sm font-sans
+          focus:outline-none focus:ring-2 focus:ring-[#4A5D4E]/30 focus:border-[#4A5D4E] transition-all placeholder:text-gray-300"
+      />
+    )}
+  </div>
+)
+
 export const SettingsCMS = () => {
   const { user } = useAuth()
 
@@ -413,41 +446,7 @@ export const SettingsCMS = () => {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // INPUT FIELD HELPER
-  // ═══════════════════════════════════════════════════════════════════
 
-  const InputField = ({
-    label, value, onChange, type = 'text', placeholder = '', required = false, rows
-  }: {
-    label: string; value: string; onChange: (v: string) => void;
-    type?: string; placeholder?: string; required?: boolean; rows?: number
-  }) => (
-    <div className="space-y-1.5">
-      <label className="block text-xs font-semibold text-[#8C9A8E] uppercase tracking-wider">{label}</label>
-      {rows ? (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          required={required}
-          rows={rows}
-          className="w-full px-4 py-3 rounded-xl border border-[#E5E1DA] bg-white text-[#4A5D4E] text-sm font-sans
-            focus:outline-none focus:ring-2 focus:ring-[#4A5D4E]/30 focus:border-[#4A5D4E] transition-all placeholder:text-gray-300 resize-none"
-        />
-      ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          required={required}
-          className="w-full px-4 py-3 rounded-xl border border-[#E5E1DA] bg-white text-[#4A5D4E] text-sm font-sans
-            focus:outline-none focus:ring-2 focus:ring-[#4A5D4E]/30 focus:border-[#4A5D4E] transition-all placeholder:text-gray-300"
-        />
-      )}
-    </div>
-  )
 
   // ═══════════════════════════════════════════════════════════════════
   // RENDER

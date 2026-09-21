@@ -22,6 +22,10 @@ import { FloatingQR } from '../components/FloatingQR'
 interface WeddingSettings {
   groom_name: string
   bride_name: string
+  groom_full_name: string
+  bride_full_name: string
+  groom_parents: string
+  bride_parents: string
   wedding_date: string
   location_name: string
   location_address: string
@@ -147,6 +151,10 @@ export const Invitation = () => {
             groomName={settings?.groom_name || 'Groom'} 
             brideName={settings?.bride_name || 'Bride'} 
             weddingDate={settings?.wedding_date || ''}
+            groomFullName={settings?.groom_full_name}
+            brideFullName={settings?.bride_full_name}
+            groomParents={settings?.groom_parents}
+            brideParents={settings?.bride_parents}
           />
         </section>
         

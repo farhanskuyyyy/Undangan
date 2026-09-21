@@ -7,6 +7,10 @@ interface HeroProps {
   groomName: string
   brideName: string
   weddingDate: string
+  groomFullName?: string
+  brideFullName?: string
+  groomParents?: string
+  brideParents?: string
 }
 
 // SVG Bunga (rose with petals) — pure inline, no image dependency
@@ -81,7 +85,7 @@ const FlowerRight = () => (
   </svg>
 )
 
-export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
+export const Hero = ({ groomName, brideName, weddingDate, groomFullName, brideFullName, groomParents, brideParents }: HeroProps) => {
   const formattedDate = weddingDate ? new Date(weddingDate).toLocaleDateString('id-ID', {
     weekday: 'long',
     year: 'numeric',
@@ -282,6 +286,68 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 sm:w-56 sm:h-56 md:w-[40rem] md:h-[40rem] bg-primary/[0.04] rounded-full blur-[60px] -z-10" />
           </div>
         </div>
+
+        {/* Parents Info */}
+        {(groomParents || brideParents) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="flex-none text-center space-y-4 sm:space-y-5 md:space-y-6 px-4"
+          >
+            {/* Groom */}
+            <div>
+              <p className="text-sm sm:text-base md:text-lg font-serif text-burgundy italic font-medium mb-1">
+                {groomFullName || groomName}
+              </p>
+              {groomParents && (
+                <p className="text-xs sm:text-sm text-gray-500 font-light">
+                  {groomParents}
+                </p>
+              )}
+            </div>
+
+            {/* & symbol */}
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-12 h-px bg-gold/40" />
+              <span className="text-2xl sm:text-3xl text-gold font-serif">&</span>
+              <div className="w-12 h-px bg-gold/40" />
+            </div>
+
+            {/* Bride */}
+            <div>
+              <p className="text-sm sm:text-base md:text-lg font-serif text-burgundy italic font-medium mb-1">
+                {brideFullName || brideName}
+              </p>
+              {brideParents && (
+                <p className="text-xs sm:text-sm text-gray-500 font-light">
+                  {brideParents}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Quran Verse */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, delay: 0.6 }}
+          className="flex-none text-center px-6 sm:px-8 md:px-12 max-w-2xl"
+        >
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-5 sm:p-6 md:p-8 border border-primary/10 shadow-sm">
+            <p className="text-[10px] sm:text-xs text-primary font-bold tracking-[0.2em] uppercase mb-3">
+              QS. Ar-Rum : 21
+            </p>
+            <p className="text-xs sm:text-sm text-gray-600 font-light leading-relaxed italic">
+              "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri,
+              supaya kamu cenderung dan merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang.
+              Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir."
+            </p>
+          </div>
+        </motion.div>
 
         {/* Date & Location */}
         <div className="flex-none pt-1 sm:pt-2 md:pt-4">

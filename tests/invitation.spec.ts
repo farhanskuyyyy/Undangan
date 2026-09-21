@@ -97,7 +97,15 @@ test.describe('API Endpoints', () => {
   });
 
   test('GET /api/guests should return guests list', async ({ request }) => {
-    const response = await request.get('/api/guests');
+    // Login first to get token
+    const loginRes = await request.post('/api/auth/login', {
+      data: { email: 'admin@admin.com', password: 'password' },
+    });
+    const { token } = await loginRes.json();
+    
+    const response = await request.get('/api/guests', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     expect(response.ok()).toBeTruthy();
     const data = await response.json();
     expect(Array.isArray(data)).toBeTruthy();

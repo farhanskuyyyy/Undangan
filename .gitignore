@@ -29,3 +29,5 @@ server/undangan.db*
 server/uploads/
 
 /.agent
+.agent/
+.playwright-mcp/

@@ -88,7 +88,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           loading="lazy"
           decoding="async"
           style={{ transform: `scale(${scale})` }}
-          className={`absolute -top-20 -left-20 w-80 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
+          className={`absolute -top-12 -left-12 sm:-top-20 sm:-left-20 w-44 sm:w-64 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
         />
       )}
 
@@ -104,7 +104,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           loading="lazy"
           decoding="async"
           style={{ transform: `scale(${scale})` }}
-          className={`absolute -top-20 -right-20 w-80 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
+          className={`absolute -top-12 -right-12 sm:-top-20 sm:-right-20 w-44 sm:w-64 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
         />
       )}
 
@@ -120,7 +120,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           loading="lazy"
           decoding="async"
           style={{ transform: `scale(${scale})` }}
-          className={`absolute -bottom-20 -left-20 w-80 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
+          className={`absolute -bottom-12 -left-12 sm:-bottom-20 sm:-left-20 w-44 sm:w-64 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
         />
       )}
 
@@ -136,7 +136,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           loading="lazy"
           decoding="async"
           style={{ transform: `scale(${scale})` }}
-          className={`absolute -bottom-20 -right-20 w-80 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
+          className={`absolute -bottom-12 -right-12 sm:-bottom-20 sm:-right-20 w-44 sm:w-64 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
         />
       )}
 
@@ -152,7 +152,7 @@ const FloralDecor: React.FC<FloralDecorProps> = ({
           loading="lazy"
           decoding="async"
           style={{ transform: `translateX(-50%) scale(${scale})` }}
-          className={`absolute -bottom-10 left-1/2 w-80 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
+          className={`absolute -bottom-8 left-1/2 w-48 sm:w-64 md:w-[32rem] ${opacity} drop-shadow-xl object-contain transition-transform duration-300`}
         />
       )}
     </div>

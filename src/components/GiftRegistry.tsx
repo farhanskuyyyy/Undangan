@@ -35,7 +35,7 @@ export const GiftRegistry: React.FC = () => {
   }
 
   return (
-    <section className="py-14 sm:py-20 md:py-24 bg-gradient-to-b from-[#FDF2F8] to-[#FFF] relative overflow-hidden">
+    <section id="gift" className="py-14 sm:py-20 md:py-24 bg-gradient-to-b from-[#FDF2F8] to-[#FFF] relative overflow-hidden">
       {/* Decorative frame vectors */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
         <svg width="100%" height="100%">

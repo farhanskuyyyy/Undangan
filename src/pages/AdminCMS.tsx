@@ -1007,29 +1007,29 @@ export const AdminCMS = () => {
   const paginatedCrudGuests = filteredAllGuests.slice((crudPage - 1) * CRUD_ITEMS_PER_PAGE, crudPage * CRUD_ITEMS_PER_PAGE)
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] p-6 md:p-12 text-[#4A5D4E]">
+    <div className="min-h-screen bg-[#FDFBF7] p-4 sm:p-6 md:p-12 text-[#4A5D4E]">
       <div className="max-w-5xl mx-auto">
-        <header className="flex justify-between items-center mb-12">
+        <header className="flex flex-wrap justify-between items-center gap-4 mb-8 md:mb-12">
           <div>
-            <h1 className="text-3xl font-serif italic mb-1">CMS Penerima Tamu</h1>
-            <p className="text-sm text-[#8C9A8E]">{user?.email}</p>
+            <h1 className="text-2xl sm:text-3xl font-serif italic mb-1">CMS Penerima Tamu</h1>
+            <p className="text-xs sm:text-sm text-[#8C9A8E] break-all">{user?.email}</p>
           </div>
           <button 
             onClick={signOut} 
-            className="text-sm bg-white px-4 py-2 rounded-full border border-[#E5E1DA] hover:border-red-200 hover:text-red-500 transition-all shadow-sm flex items-center gap-1.5"
+            className="text-xs sm:text-sm bg-white px-4 py-2.5 rounded-full border border-[#E5E1DA] hover:border-red-200 hover:text-red-500 transition-all shadow-sm flex items-center gap-1.5 min-h-[44px] cursor-pointer"
           >
             <LogOut size={14} />
             Logout
           </button>
         </header>
 
-        <div className="flex bg-[#FDFBF7] p-1.5 rounded-2xl mb-8 border border-[#E5E1DA] max-w-sm shadow-sm">
+        <div className="flex bg-[#FDFBF7] p-1.5 rounded-2xl mb-6 sm:mb-8 border border-[#E5E1DA] w-full sm:max-w-sm shadow-sm">
           <button
             onClick={() => {
               setActiveTab('presence')
               setCrudSearch('')
             }}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === 'presence' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[44px] flex items-center justify-center cursor-pointer ${activeTab === 'presence' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
           >
             Dashboard Kehadiran
           </button>
@@ -1038,7 +1038,7 @@ export const AdminCMS = () => {
               setActiveTab('management')
               setCrudPage(1)
             }}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === 'management' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[44px] flex items-center justify-center cursor-pointer ${activeTab === 'management' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
           >
             Manajemen Undangan
           </button>
@@ -1176,7 +1176,7 @@ export const AdminCMS = () => {
                   setCheckInMode('scan')
                   stopScanner()
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${checkInMode === 'scan' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] cursor-pointer ${checkInMode === 'scan' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
               >
                 <ScanLine size={16} />
                 Scan QR
@@ -1186,7 +1186,7 @@ export const AdminCMS = () => {
                   setCheckInMode('search')
                   stopScanner()
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${checkInMode === 'search' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] cursor-pointer ${checkInMode === 'search' ? 'bg-[#4A5D4E] text-white shadow-sm' : 'text-[#8C9A8E] hover:text-[#4A5D4E]'}`}
               >
                 <Search size={16} />
                 Cari Nama
@@ -1310,7 +1310,7 @@ export const AdminCMS = () => {
                               <button
                                 onClick={() => handleSelectGuest(guest.id)}
                                 disabled={loading}
-                                className="text-[10px] bg-[#C17E61] text-white px-3 py-1.5 rounded-lg hover:bg-[#A96B51] transition-all font-medium disabled:opacity-50 shadow-sm cursor-pointer"
+                                className="text-xs bg-[#C17E61] text-white px-3.5 py-2 rounded-lg hover:bg-[#A96B51] transition-all font-medium disabled:opacity-50 shadow-sm cursor-pointer min-h-[38px] flex items-center justify-center shrink-0"
                               >
                                 Edit / Detail
                               </button>
@@ -1318,7 +1318,7 @@ export const AdminCMS = () => {
                               <button
                                 onClick={() => handleSelectGuest(guest.id)}
                                 disabled={loading}
-                                className="text-[10px] bg-[#4A5D4E] text-white px-3 py-1.5 rounded-lg hover:bg-[#3d4d41] transition-all font-medium disabled:opacity-50 shadow-sm cursor-pointer"
+                                className="text-xs bg-[#4A5D4E] text-white px-3.5 py-2 rounded-lg hover:bg-[#3d4d41] transition-all font-medium disabled:opacity-50 shadow-sm cursor-pointer min-h-[38px] flex items-center justify-center shrink-0"
                               >
                                 Pilih Tamu
                               </button>
@@ -2087,7 +2087,7 @@ export const AdminCMS = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full md:w-auto">
             <button
               onClick={() => {
                 setEditingGuest(null)
@@ -2097,20 +2097,20 @@ export const AdminCMS = () => {
                 setCrudIsVip(false)
                 setShowCrudModal(true)
               }}
-              className="flex-1 md:flex-initial bg-[#4A5D4E] hover:bg-[#3D4C40] text-white px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer"
+              className="flex-1 sm:flex-initial bg-[#4A5D4E] hover:bg-[#3D4C40] text-white px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer min-h-[44px]"
             >
               <Plus size={14} /> Tambah Tamu
             </button>
             <button
               onClick={handleDownloadCSVTemplate}
-              className="flex-1 md:flex-initial bg-white border border-[#E5E1DA] hover:bg-[#FDFBF7] text-[#4A5D4E] px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer"
+              className="flex-1 sm:flex-initial bg-white border border-[#E5E1DA] hover:bg-[#FDFBF7] text-[#4A5D4E] px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer min-h-[44px]"
             >
               <Download size={14} /> Unduh Template CSV
             </button>
             <button
               onClick={() => fileImportRef.current?.click()}
               disabled={importingCSV}
-              className="flex-1 md:flex-initial bg-[#C17E61] hover:bg-[#A96B51] disabled:bg-gray-300 text-white px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer"
+              className="flex-1 sm:flex-initial bg-[#C17E61] hover:bg-[#A96B51] disabled:bg-gray-300 text-white px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 font-semibold shadow-sm text-xs cursor-pointer min-h-[44px]"
             >
               <FileSpreadsheet size={14} /> {importingCSV ? 'Mengimpor...' : 'Impor Tamu (CSV)'}
             </button>
@@ -2206,7 +2206,7 @@ export const AdminCMS = () => {
                       </code>
                       <button
                         onClick={() => handleCopyInvitationLink(g.qr_code, g.id)}
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all border cursor-pointer ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border cursor-pointer min-h-[36px] ${
                           copiedGuestId === g.id
                             ? 'bg-green-50 border-green-200 text-green-700'
                             : 'bg-white border-[#E5E1DA] hover:border-[#4A5D4E] text-[#4A5D4E]'
@@ -2214,12 +2214,12 @@ export const AdminCMS = () => {
                       >
                         {copiedGuestId === g.id ? (
                           <>
-                            <Check size={10} />
+                            <Check size={12} />
                             <span>Tersalin</span>
                           </>
                         ) : (
                           <>
-                            <Copy size={10} />
+                            <Copy size={12} />
                             <span>Salin Link</span>
                           </>
                         )}
@@ -2236,13 +2236,13 @@ export const AdminCMS = () => {
                             setCrudIsVip(g.is_vip || false)
                             setShowCrudModal(true)
                           }}
-                          className="text-xs text-[#4A5D4E] hover:text-[#3D4C40] bg-[#F0F4F1] hover:bg-[#E2EAE4] px-2.5 py-1.5 rounded-lg transition-all font-semibold cursor-pointer"
+                          className="text-xs text-[#4A5D4E] hover:text-[#3D4C40] bg-[#F0F4F1] hover:bg-[#E2EAE4] px-3 py-2 rounded-lg transition-all font-semibold cursor-pointer min-h-[36px] flex items-center justify-center"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDeleteGuest(g.id, g.name)}
-                          className="text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg transition-all font-semibold cursor-pointer"
+                          className="text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg transition-all font-semibold cursor-pointer min-h-[36px] flex items-center justify-center"
                         >
                           Hapus
                         </button>
@@ -2445,14 +2445,14 @@ export const AdminCMS = () => {
                 <button
                   type="button"
                   onClick={() => setShowCrudModal(false)}
-                  className="flex-1 bg-white hover:bg-gray-50 border border-[#E5E1DA] text-gray-600 py-2.5 rounded-xl transition-all font-semibold text-xs text-center cursor-pointer"
+                  className="flex-1 bg-white hover:bg-gray-50 border border-[#E5E1DA] text-gray-600 py-3 rounded-xl transition-all font-semibold text-xs text-center cursor-pointer min-h-[44px]"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-[#4A5D4E] hover:bg-[#3D4C40] text-white py-2.5 rounded-xl transition-all font-semibold text-xs text-center shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="flex-1 bg-[#4A5D4E] hover:bg-[#3D4C40] text-white py-3 rounded-xl transition-all font-semibold text-xs text-center shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[44px]"
                 >
                   {loading ? (
                     <>

@@ -16,6 +16,7 @@ import { Envelope } from '../components/Envelope'
 import { ParallaxDecor } from '../components/ParallaxDecor'
 import FloralDecor from '../components/FloralDecor'
 import { FloatingPetals } from '../components/FloatingPetals'
+import { BottomNav } from '../components/BottomNav'
 
 interface WeddingSettings {
   groom_name: string
@@ -140,7 +141,7 @@ export const Invitation = () => {
 
       <div className={`transition-all duration-1000 ${isOpen ? 'opacity-100' : 'opacity-0 blur-sm'}`}>
         {/* Hero Section */}
-        <section className="bg-gradient-to-b from-[#FFF] to-blush relative overflow-hidden">
+        <section id="hero" className="bg-gradient-to-b from-[#FFF] to-blush relative overflow-hidden">
           <Hero 
             groomName={settings?.groom_name || 'Groom'} 
             brideName={settings?.bride_name || 'Bride'} 
@@ -149,7 +150,7 @@ export const Invitation = () => {
         </section>
         
         {/* Countdown & Rundown Section */}
-        <section className="bg-gradient-to-b from-blush to-[#FFF] py-14 sm:py-20 md:py-24 relative overflow-hidden">
+        <section id="event" className="bg-gradient-to-b from-blush to-[#FFF] py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
             topLeftImage="/rose-frame5.webp"
           />
@@ -289,6 +290,7 @@ export const Invitation = () => {
           </div>
         </footer>
       </div>
+      <BottomNav visible={isOpen} />
       <MusicPlayer autoPlay={isOpen} />
     </div>
   )

@@ -125,7 +125,7 @@ export const RSVPForm = ({
   }
 
   return (
-    <div className="relative">
+    <div id="rsvp" className="relative">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

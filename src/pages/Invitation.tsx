@@ -175,7 +175,7 @@ export const Invitation = () => {
         </section>
 
         {/* Love Story Section */}
-        <section className="bg-gradient-to-b from-[#FFF] to-blush py-14 sm:py-20 md:py-24 relative overflow-hidden">
+        <section id="story" className="bg-gradient-to-b from-[#FFF] to-blush py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
             topLeftImage="/rose-frame5.webp"
             bottomRightImage="/rose-frame5.webp"
@@ -187,7 +187,7 @@ export const Invitation = () => {
         </section>
 
         {/* Gallery Section */}
-        <section className="bg-transparent py-14 sm:py-20 md:py-24 relative overflow-hidden">
+        <section id="gallery" className="bg-transparent py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
             topLeftImage="/rose-frame3.webp"
             scale={1.1}
@@ -198,10 +198,10 @@ export const Invitation = () => {
         </section>
 
         {/* Gift Registry Section */}
-        <GiftRegistry />
+        <section id="gift"><GiftRegistry /></section>
 
         {/* Location & RSVP Section */}
-        <section className="bg-gradient-to-b from-blush to-[#FFF] py-14 sm:py-20 md:py-24 relative overflow-hidden">
+        <section id="rsvp" className="bg-gradient-to-b from-blush to-[#FFF] py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
             topRightImage="/rose-frame5.webp"
           />

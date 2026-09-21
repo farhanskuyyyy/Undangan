@@ -20,7 +20,7 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 
 // File upload middleware
-const uploadsDir = path.join(__dirname, 'uploads', 'photos');
+const uploadsDir = '/var/www/tazkiahfarhan/uploads/photos';
 fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({

@@ -744,7 +744,7 @@ export const AdminCMS = () => {
         <body>
           <div class="print-card">
             <img src="${guest.photo_url}" id="print-image" />
-            <p>Terima kasih telah berbagi kebahagiaan bersama kami. <br><strong>— Farhan & Tazkiah</strong></p>
+            <p>Terima kasih telah berbagi kebahagiaan bersama kami. <br><strong>- Farhan & Tazkiah</strong></p>
           </div>
           <script>
             (function() {

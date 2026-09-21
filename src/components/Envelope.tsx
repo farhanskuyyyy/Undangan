@@ -145,7 +145,7 @@ export const Envelope: React.FC<EnvelopeProps> = ({ groomName, brideName, guestN
                   {/* Premium Gold Wax Seal */}
                   <div className="w-20 h-20 md:w-24 md:h-24 bg-gold rounded-full shadow-[0_12px_24px_rgba(0,0,0,0.3),inset_0_2px_4px_rgba(255,255,255,0.4)] flex items-center justify-center border-4 border-gold/80 relative overflow-hidden transform-gpu">
                     {/* Metallic Gold Texture Overlay */}
-                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] mix-blend-overlay" />
+                    <div className="absolute inset-0 opacity-20 bg-[url('/natural-paper.png')] mix-blend-overlay" />
                     
                     {/* Inner recessed circle */}
                     <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border border-burgundy/10 flex items-center justify-center bg-gradient-to-tr from-gold to-[#EAB308] shadow-[inset_0_4px_8px_rgba(0,0,0,0.25)]">

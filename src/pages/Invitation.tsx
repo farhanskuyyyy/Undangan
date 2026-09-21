@@ -151,7 +151,7 @@ export const Invitation = () => {
         {/* Countdown & Rundown Section */}
         <section className="bg-gradient-to-b from-blush to-[#FFF] py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
+            topLeftImage="/rose-frame5.webp"
           />
           <div className="max-w-4xl mx-auto px-6 relative z-10">
             <motion.div 
@@ -175,8 +175,8 @@ export const Invitation = () => {
         {/* Love Story Section */}
         <section className="bg-gradient-to-b from-[#FFF] to-blush py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
-            bottomRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
+            topLeftImage="/rose-frame5.webp"
+            bottomRightImage="/rose-frame5.webp"
             scale={1.1}
           />
           <div className="max-w-4xl mx-auto relative z-10">
@@ -187,7 +187,7 @@ export const Invitation = () => {
         {/* Gallery Section */}
         <section className="bg-transparent py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
-            topLeftImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame3.png"
+            topLeftImage="/rose-frame3.webp"
             scale={1.1}
           />
           <div className="max-w-4xl mx-auto relative z-10">
@@ -201,7 +201,7 @@ export const Invitation = () => {
         {/* Location & RSVP Section */}
         <section className="bg-gradient-to-b from-blush to-[#FFF] py-14 sm:py-20 md:py-24 relative overflow-hidden">
           <FloralDecor 
-            topRightImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
+            topRightImage="/rose-frame5.webp"
           />
           <div className="max-w-4xl mx-auto px-6 relative z-10">
             <motion.div 
@@ -276,7 +276,7 @@ export const Invitation = () => {
 
         <footer className="bg-white py-14 sm:py-20 md:py-24 text-center px-4 sm:px-6 relative overflow-hidden border-t border-primary/5">
           <FloralDecor 
-            bottomCenterImage="https://wp.envelope.id/wp-content/uploads/2025/02/rose-pink-gold-floral-arrangement-background-frame5-1-e1739704958413.png"
+            bottomCenterImage="/rose-frame5.webp"
           />
           <div className="max-w-4xl mx-auto relative z-10">
             <div className="w-16 h-0.5 bg-primary/20 mx-auto mb-8" />

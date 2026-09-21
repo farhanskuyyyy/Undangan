@@ -251,8 +251,10 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
             >
               <div className="w-32 h-48 sm:w-40 sm:h-56 md:w-[22rem] md:h-[30rem] overflow-visible">
                 <img
-                  src="/cowo.png"
-                  alt="Groom"
+                  src="/cowo.webp"
+                  alt="Mempelai Pria - Farhan"
+                  width="570"
+                  height="438"
                   className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(131,24,67,0.15)] rounded-3xl"
                 />
               </div>
@@ -267,8 +269,10 @@ export const Hero = ({ groomName, brideName, weddingDate }: HeroProps) => {
             >
               <div className="w-32 h-48 sm:w-40 sm:h-56 md:w-[22rem] md:h-[30rem] overflow-visible">
                 <img
-                  src="/cewe.png"
-                  alt="Bride"
+                  src="/cewe.webp"
+                  alt="Mempelai Wanita - Tazkiah"
+                  width="612"
+                  height="408"
                   className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(131,24,67,0.15)] rounded-3xl"
                 />
               </div>

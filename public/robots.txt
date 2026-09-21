@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /assets/
+Allow: /uploads/
+
+Disallow: /admin
+Disallow: /login
+Disallow: /projector
+Disallow: /api/
+
+Sitemap: https://tazkiahfarhan.my.id/sitemap.xml

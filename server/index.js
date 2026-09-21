@@ -192,11 +192,32 @@ app.get('/api/auth/session', authenticateToken, (req, res) => {
   res.json({ user: req.user });
 });
 
-// Guest routes (public read, authenticated write)
+// Optional auth helper to check if requester is admin
+function getAdminUser(req) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return null;
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch {
+    return null;
+  }
+}
+
+// Guest routes
+// Public access: returns sanitized wishes/guestbook messages OR projector attendee photos
+// Admin access: returns full guest list with qr_code, souvenir_taken, etc.
 app.get('/api/guests', (req, res) => {
   try {
+    const admin = getAdminUser(req);
     const { has_arrived, qr_code, message_not_null } = req.query;
     
+    // If not authenticated admin:
+    // Only allow message_not_null (public guestbook wishes) OR has_arrived=true (projector screen) OR specific qr_code
+    if (!admin && !message_not_null && has_arrived === undefined && !qr_code) {
+      return res.status(401).json({ error: 'Authentication required to view guest directory' });
+    }
+
     let query = 'SELECT * FROM guests';
     const conditions = [];
     const params = {};
@@ -219,16 +240,39 @@ app.get('/api/guests', (req, res) => {
       query += ' WHERE ' + conditions.join(' AND ');
     }
     
+    // Order guestbook newest first
+    if (message_not_null === 'true') {
+      query += ' ORDER BY created_at DESC';
+    }
+
     const guests = db.prepare(query).all(params);
     
-    // Convert SQLite integer booleans back to JS booleans
-    const formatted = guests.map(g => ({
-      ...g,
-      rsvp_status: !!g.rsvp_status,
-      souvenir_taken: !!g.souvenir_taken,
-      has_arrived: !!g.has_arrived,
-      is_vip: !!g.is_vip
-    }));
+    // If request is from unauthenticated user (public): strip sensitive operational fields
+    const formatted = guests.map(g => {
+      if (admin) {
+        return {
+          ...g,
+          rsvp_status: !!g.rsvp_status,
+          souvenir_taken: !!g.souvenir_taken,
+          has_arrived: !!g.has_arrived,
+          is_vip: !!g.is_vip
+        };
+      }
+      
+      // Sanitized public projection
+      return {
+        id: g.id,
+        name: g.name,
+        rsvp_status: !!g.rsvp_status,
+        attendance_count: g.attendance_count,
+        message: g.message,
+        photo_url: g.photo_url,
+        wishes: g.wishes,
+        arrival_time: g.arrival_time,
+        is_vip: !!g.is_vip,
+        created_at: g.created_at
+      };
+    });
     
     res.json(formatted);
   } catch (err) {
@@ -237,54 +281,60 @@ app.get('/api/guests', (req, res) => {
   }
 });
 
+// Single guest by QR code (for personalized invitation view)
 app.get('/api/guests/:qr_code', (req, res) => {
   try {
-    const guest = db.prepare('SELECT * FROM guests WHERE qr_code = ?').get(req.params.qr_code);
+    const guest = db.prepare('SELECT id, name, qr_code, rsvp_status, attendance_count, invited_pax, description FROM guests WHERE qr_code = ?').get(req.params.qr_code);
     if (!guest) {
       return res.status(404).json({ error: 'Guest not found' });
     }
     res.json({
       ...guest,
-      rsvp_status: !!guest.rsvp_status,
-      souvenir_taken: !!guest.souvenir_taken,
-      has_arrived: !!guest.has_arrived,
-      is_vip: !!guest.is_vip
+      rsvp_status: !!guest.rsvp_status
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// Create guest: Admin authenticated OR public manual RSVP with sanitized fields
 app.post('/api/guests', (req, res) => {
   try {
+    const admin = getAdminUser(req);
     const guests = Array.isArray(req.body) ? req.body : [req.body];
     const results = [];
     
     for (const guest of guests) {
+      if (!guest.name || typeof guest.name !== 'string' || guest.name.trim().length === 0) {
+        return res.status(400).json({ error: 'Nama tamu wajib diisi' });
+      }
+
       const id = guest.id || require('crypto').randomUUID();
+      const qr_code = admin ? (guest.qr_code || `GUEST-${Date.now()}`) : `manual-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      
       const stmt = db.prepare(`
         INSERT INTO guests (id, name, qr_code, rsvp_status, souvenir_taken, message, attendance_count, invited_pax, has_arrived, arrival_time, is_vip, photo_url, wishes, description)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       
-      const info = stmt.run(
+      stmt.run(
         id,
-        guest.name,
-        guest.qr_code,
+        guest.name.trim().slice(0, 100),
+        qr_code,
         guest.rsvp_status ? 1 : 0,
-        guest.souvenir_taken ? 1 : 0,
-        guest.message || null,
-        guest.attendance_count || 1,
-        guest.invited_pax || 2,
-        guest.has_arrived ? 1 : 0,
-        guest.arrival_time || null,
-        guest.is_vip ? 1 : 0,
-        guest.photo_url || null,
-        guest.wishes || null,
-        guest.description || null
+        admin && guest.souvenir_taken ? 1 : 0,
+        guest.message ? String(guest.message).trim().slice(0, 500) : null,
+        Math.min(Math.max(Number(guest.attendance_count) || 1, 0), 10),
+        admin ? (guest.invited_pax || 2) : 2,
+        admin && guest.has_arrived ? 1 : 0,
+        admin ? (guest.arrival_time || null) : null,
+        admin && guest.is_vip ? 1 : 0,
+        admin ? (guest.photo_url || null) : null,
+        admin ? (guest.wishes || null) : null,
+        admin ? (guest.description || null) : null
       );
       
-      results.push({ id, ...guest });
+      results.push({ id, name: guest.name, qr_code, rsvp_status: !!guest.rsvp_status });
     }
     
     res.json(results.length === 1 ? results[0] : results);
@@ -294,27 +344,46 @@ app.post('/api/guests', (req, res) => {
   }
 });
 
+// Update guest: Admin can update anything; Public can only update their own RSVP (rsvp_status, attendance_count, message)
 app.put('/api/guests/:id', (req, res) => {
   try {
+    const admin = getAdminUser(req);
     const { id } = req.params;
     const updates = req.body;
     
+    const existing = db.prepare('SELECT * FROM guests WHERE id = ?').get(id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Guest not found' });
+    }
+
     const setClauses = [];
     const params = {};
     
-    for (const [key, value] of Object.entries(updates)) {
-      if (key !== 'id') {
-        setClauses.push(`${key} = @${key}`);
+    // If not admin, whitelist strictly allowed RSVP fields
+    const allowedKeys = admin 
+      ? ['name', 'qr_code', 'rsvp_status', 'souvenir_taken', 'message', 'attendance_count', 'invited_pax', 'has_arrived', 'arrival_time', 'is_vip', 'photo_url', 'wishes', 'description']
+      : ['rsvp_status', 'attendance_count', 'message'];
+
+    for (const key of allowedKeys) {
+      if (updates[key] !== undefined) {
+        let value = updates[key];
         if (typeof value === 'boolean') {
-          params[key] = value ? 1 : 0;
-        } else {
-          params[key] = value;
+          value = value ? 1 : 0;
+        } else if (key === 'attendance_count') {
+          value = Math.min(Math.max(Number(value) || 1, 0), 10);
+        } else if (key === 'message' && value) {
+          value = String(value).trim().slice(0, 500);
         }
+        setClauses.push(`${key} = @${key}`);
+        params[key] = value;
       }
     }
     
+    if (setClauses.length === 0) {
+      return res.json(existing);
+    }
+
     params.id = id;
-    
     const stmt = db.prepare(`UPDATE guests SET ${setClauses.join(', ')} WHERE id = @id`);
     stmt.run(params);
     
@@ -572,9 +641,4 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
   db.close();
   process.exit(0);
-});
-
-// Start server
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Server running on http://127.0.0.1:${PORT}`);
 });

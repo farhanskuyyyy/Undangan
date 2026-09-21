@@ -7,6 +7,7 @@ import { Invitation } from './pages/Invitation'
 // Code splitting: Heavy admin, login, and projector pages are lazy loaded
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
 const AdminCMS = lazy(() => import('./pages/AdminCMS').then(m => ({ default: m.AdminCMS })))
+const SettingsCMS = lazy(() => import('./pages/SettingsCMS').then(m => ({ default: m.SettingsCMS })))
 const ProjectorSlideshow = lazy(() => import('./pages/ProjectorSlideshow').then(m => ({ default: m.ProjectorSlideshow })))
 
 function AppLoadingFallback() {
@@ -30,6 +31,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminCMS />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsCMS />
                 </ProtectedRoute>
               }
             />

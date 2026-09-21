@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Html5Qrcode } from 'html5-qrcode'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
-import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles, Plus, Copy, FileSpreadsheet, Printer, HelpCircle, FlipHorizontal } from 'lucide-react'
+import { CheckCircle, XCircle, Gift, User, ScanLine, Clock, Users, Search, Camera, Image, Upload, LogOut, Trash2, Check, RefreshCw, Eye, X, ChevronLeft, ChevronRight, Heart, Download, TrendingUp, Award, Sparkles, Plus, Copy, FileSpreadsheet, Printer, HelpCircle, FlipHorizontal, Settings } from 'lucide-react'
 import Swal from 'sweetalert2'
 
 const QUICK_WISHES_TEMPLATES = [
@@ -1014,13 +1014,22 @@ export const AdminCMS = () => {
             <h1 className="text-2xl sm:text-3xl font-serif italic mb-1">CMS Penerima Tamu</h1>
             <p className="text-xs sm:text-sm text-[#8C9A8E] break-all">{user?.email}</p>
           </div>
-          <button 
-            onClick={signOut} 
-            className="text-xs sm:text-sm bg-white px-4 py-2.5 rounded-full border border-[#E5E1DA] hover:border-red-200 hover:text-red-500 transition-all shadow-sm flex items-center gap-1.5 min-h-[44px] cursor-pointer"
-          >
-            <LogOut size={14} />
-            Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href="/admin/settings"
+              className="text-xs sm:text-sm bg-white px-4 py-2.5 rounded-full border border-[#E5E1DA] hover:border-[#C17E61] hover:text-[#C17E61] transition-all shadow-sm flex items-center gap-1.5 min-h-[44px] cursor-pointer"
+            >
+              <Settings size={14} />
+              Settings
+            </a>
+            <button 
+              onClick={signOut} 
+              className="text-xs sm:text-sm bg-white px-4 py-2.5 rounded-full border border-[#E5E1DA] hover:border-red-200 hover:text-red-500 transition-all shadow-sm flex items-center gap-1.5 min-h-[44px] cursor-pointer"
+            >
+              <LogOut size={14} />
+              Logout
+            </button>
+          </div>
         </header>
 
         <div className="flex bg-[#FDFBF7] p-1.5 rounded-2xl mb-6 sm:mb-8 border border-[#E5E1DA] w-full sm:max-w-sm shadow-sm">

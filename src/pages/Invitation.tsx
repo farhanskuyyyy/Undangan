@@ -17,6 +17,7 @@ import { ParallaxDecor } from '../components/ParallaxDecor'
 import FloralDecor from '../components/FloralDecor'
 import { FloatingPetals } from '../components/FloatingPetals'
 import { BottomNav } from '../components/BottomNav'
+import { FloatingQR } from '../components/FloatingQR'
 
 interface WeddingSettings {
   groom_name: string
@@ -291,6 +292,13 @@ export const Invitation = () => {
         </footer>
       </div>
       <BottomNav visible={isOpen} />
+      <FloatingQR 
+        guestId={guestId}
+        guestName={guestName}
+        groomName={settings?.groom_name}
+        brideName={settings?.bride_name}
+        visible={isOpen}
+      />
       <MusicPlayer autoPlay={isOpen} />
     </div>
   )

@@ -430,14 +430,37 @@ app.put('/api/wedding_settings', authenticateToken, (req, res) => {
     
     if (existing) {
       db.prepare(`
-        UPDATE wedding_settings SET groom_name = ?, bride_name = ?, wedding_date = ?, location_name = ?, location_address = ?, maps_url = ?
+        UPDATE wedding_settings SET 
+          groom_name = COALESCE(?, groom_name),
+          bride_name = COALESCE(?, bride_name),
+          groom_full_name = COALESCE(?, groom_full_name),
+          bride_full_name = COALESCE(?, bride_full_name),
+          groom_parents = COALESCE(?, groom_parents),
+          bride_parents = COALESCE(?, bride_parents),
+          wedding_date = COALESCE(?, wedding_date),
+          location_name = COALESCE(?, location_name),
+          location_address = COALESCE(?, location_address),
+          maps_url = COALESCE(?, maps_url)
         WHERE id = ?
-      `).run(settings.groom_name, settings.bride_name, settings.wedding_date, settings.location_name, settings.location_address, settings.maps_url, existing.id);
+      `).run(
+        settings.groom_name, settings.bride_name,
+        settings.groom_full_name, settings.bride_full_name,
+        settings.groom_parents, settings.bride_parents,
+        settings.wedding_date, settings.location_name,
+        settings.location_address, settings.maps_url,
+        existing.id
+      );
     } else {
       db.prepare(`
-        INSERT INTO wedding_settings (groom_name, bride_name, wedding_date, location_name, location_address, maps_url)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(settings.groom_name, settings.bride_name, settings.wedding_date, settings.location_name, settings.location_address, settings.maps_url);
+        INSERT INTO wedding_settings (groom_name, bride_name, groom_full_name, bride_full_name, groom_parents, bride_parents, wedding_date, location_name, location_address, maps_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        settings.groom_name, settings.bride_name,
+        settings.groom_full_name, settings.bride_full_name,
+        settings.groom_parents, settings.bride_parents,
+        settings.wedding_date, settings.location_name,
+        settings.location_address, settings.maps_url
+      );
     }
     
     const updated = db.prepare('SELECT * FROM wedding_settings LIMIT 1').get();

@@ -1,0 +1,23 @@
+services:
+  undangan-api:
+    build: .
+    container_name: undangan-api
+    restart: unless-stopped
+    ports:
+      # bind localhost saja — diakses lewat nginx
+      - "127.0.0.1:3456:3456"
+    environment:
+      NODE_ENV: production
+      PORT: "3456"
+      # container butuh listen 0.0.0.0 biar port mapping kejangkau;
+      # host tetap dibatasi 127.0.0.1 lewat baris ports
+      HOST: "0.0.0.0"
+      JWT_SECRET: undangan-wedding-secret-key-2026
+      ADMIN_PASSWORD: password
+      FRONTEND_URL: https://tazkiahfarhan.my.id
+      NODE_PATH: /deps/node_modules
+    volumes:
+      # code + sqlite + uploads dari host (persist)
+      - ./:/app
+      # foto undangan ditulis ke path absolut ini (hardcoded di index.js)
+      - /var/www/tazkiahfarhan/uploads:/var/www/tazkiahfarhan/uploads

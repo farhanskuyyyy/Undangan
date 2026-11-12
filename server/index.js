@@ -651,8 +651,8 @@ app.delete('/api/photos/:id', authenticateToken, (req, res) => {
 });
 
 // Start server
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Server running on http://127.0.0.1:${PORT}`);
+app.listen(PORT, process.env.HOST || '127.0.0.1', () => {
+  console.log(`Server running on http://${process.env.HOST || '127.0.0.1'}:${PORT}`);
 });
 
 // Graceful shutdown

@@ -1,0 +1,8 @@
+node_modules
+node_modules.host-backup
+uploads
+undangan.db
+undangan.db-wal
+undangan.db-shm
+*.log
+.git

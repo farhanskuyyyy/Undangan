@@ -14,7 +14,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'https://tazkiahfarhan.my.id';
 
 // Middleware
 app.use(cors({
-  origin: [FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'],
+  origin: [FRONTEND_URL, 'https://wedding.kreasifarhan.id', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:3457'],
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
